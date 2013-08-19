@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         edvsd_viewer.cpp \
-    edvsd_visualizer.cpp
+    edvsd_visualizer.cpp \
+    edvsd_fileprocessor.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
-    edvsd_visualizer.h
+    edvsd_visualizer.h \
+    edvsd_fileprocessor.h
 
 FORMS    += edvsd_viewer.ui
