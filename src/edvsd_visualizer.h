@@ -38,7 +38,7 @@ public:
 	 */
 	void setMode(EDVS_Visualization_Mode p_mode);
 
-	void drawEvents(EDVS_Event *p_buffer, int p_n);
+
 
 private:
 	int m_size_x, m_size_y;
@@ -60,6 +60,9 @@ signals:
 
 private slots:
 	void displayFrame();
+
+public slots:
+	void drawEvents(EDVS_Event *p_buffer, int p_n);
 
 };
 

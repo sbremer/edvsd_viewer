@@ -5,6 +5,7 @@
 #include <QFileDialog>
 
 #include "edvsd_visualizer.h"
+#include "edvsd_fileprocessor.h"
 
 namespace Ui {
 class EDVSD_Viewer;
@@ -32,6 +33,7 @@ private slots:
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;
+	EDVSD_FileProcessor *m_fileprocessor;
 
 
 };

@@ -45,7 +45,7 @@ void EDVSD_Visualizer::drawEvents(EDVS_Event *p_buffer, int p_n)
 {
 	quint32 *data = (quint32*)(m_image->bits());
 	EDVS_Event event;
-	for(int a=0; a<p_n;a++){
+	for(int a=0; a<p_n; a++){
 		event = p_buffer[a];
 		*(data+event.y*m_size_x+event.x) = m_colors[(int)m_mode][event.p];
 	}

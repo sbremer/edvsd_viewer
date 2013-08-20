@@ -26,7 +26,7 @@ void EDVSD_Viewer::on_actionE_xit_triggered()
 
 void EDVSD_Viewer::on_action_Close_File_triggered()
 {
-
+	m_fileprocessor->closeFile();
 }
 
 void EDVSD_Viewer::on_action_Open_File_triggered()
@@ -36,7 +36,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 
 	}
 	else{
-		m_ui->statusBar->setStatusTip("Unable to open " + m_filename + "!");
+		m_ui->statusBar->setStatusTip("Unable to open " + filename + "!");
 	}
 }
 
