@@ -18,7 +18,6 @@ EDVSD_Visualizer::EDVSD_Visualizer(QWidget *p_parent, int p_size_x, int p_size_y
 
 	m_timer = new QTimer();
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(displayFrame()));
-	m_timer->start(33);
 }
 
 EDVSD_Visualizer::~EDVSD_Visualizer()
@@ -28,6 +27,11 @@ EDVSD_Visualizer::~EDVSD_Visualizer()
 }
 
 const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFFFF0000, 0xFF00FF00, 0xFFFFFFFF}, {0xFFFFFFFF, 0xFF000000, 0xFF808080}};
+
+void EDVSD_Visualizer::start()
+{
+	m_timer->start(33);
+}
 
 void EDVSD_Visualizer::setScaler(double p_scaler)
 {

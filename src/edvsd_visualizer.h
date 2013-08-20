@@ -38,6 +38,8 @@ public:
 	 */
 	void setMode(EDVS_Visualization_Mode p_mode);
 
+	void start();
+
 
 
 private:

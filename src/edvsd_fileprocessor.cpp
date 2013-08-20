@@ -5,40 +5,53 @@ EDVSD_FileProcessor::EDVSD_FileProcessor(QObject *parent) :
 {
 	m_file = NULL;
 	m_fileopen = false;
+	m_timestamp = 0;
+	m_totalevents = 0;
+	m_pos = 0;
 }
 
 EDVSD_FileProcessor::~EDVSD_FileProcessor()
 {
 	if(m_file!=NULL)
 		delete m_file;
+	m_data.clear();
 }
 
 QString EDVSD_FileProcessor::getFileName()
 {
-	return m_filename;
+	if(!m_fileopen)return QString("");
+	return m_file->fileName();
 }
 int EDVSD_FileProcessor::getSizeX()
 {
+	if(!m_fileopen)return 0;
 	return m_size_x;
 }
 
 int EDVSD_FileProcessor::getSizeY()
 {
+	if(!m_fileopen)return 0;
 	return m_size_y;
 }
 
 EDVS_Timestamp_Resolution EDVSD_FileProcessor::getTimestampResolution()
 {
+	if(!m_fileopen)return EDVS_Timestamp_Resolution_None;
 	return m_timestampresolution;
+}
+
+int EDVSD_FileProcessor::getTotalEvents()
+{
+	if(!m_fileopen)return 0;
+	return m_totalevents;
 }
 
 bool EDVSD_FileProcessor::loadFile(QString p_filename)
 {
 	if(m_fileopen)
 		return false;
-	m_filename = p_filename;
-	if(m_filename.length()>0&&QFile(m_filename).exists()){
-		m_file = new QFile(m_filename);
+	if(p_filename.length()>0&&QFile(p_filename).exists()){
+		m_file = new QFile(p_filename);
 		if(!m_file->open(QIODevice::ReadOnly))
 			return false;
 		char buffer[5];
@@ -53,6 +66,14 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		m_timestampresolution = (EDVS_Timestamp_Resolution)buffer[3];
 		if(m_timestampresolution<0||m_timestampresolution>3)
 			return false;
+		m_file->seek(0);
+		m_data = m_file->readAll();
+		if(m_data.length()<4+sizeof(EDVS_Event))
+			return false;
+		m_eventptr = (EDVS_Event*)(m_data.data()+4);
+		m_totalevents = (m_data.length()-4)/sizeof(EDVS_Event);
+		m_pos = 0;
+		m_timestamp = m_eventptr[0].t;
 		m_fileopen = true;
 		return true;
 	}
@@ -65,32 +86,60 @@ void EDVSD_FileProcessor::closeFile()
 	if(m_file!=NULL)
 		delete m_file;
 	m_fileopen = false;
-	m_filename = "";
+	m_timestamp = 0;
+	m_data.clear();
+	m_totalevents = 0;
 }
 
-int EDVSD_FileProcessor::readEvents(int p_n)
+int EDVSD_FileProcessor::readEvents(unsigned int p_n)
+{
+	if(m_totalevents==m_pos){
+		return 0;
+	}
+	else if(m_totalevents-m_pos<p_n){
+		emit eventsRead(&(m_eventptr[m_pos]), m_totalevents-m_pos);
+		m_pos = m_totalevents;
+		return m_totalevents-m_pos;
+	}
+	else{
+		emit eventsRead(&(m_eventptr[m_pos]), p_n);
+		m_pos+=p_n;
+		return p_n;
+	}
+}
+
+int EDVSD_FileProcessor::readEventsByTime(unsigned int p_t)
 {
 	int read = 0;
-	EDVS_Event buffer[EDVSD_BUFFER_SIZE];
-	int i;
-	while(read<p_n){
-		i = m_file->read((char*)buffer, sizeof(EDVS_Event)*(p_n-read<EDVSD_BUFFER_SIZE ? p_n-read : EDVSD_BUFFER_SIZE));
-		if(i==-1)
-			break;
-		else if(i<EDVSD_BUFFER_SIZE*sizeof(EDVS_Event)){
-			emit eventsRead(buffer, i/sizeof(EDVS_Event));
-			read+=i/sizeof(EDVS_Event);
-			break;
-		}
-		else{
-			emit eventsRead(buffer, EDVSD_BUFFER_SIZE);
-			read+=EDVSD_BUFFER_SIZE;
+	int timestamp_new;
+	switch(m_timestampresolution){
+	case EDVS_Timestamp_Resolution_16bit:
+		timestamp_new = 0xFFFF & (m_timestamp + p_t);
+		break;
+	case EDVS_Timestamp_Resolution_24bit:
+		timestamp_new = 0xFFFFFF & (m_timestamp + p_t);
+		break;
+	case EDVS_Timestamp_Resolution_32bit:
+		timestamp_new = 0xFFFFFFFF & (m_timestamp + p_t);
+		break;
+	case EDVS_Timestamp_Resolution_None:
+	default:
+		return 0;
+	}
+	int a = m_pos;
+
+	//Detect overflow
+	if(timestamp_new<m_timestamp){
+		while(a<m_totalevents && m_eventptr[a].t>timestamp_new){
+			a++;
 		}
 	}
+
+	while(a<m_totalevents && m_eventptr[a].t<timestamp_new){
+		a++;
+	}
+	read = a-m_pos;
+	emit eventsRead(&(m_eventptr[m_pos]), read);
+	m_pos=a;
 	return read;
-}
-
-int EDVSD_FileProcessor::readEventsByTime(int p_t)
-{
-
 }

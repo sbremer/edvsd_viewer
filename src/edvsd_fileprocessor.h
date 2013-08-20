@@ -22,16 +22,23 @@ public:
 	int getSizeY();
 	EDVS_Timestamp_Resolution getTimestampResolution();
 
-	int readEvents(int p_n);
-	int readEventsByTime(int p_t);
+	int getTotalEvents();
+	int readEvents(unsigned int p_n);
+	int readEventsByTime(unsigned int p_t);
 
 private:
-	QString m_filename;
 	QFile *m_file;
+
+	QByteArray m_data;
+	EDVS_Event *m_eventptr;
+	int m_totalevents;
+	int m_pos;
 
 	bool m_fileopen;
 	int m_size_x, m_size_y;
 	EDVS_Timestamp_Resolution m_timestampresolution;
+
+	quint32 m_timestamp;
 	
 signals:
 	void eventsRead(EDVS_Event *p_buffer, int p_n);

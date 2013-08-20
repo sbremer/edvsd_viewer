@@ -19,6 +19,12 @@ EDVSD_Viewer::~EDVSD_Viewer()
 
 }
 
+void EDVSD_Viewer::loadEventData()
+{
+	//Todo: Add feature for manipolation of replay speed
+	m_fileprocessor->readEventsByTime(33*1000);
+}
+
 void EDVSD_Viewer::on_actionE_xit_triggered()
 {
 	this->close();
@@ -33,7 +39,14 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load dvsd file", "", "*.dvsd");
 	if(m_fileprocessor->loadFile(filename)){
-
+		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
+		m_visualizer = new EDVSD_Visualizer(this, m_fileprocessor->getSizeX(), m_fileprocessor->getSizeY());
+		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
+		m_ui->statusBar->setStatusTip("File: " + m_fileprocessor->getFileName()
+									  + " SizeX: " + QString::number(m_fileprocessor->getSizeX())
+									  + " SizeY: " + QString::number(m_fileprocessor->getSizeY())
+									  + " TSRes(in byte): " + (m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0));
+		m_visualizer->start();
 	}
 	else{
 		m_ui->statusBar->setStatusTip("Unable to open " + filename + "!");

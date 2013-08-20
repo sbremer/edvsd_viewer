@@ -18,6 +18,9 @@ class EDVSD_Viewer : public QMainWindow
 public:
     explicit EDVSD_Viewer(QWidget *parent = 0);
     ~EDVSD_Viewer();
+
+public slots:
+	void loadEventData();
     
 private slots:
 	void on_actionE_xit_triggered();
