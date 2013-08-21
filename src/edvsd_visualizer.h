@@ -24,11 +24,6 @@ public:
 	~EDVSD_Visualizer();
 
 	/**
-	 * @brief overrides paintEvent of QWidget
-	 */
-	void paintEvent(QPaintEvent *p_paintevent);
-
-	/**
 	 * @brief set scale factor of visualization (default is 1.0)
 	 */
 	void setScaler(double p_scaler);
@@ -49,13 +44,18 @@ private:
 	int m_fade;
 
 	QWidget *m_parent;
-	QPainter m_painter;
 	QImage *m_image;
 	QTimer *m_timer;
 
 	void fadeImage();
 
 	static const quint32 m_colors[2][3];
+
+protected:
+	/**
+	 * @brief overrides paintEvent of QWidget
+	 */
+	virtual void paintEvent(QPaintEvent *p_paintevent);
 
 signals:
 	void loadEventData();

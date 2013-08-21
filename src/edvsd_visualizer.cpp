@@ -1,5 +1,8 @@
 #include "edvsd_visualizer.h"
 
+#include "iostream"
+using namespace std;
+
 EDVSD_Visualizer::EDVSD_Visualizer(QWidget *p_parent, int p_size_x, int p_size_y) :
 	QWidget(p_parent)
 {
@@ -8,7 +11,7 @@ EDVSD_Visualizer::EDVSD_Visualizer(QWidget *p_parent, int p_size_x, int p_size_y
 	m_size_y = p_size_y;
 	m_scaler = 1.0;
 	m_mode = EDVS_Visualization_Mode_Green_Red;
-	m_fade = 60;
+	m_fade = 30;
 
 	this->resize((int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler));
 
@@ -26,7 +29,8 @@ EDVSD_Visualizer::~EDVSD_Visualizer()
 	delete m_timer;
 }
 
-const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFFFF0000, 0xFF00FF00, 0xFFFFFFFF}, {0xFFFFFFFF, 0xFF000000, 0xFF808080}};
+//?
+const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFFFF0000, 0xFF00FF00, 0xFF000000}, {0xFFFFFFFF, 0xFF000000, 0xFF808080}};
 
 void EDVSD_Visualizer::start()
 {
@@ -50,23 +54,27 @@ void EDVSD_Visualizer::drawEvents(EDVS_Event *p_buffer, int p_n)
 	quint32 *data = (quint32*)(m_image->bits());
 	EDVS_Event event;
 	for(int a=0; a<p_n; a++){
+
 		event = p_buffer[a];
+		//cout << "TS: " << event.t << endl;
+		//cout.flush();
+
+
 		*(data+event.y*m_size_x+event.x) = m_colors[(int)m_mode][event.p];
 	}
 }
 
 void EDVSD_Visualizer::displayFrame()
 {
-	this->update();
+	update();
 }
 
 void EDVSD_Visualizer::paintEvent(QPaintEvent *p_paintevent)
 {
+	QPainter painter (this);
 	fadeImage();
-	m_painter.begin(m_parent);
 	QPixmap buffer = QPixmap::fromImage(*m_image, Qt::ThresholdDither);
-	m_painter.drawPixmap(0, 0, (int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler), buffer, 0, 0, m_size_x, m_size_y);
-	m_painter.end();
+	painter.drawPixmap(0, 0, (int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler), buffer, 0, 0, m_size_x, m_size_y);
 	emit loadEventData();
 	p_paintevent->accept();
 }
@@ -79,12 +87,12 @@ void EDVSD_Visualizer::fadeImage()
 	if(m_mode == EDVS_Visualization_Mode_Green_Red){
 		for(int a=0;a<m_size_x*m_size_y;a++){
 			channel = (quint8*)data;
-			x = channel[1] - m_fade;
+			x = (int)(channel[1] - m_fade);
 			channel[1] = (x>=0 ? x : 0);
-			x = channel[2] - m_fade;
+			x = (int)(channel[2] - m_fade);
 			channel[2] = (x>=0 ? x : 0);
-//			x = channel[3] - m_fade;
-//			channel[3] = (x>=0 ? x : 0);
+			//			x = (int)(channel[3] - m_fade);
+			//			channel[3] = (x>=0 ? x : 0);
 			data++;
 		}
 	}

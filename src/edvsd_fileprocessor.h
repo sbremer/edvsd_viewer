@@ -18,13 +18,13 @@ public:
 	void closeFile();
 
 	QString getFileName();
-	int getSizeX();
-	int getSizeY();
+	unsigned int getSizeX();
+	unsigned int getSizeY();
 	EDVS_Timestamp_Resolution getTimestampResolution();
 
 	int getTotalEvents();
 	int readEvents(unsigned int p_n);
-	int readEventsByTime(unsigned int p_t);
+	int readEventsByTime(quint32 p_t);
 
 private:
 	QFile *m_file;
@@ -35,7 +35,7 @@ private:
 	int m_pos;
 
 	bool m_fileopen;
-	int m_size_x, m_size_y;
+	unsigned int m_size_x, m_size_y;
 	EDVS_Timestamp_Resolution m_timestampresolution;
 
 	quint32 m_timestamp;

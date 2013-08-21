@@ -1,6 +1,9 @@
 #include "edvsd_viewer.h"
 #include "ui_edvsd_viewer.h"
 
+#include "iostream"
+using namespace std;
+
 EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
     QMainWindow(parent),
 	m_ui(new Ui::EDVSD_Viewer)
@@ -22,7 +25,10 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	//Todo: Add feature for manipolation of replay speed
-	m_fileprocessor->readEventsByTime(33*1000);
+	int c = m_fileprocessor->readEventsByTime(33*1000);
+	//int c = m_fileprocessor->readEvents(10);
+//	if(c!=0)
+//		cout << c << endl;
 }
 
 void EDVSD_Viewer::on_actionE_xit_triggered()
@@ -39,17 +45,21 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Load dvsd file", "", "*.dvsd");
 	if(m_fileprocessor->loadFile(filename)){
-		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		m_visualizer = new EDVSD_Visualizer(this, m_fileprocessor->getSizeX(), m_fileprocessor->getSizeY());
+		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
-		m_ui->statusBar->setStatusTip("File: " + m_fileprocessor->getFileName()
-									  + " SizeX: " + QString::number(m_fileprocessor->getSizeX())
-									  + " SizeY: " + QString::number(m_fileprocessor->getSizeY())
-									  + " TSRes(in byte): " + (m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0));
+		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
+				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
+				+ " SizeY: " + QString::number((int)(m_fileprocessor->getSizeY()))
+				+ " TSRes(in byte): " + QString::number((int)(m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0))
+				+ " TE: " + QString::number(m_fileprocessor->getTotalEvents()));
+		m_visualizer->move(0,26);
+		m_visualizer->setScaler(3.0);
+		m_visualizer->show();
 		m_visualizer->start();
 	}
 	else{
-		m_ui->statusBar->setStatusTip("Unable to open " + filename + "!");
+		m_ui->statusBar->showMessage("\nUnable to open " + filename + "!");
 	}
 }
 

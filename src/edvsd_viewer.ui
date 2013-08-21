@@ -48,7 +48,17 @@
    <addaction name="menu_File"/>
    <addaction name="menu_Settings"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="mouseTracking">
+    <bool>false</bool>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="accessibleName">
+    <string/>
+   </property>
+  </widget>
   <action name="action_Open_File">
    <property name="text">
     <string>&amp;Open File...</string>

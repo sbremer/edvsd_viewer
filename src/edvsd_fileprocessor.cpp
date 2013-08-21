@@ -1,5 +1,8 @@
 #include "edvsd_fileprocessor.h"
 
+#include "iostream"
+using namespace std;
+
 EDVSD_FileProcessor::EDVSD_FileProcessor(QObject *parent) :
 	QObject(parent)
 {
@@ -22,13 +25,13 @@ QString EDVSD_FileProcessor::getFileName()
 	if(!m_fileopen)return QString("");
 	return m_file->fileName();
 }
-int EDVSD_FileProcessor::getSizeX()
+unsigned int EDVSD_FileProcessor::getSizeX()
 {
 	if(!m_fileopen)return 0;
 	return m_size_x;
 }
 
-int EDVSD_FileProcessor::getSizeY()
+unsigned int EDVSD_FileProcessor::getSizeY()
 {
 	if(!m_fileopen)return 0;
 	return m_size_y;
@@ -54,15 +57,15 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		m_file = new QFile(p_filename);
 		if(!m_file->open(QIODevice::ReadOnly))
 			return false;
-		char buffer[5];
-		if(m_file->read(buffer,4)!=4)
+		unsigned char buffer[5];
+		if(m_file->read((char*)buffer,4)!=4)
 			return false;
 
 		//File Version can be different to 1 in the future!
 		if(buffer[0]!=1)
 			return false;
-		m_size_x = (int)buffer[1];
-		m_size_y = (int)buffer[2];
+		m_size_x = (unsigned int)buffer[1];
+		m_size_y = (unsigned int)buffer[2];
 		m_timestampresolution = (EDVS_Timestamp_Resolution)buffer[3];
 		if(m_timestampresolution<0||m_timestampresolution>3)
 			return false;
@@ -108,10 +111,10 @@ int EDVSD_FileProcessor::readEvents(unsigned int p_n)
 	}
 }
 
-int EDVSD_FileProcessor::readEventsByTime(unsigned int p_t)
+int EDVSD_FileProcessor::readEventsByTime(quint32 p_t)
 {
 	int read = 0;
-	int timestamp_new;
+	quint32 timestamp_new;
 	switch(m_timestampresolution){
 	case EDVS_Timestamp_Resolution_16bit:
 		timestamp_new = 0xFFFF & (m_timestamp + p_t);
@@ -128,6 +131,8 @@ int EDVSD_FileProcessor::readEventsByTime(unsigned int p_t)
 	}
 	int a = m_pos;
 
+	cout << timestamp_new << endl;
+
 	//Detect overflow
 	if(timestamp_new<m_timestamp){
 		while(a<m_totalevents && m_eventptr[a].t>timestamp_new){
@@ -141,5 +146,6 @@ int EDVSD_FileProcessor::readEventsByTime(unsigned int p_t)
 	read = a-m_pos;
 	emit eventsRead(&(m_eventptr[m_pos]), read);
 	m_pos=a;
+	m_timestamp = timestamp_new;
 	return read;
 }
