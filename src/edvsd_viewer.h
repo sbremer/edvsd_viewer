@@ -6,6 +6,7 @@
 
 #include "edvsd_visualizer.h"
 #include "edvsd_fileprocessor.h"
+#include "edvsd_anormaly_detection.h"
 
 namespace Ui {
 class EDVSD_Viewer;
@@ -37,6 +38,7 @@ private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;
 	EDVSD_FileProcessor *m_fileprocessor;
+	EDVSD_Anormaly_Detection *m_detection;
 
 
 };

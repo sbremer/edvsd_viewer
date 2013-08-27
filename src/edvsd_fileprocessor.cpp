@@ -86,8 +86,10 @@ void EDVSD_FileProcessor::closeFile()
 {
 	if(!m_fileopen)
 		return;
-	if(m_file!=NULL)
+	if(m_file!=NULL){
+		m_file->close();
 		delete m_file;
+	}
 	m_fileopen = false;
 	m_timestamp = 0;
 	m_data.clear();

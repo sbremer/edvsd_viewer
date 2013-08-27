@@ -35,7 +35,7 @@ public:
 
 	void start();
 
-
+	QPainter *getDebugPainter();
 
 private:
 	int m_size_x, m_size_y;
@@ -46,6 +46,9 @@ private:
 	QWidget *m_parent;
 	QImage *m_image;
 	QTimer *m_timer;
+
+	QPixmap *m_debug_pixmap;
+	QPainter *m_debug_painter;
 
 	void fadeImage();
 
