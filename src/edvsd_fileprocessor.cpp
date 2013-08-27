@@ -43,6 +43,11 @@ EDVS_Timestamp_Resolution EDVSD_FileProcessor::getTimestampResolution()
 	return m_timestampresolution;
 }
 
+EDVS_Event* EDVSD_FileProcessor::getEventPtr()
+{
+	return m_eventptr;
+}
+
 int EDVSD_FileProcessor::getTotalEvents()
 {
 	if(!m_fileopen)return 0;
@@ -78,6 +83,15 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		m_pos = 0;
 		m_timestamp = m_eventptr[0].t;
 		m_fileopen = true;
+
+		//Swap x and y
+		quint8 temp;
+		for(int a=0;a<m_totalevents;a++){
+			temp = m_eventptr[a].y;
+			m_eventptr[a].y = m_eventptr[a].x;
+			m_eventptr[a].x = temp;
+		}
+
 		return true;
 	}
 }

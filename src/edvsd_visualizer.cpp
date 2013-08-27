@@ -20,12 +20,13 @@ EDVSD_Visualizer::EDVSD_Visualizer(QWidget *p_parent, int p_size_x, int p_size_y
 	m_debug_pixmap = new QPixmap(m_size_x, m_size_y);
 	m_debug_pixmap->fill(Qt::transparent);
 	m_debug_painter = new QPainter(m_debug_pixmap);
+	m_debug_painter->scale(m_scaler, m_scaler);
 	QPen pen;
 	QColor color(Qt::blue);
 	pen.setColor(color);
-	pen.setWidth(4);
+	pen.setWidthF(1.0/m_scaler);
 	m_debug_painter->setPen(pen);
-	m_debug_painter->scale(m_scaler, m_scaler);
+	m_debug_painter->setCompositionMode(QPainter::CompositionMode_Source);
 
 	m_image->fill(m_colors[m_mode][2]);
 
@@ -48,6 +49,7 @@ const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFF00FF00, 0xFFFF0000, 0xFF0
 void EDVSD_Visualizer::start()
 {
 	m_timer->start(33);
+//	m_timer->start(200);
 }
 
 void EDVSD_Visualizer::setScaler(double p_scaler)
@@ -58,7 +60,15 @@ void EDVSD_Visualizer::setScaler(double p_scaler)
 	m_debug_painter->end();
 	delete m_debug_pixmap;
 	m_debug_pixmap = new QPixmap((int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler));
+	m_debug_pixmap->fill(Qt::transparent);
 	m_debug_painter->begin(m_debug_pixmap);
+	m_debug_painter->scale(m_scaler, m_scaler);
+	QPen pen;
+	QColor color(Qt::blue);
+	pen.setColor(color);
+	pen.setWidthF(1.0/m_scaler);
+	m_debug_painter->setPen(pen);
+	m_debug_painter->setCompositionMode(QPainter::CompositionMode_Source);
 }
 
 void EDVSD_Visualizer::setMode(EDVS_Visualization_Mode p_mode)
@@ -82,7 +92,7 @@ void EDVSD_Visualizer::drawEvents(EDVS_Event *p_buffer, int p_n)
 		//cout << "TS: " << event.t << endl;
 		//cout.flush();
 
-		*(data+event.x*m_size_x+event.y) = m_colors[(int)m_mode][event.p];
+		*(data+event.y*m_size_x+event.x) = m_colors[(int)m_mode][event.p];
 	}
 }
 
@@ -99,15 +109,15 @@ void EDVSD_Visualizer::paintEvent(QPaintEvent *p_paintevent)
 	painter.drawPixmap(0, 0, (int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler), buffer, 0, 0, m_size_x, m_size_y);
 	painter.drawPixmap(0, 0, *m_debug_pixmap);
 
-	m_debug_painter->end();
-	m_debug_pixmap->fill(Qt::transparent);
-	m_debug_painter->begin(m_debug_pixmap);
-	QPen pen;
-	QColor color(Qt::blue);
-	pen.setColor(color);
-	pen.setWidth(4);
-	m_debug_painter->setPen(pen);
-	m_debug_painter->scale(m_scaler, m_scaler);
+//	m_debug_painter->end();
+//	m_debug_pixmap->fill(Qt::transparent);
+//	m_debug_painter->begin(m_debug_pixmap);
+//	QPen pen;
+//	QColor color(Qt::blue);
+//	pen.setColor(color);
+//	pen.setWidth(1);
+//	m_debug_painter->setPen(pen);
+//	m_debug_painter->scale(m_scaler, m_scaler);
 
 	p_paintevent->accept();
 	emit loadEventData();

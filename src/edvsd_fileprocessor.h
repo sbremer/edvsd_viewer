@@ -22,6 +22,7 @@ public:
 	unsigned int getSizeY();
 	EDVS_Timestamp_Resolution getTimestampResolution();
 
+	EDVS_Event *getEventPtr();
 	int getTotalEvents();
 	int readEvents(unsigned int p_n);
 	int readEventsByTime(quint32 p_t);

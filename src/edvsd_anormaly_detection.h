@@ -2,6 +2,8 @@
 #define EDVSD_ANORMALY_DETECTION_H
 
 #include <QPainter>
+#include <qmath.h>
+
 #include "edvsd.h"
 
 class EDVSD_Anormaly_Detection : public QObject
@@ -18,6 +20,7 @@ public slots:
 
 private:
 	QPainter *m_painter;
+	QPointF m_points[13*13];
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H
