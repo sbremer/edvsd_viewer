@@ -147,7 +147,7 @@ int EDVSD_FileProcessor::readEventsByTime(quint32 p_t)
 	}
 	int a = m_pos;
 
-	cout << timestamp_new << endl;
+	//cout << timestamp_new << endl;
 
 	//Detect overflow
 	if(timestamp_new<m_timestamp){

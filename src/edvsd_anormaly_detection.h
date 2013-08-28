@@ -41,6 +41,8 @@ private:
 	const double Tracker_Pow = 4.0;
 	const double Seperator_Dist = 1.0;
 
+	QList<quint32> m_endevents;
+
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H

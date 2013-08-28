@@ -1,5 +1,8 @@
 #include "edvsd_anormaly_detection.h"
 
+#include <iostream>
+using namespace std;
+
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent) :
 	QObject(parent)
 {
@@ -13,12 +16,6 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 {
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
-
-//	//Normalize Timestamp (first ts = 0; 24bit TS ~ 16.7s, plenty --> no overflows)
-//	quint32 ts_norm = p_buffer[0].t;
-//	for(int a=0;a<p_n;a++){
-//		p_buffer[a].t = 0xFFFFFF & (p_buffer[a].t - ts_norm);
-//	}
 
 	QPointF point_cloud_revers[13*13];
 
@@ -90,37 +87,81 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 		}
 	}
 
-	QList<QPointF> point_cloud;
-
-	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
-		point_cloud.append(i->start);
-	}
-
 	//Track motion (forward, find endpoints)
-	for(QList<QPointF>::iterator i = point_cloud.begin(); i != point_cloud.end(); i++){
+	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
+		QPointF tracker = i->start;
+
 		for(int a=0;a<p_n;a++){
+			if(!p_buffer[a].p)continue;
 			EDVS_Event event = p_buffer[a];
 			QPointF tmp;
-			QPointF point = *i;
+			QPointF point = tracker;
 			double fact = Tracker_Factor/qPow(qSqrt((event.x-point.x())*(event.x-point.x())+(event.y-point.y())*(event.y-point.y())), Tracker_Pow);
 			fact = qMin(1.0, fact);
 			tmp.setX(point.x()*(1.0-fact)+event.x*fact);
 			tmp.setY(point.y()*(1.0-fact)+event.y*fact);
 			//m_painter->drawLine(*i,tmp);
-			*i = tmp;
+			tracker = tmp;
 		}
+
+		i->end = tracker;
 	}
 
-	//Add endpoints to motion list
-	QList<QPointF>::iterator j = point_cloud.begin();
+	//draw start and endpoint
 	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
-		i->end = *j;
-		j++;
-
 		m_painter->drawEllipse(i->start,1.0,1.0);
 		m_painter->drawEllipse(i->end,1.0,1.0);
 		m_painter->drawLine(i->start, i->end);
+	}
 
+	//Motion Tracking
+	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
+		QList<QPointF> tracker;
+		tracker.append(i->start);
+
+		for(int a=0;a<p_n;a++){
+			if(!p_buffer[a].p)continue;
+			bool atstart = false;
+
+			//Find closest point to event
+			QPointF event = QPointF((double)(p_buffer[a].x), (double)(p_buffer[a].y));
+			double distmin = 1000;
+			QList<QPointF>::iterator pointmin;
+			for(QList<QPointF>::iterator j = tracker.begin(); j!=tracker.end();j++){
+				double dist = getDistance(event, *j);
+				if(dist<distmin){
+					distmin = dist;
+					pointmin = j;
+				}
+				if(getDistance(*j,i->start)<8.0){
+					atstart = true;
+				}
+			}
+
+			QPointF tmp;
+			QPointF point = *pointmin;
+			double fact = 2*Tracker_Factor/qPow(getDistance(event, point), 2.5);
+			fact = qMin(1.0, fact);
+			tmp.setX(point.x()*(1.0-fact)+event.x()*fact);
+			tmp.setY(point.y()*(1.0-fact)+event.y()*fact);
+			*pointmin = tmp;
+
+			if(getDistance(tmp,i->end)<5.0){
+				tracker.erase(pointmin);
+				m_endevents.append(p_buffer[a].t);
+			}
+
+			if(!atstart){
+				tracker.append(i->start);
+			}
+		}
+	}
+
+	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
+		//cout << *i << endl;
+		if(i!=m_endevents.begin()){
+			cout << "\t" << (*i-*(i-1)) << endl;
+		}
 	}
 
 }
