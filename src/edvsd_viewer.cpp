@@ -11,6 +11,7 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 	m_ui->setupUi(this);
 	m_fileprocessor = new EDVSD_FileProcessor();
 	m_visualizer = NULL;
+	m_detection = NULL;
 }
 
 EDVSD_Viewer::~EDVSD_Viewer()
@@ -43,8 +44,10 @@ void EDVSD_Viewer::on_action_Close_File_triggered()
 	if(m_visualizer!=NULL){
 		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		disconnect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
-		//disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeEvents(EDVS_Event*,int)));
 		delete m_visualizer;
+	}
+	if(m_detection!=NULL){
+		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
 		delete m_detection;
 	}
 }
@@ -61,7 +64,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		m_detection = new EDVSD_Anormaly_Detection();
 		m_detection->setDebugPainter(m_visualizer->getDebugPainter());
 
-		//connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeEvents(EDVS_Event*,int)));
+		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
 
 		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
 				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))

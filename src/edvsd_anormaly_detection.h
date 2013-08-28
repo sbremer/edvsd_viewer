@@ -6,6 +6,16 @@
 
 #include "edvsd.h"
 
+struct MotionF{
+	QPointF start,end;
+	int num;
+
+	bool operator==(MotionF a) const{
+		if(a.start.x()==start.x() && a.start.y()==start.y())return true;
+		else return false;
+	}
+};
+
 class EDVSD_Anormaly_Detection : public QObject
 {
 	Q_OBJECT
@@ -15,12 +25,22 @@ public:
 
 	void setDebugPainter(QPainter *p_painter);
 
-public slots:
 	void analyzeEvents(EDVS_Event *p_buffer, int p_n);
+
+public slots:
+	void analyzeLiveEvents(EDVS_Event *p_buffer, int p_n);
 
 private:
 	QPainter *m_painter;
-	QPointF m_points[13*13];
+
+	QList<MotionF> m_motions;
+
+	double getDistance(QPointF,QPointF);
+
+	const double Tracker_Factor = 2.0;
+	const double Tracker_Pow = 4.0;
+	const double Seperator_Dist = 1.0;
+
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H
