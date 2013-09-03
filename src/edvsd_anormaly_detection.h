@@ -16,6 +16,22 @@ struct MotionF{
 	}
 };
 
+template <int N>
+struct Particle{
+	QPointF point[N];
+	int ts;
+
+	Particle(QPointF p_point = QPointF(), int p_ts = -1)
+	{
+		for(int a=0;a<N;a++){
+			point[a] = p_point;
+		}
+		ts = p_ts;
+	}
+};
+
+typedef Particle<2> Particle2;
+
 class EDVSD_Anormaly_Detection : public QObject
 {
 	Q_OBJECT
@@ -37,11 +53,13 @@ private:
 
 	double getDistance(QPointF,QPointF);
 
-	const double Tracker_Factor = 2.0;
-	const double Tracker_Pow = 4.0;
-	const double Seperator_Dist = 1.0;
-
 	QList<quint32> m_endevents;
+
+	QList<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
+	QList<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
+	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
+
+	QList<Particle2> tracker;
 
 };
 

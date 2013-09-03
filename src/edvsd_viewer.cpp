@@ -27,7 +27,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	//Todo: Add feature for manipolation of replay speed
-	int c = m_fileprocessor->readEventsByTime(33*10);
+	int c = m_fileprocessor->readEventsByTime(33*30);
 	//int c = m_fileprocessor->readEvents(10);
 //	if(c!=0)
 //		cout << c << endl;
@@ -77,6 +77,17 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		m_visualizer->show();
 
 		m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+
+
+//		QFile output(filename+".txt");
+//		output.open(QIODevice::WriteOnly);
+//		EDVS_Event* eventptr = m_fileprocessor->getEventPtr();
+//		for(int a=0;a<m_fileprocessor->getTotalEvents();a++){
+//			QString data = QString::number(eventptr[a].t) + "\t" + QString::number(eventptr[a].x) + "\t" + QString::number(eventptr[a].y) + "\t" + QString::number(eventptr[a].p) + "\n";
+//			output.write(data.toLocal8Bit().data());
+//		}
+//		output.close();
+
 		m_visualizer->start();
 	}
 	else{
