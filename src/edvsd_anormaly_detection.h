@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <qmath.h>
 
+#include <QFile>
+
 #include "edvsd.h"
 
 struct MotionF{
@@ -38,6 +40,7 @@ class EDVSD_Anormaly_Detection : public QObject
 
 public:
 	explicit EDVSD_Anormaly_Detection(QObject *parent = 0);
+	~EDVSD_Anormaly_Detection();
 
 	void setDebugPainter(QPainter *p_painter);
 
@@ -60,6 +63,7 @@ private:
 	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 
 	QList<Particle2> tracker;
+	QFile m_output_file;
 
 };
 

@@ -6,6 +6,14 @@ using namespace std;
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent) :
 	QObject(parent)
 {
+	system("rm data.dat");
+	m_output_file.setFileName("data.dat");
+	m_output_file.open(QIODevice::WriteOnly);
+}
+
+EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
+{
+	m_output_file.close();
 }
 
 void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
@@ -232,39 +240,34 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 						pointmin = j;
 						particlemin = b;
 					}
-					if(getDistance(j->point[b],i->start)<5.0){
+					if(getDistance(j->point[b],i->start)<2.0){
 						atstart = true;
 					}
 				}
 			}
 
-//			QPointF tmp;
-//			QPointF point = (*pointmin)[particlemin];
-//			double fact = 0.2/qPow(getDistance(event, point), 1);
-//			//fact = 0.1;
-//			fact = qMin(1.0, fact);
-//			tmp.setX(point.x()*(1.0-fact)+event.x()*fact);
-//			tmp.setY(point.y()*(1.0-fact)+event.y()*fact);
-//			(*pointmin)[particlemin] = tmp;
-
-//			QPointF tmp2;
-//			QPointF point2 = (*pointmin)[(particlemin+1)%2];
-//			double fact2 = 0.1/qPow(getDistance(event, point2), 1);
-//			fact2 = 0.02;
-//			fact2 = qMin(1.0, fact2);
-//			tmp2.setX(point2.x()*(1.0-fact2)+event.x()*fact2);
-//			tmp2.setY(point2.y()*(1.0-fact2)+event.y()*fact2);
-//			(*pointmin)[(particlemin+1)%2] = tmp2;
-
 			QPointF *p1 = pointmin->point+particlemin;
 			QPointF *p2 = pointmin->point+(particlemin+1)%2;
 
 			QPointF delta = event-*p1;
-			double fact = 0.2/getDistance(QPointF(0.0,0.0),delta);
+			double fact = 0.2/qPow(getDistance(QPointF(0.0,0.0),delta),1);
 			fact = qMin(0.2,fact);
 
 			*p1 += delta*fact;
 			*p2 += delta*fact*0.5 + (*p1 - *p2)*0.01;
+
+			if(getDistance(*p1,i->start)+getDistance(*p2,i->start)>2.0 && pointmin->ts==-1){
+				pointmin->ts = p_buffer[a].t;
+			}
+
+			if(pointmin->ts!=-1){
+				QString cmd;
+				cmd += QString::number(p_buffer[a].t-pointmin->ts) + "\t";
+				cmd += QString::number((p1->x()+p2->x())/2.0) + "\t";
+				cmd += QString::number((p1->y()+p2->y())/2.0) + "\t";
+				cmd += QString::number(qAtan((p1->x()-p2->x())/(p1->y()-p2->y()))) + "\n";
+				m_output_file.write(cmd.toLocal8Bit().data());
+			}
 
 			if(getDistance(*p1,i->end)+getDistance(*p2,i->end)<End_Dist){
 				tracker.erase(pointmin);
