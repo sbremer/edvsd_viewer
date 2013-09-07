@@ -105,7 +105,7 @@ QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionStartpoints(EDVS_Event *p_
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions)
 {
 	const double Tracker_Factor = 2.0;
-	const double Tracker_Pow = 3.2;
+	const double Tracker_Pow = 3.3;
 
 	//Track motion (forward, find endpoints)
 	for(QList<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
@@ -250,7 +250,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 			QPointF *p2 = pointmin->point+(particlemin+1)%2;
 
 			QPointF delta = event-*p1;
-			double fact = 0.2/qPow(getDistance(QPointF(0.0,0.0),delta),1);
+			double fact = 3.2/qPow(getDistance(QPointF(0.0,0.0),delta),3);
 			fact = qMin(0.2,fact);
 
 			*p1 += delta*fact;
