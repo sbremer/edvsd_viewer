@@ -13,8 +13,12 @@ public:
 	NeuronLayer(int p_size, int p_size_beneath);
 	NeuronLayer();
 	void calculateOutput(const vector<double const*> &p_input);
+	void calculateError(const vector<double const*> &p_exp_output);
+	void calculateDelta(const vector<double*> &p_delta_ref);
+	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
 	const vector<double const*> &m_output_ref;
+	const vector<double*> &m_delta_ref;
 
 	//Dummy, never used
 	NeuronLayer& operator= (const NeuronLayer& p_value){
@@ -24,6 +28,7 @@ public:
 private:
 	vector<Neuron> m_neurons;
 	vector<double const*> m_output;
+	vector<double*> m_delta;
 	const int m_size;
 };
 
