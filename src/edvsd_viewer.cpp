@@ -45,10 +45,12 @@ void EDVSD_Viewer::on_action_Close_File_triggered()
 		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		disconnect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
 		delete m_visualizer;
+		m_visualizer = NULL;
 	}
 	if(m_detection!=NULL){
 		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
 		delete m_detection;
+		m_detection = NULL;
 	}
 }
 

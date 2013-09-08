@@ -23,7 +23,7 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
 {
-	const double Tracker_Factor = 2.0;
+	const double Tracker_Factor = 2.5;
 	const double Tracker_Pow = 3.2;
 	const double Seperator_Dist = 1.0;
 
@@ -203,13 +203,15 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 //	QPointF *tmp = new QPointF[2];
 //	tmp[0] = tmp[1] = m_motions.at(0).start;
 	tracker.append(Particle2(m_motions.at(0).start));
+	spawn = -1;
 }
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	const double End_Dist = 6;
+	const double End_Dist = 6.0;
+	const double Start_Dist = 6.0;
 	const int Points = 2;
 
 	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
@@ -250,13 +252,14 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 			QPointF *p2 = pointmin->point+(particlemin+1)%2;
 
 			QPointF delta = event-*p1;
-			double fact = 3.2/qPow(getDistance(QPointF(0.0,0.0),delta),3);
-			fact = qMin(0.2,fact);
+			double fact = 3.0/qPow(getDistance(QPointF(0.0,0.0),delta),3);
+			fact = qMin(0.3,fact);
 
 			*p1 += delta*fact;
-			*p2 += delta*fact*0.5 + (*p1 - *p2)*0.01;
+			//*p2 += delta*fact*0.5 + (*p1 - *p2)*0.01;
+			*p2 += delta*fact*0.6 + (*p1 - *p2)*0.005;
 
-			if(getDistance(*p1,i->start)+getDistance(*p2,i->start)>2.0 && pointmin->ts==-1){
+			if(getDistance(*p1,i->start)+getDistance(*p2,i->start)>Start_Dist && pointmin->ts==-1){
 				pointmin->ts = p_buffer[a].t;
 			}
 
@@ -274,7 +277,12 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 				//endtimestamps.append(p_buffer[a].t);
 			}
 
-			if(!atstart){
+			if(!atstart && spawn == -1){
+				spawn = p_buffer[a].t + 2000;
+				//tracker.append(Particle2(m_motions.at(0).start));
+			}
+			if(spawn != -1 && p_buffer[a].t >= spawn){
+				spawn = -1;
 				tracker.append(Particle2(m_motions.at(0).start));
 			}
 		}

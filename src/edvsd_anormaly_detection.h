@@ -63,6 +63,8 @@ private:
 	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 
 	QList<Particle2> tracker;
+	int spawn;
+
 	QFile m_output_file;
 
 };
