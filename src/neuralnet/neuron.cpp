@@ -10,7 +10,6 @@ Neuron::Neuron(int p_size)
 	:m_size(p_size), m_activation_function(Function_Tanh), m_output_ref(&m_output)
 {
 	m_weights.resize(m_size);
-	//Initiallize weights
 }
 
 void Neuron::calculateOutput(const vector<const double *> &p_input)
@@ -32,6 +31,15 @@ void Neuron::calculateDelta(const vector<double *> &p_delta_ref)
 	}
 }
 
+void Neuron::initializeWeights(double p_rndabs)
+{
+	for(int a = 0; a < m_size; a++){
+		m_weights[a] = generateRandom(p_rndabs);
+	}
+
+	m_bias = generateRandom(4*p_rndabs);
+}
+
 void Neuron::updateWeights(const vector<const double *> &p_input, double p_learnrate)
 {
 	for(int a = 0; a < m_size; a++){
@@ -39,4 +47,9 @@ void Neuron::updateWeights(const vector<const double *> &p_input, double p_learn
 	}
 
 	m_bias += p_learnrate * m_delta * m_activation_function.m_function_derivative(m_net);
+}
+
+double Neuron::generateRandom(double p_rndabs)
+{
+	return (rand()%1000000) / 500000.0 * p_rndabs - p_rndabs;
 }

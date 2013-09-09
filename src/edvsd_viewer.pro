@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     edvsd_anormaly_detection.cpp \
 	neuralnet/neuralnet.cpp \
     neuralnet/neuronlayer.cpp \
-    neuralnet/neuron.cpp
+    neuralnet/neuron.cpp \
+    detection/kohonentracking.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -29,6 +30,8 @@ HEADERS  += edvsd_viewer.h \
 	neuralnet/neuralnet.h \
     neuralnet/neuronlayer.h \
     neuralnet/neuron.h \
-    neuralnet/neuralnet_functions.h
+    neuralnet/neuralnet_functions.h \
+    detection/kohonentracking.h \
+    detection/particles.h
 
 FORMS    += edvsd_viewer.ui

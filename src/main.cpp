@@ -1,6 +1,8 @@
 #include "edvsd_viewer.h"
 #include <QApplication>
 
+#define QT
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

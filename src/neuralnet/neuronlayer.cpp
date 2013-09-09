@@ -1,11 +1,5 @@
 #include "neuronlayer.h"
 
-NeuronLayer::NeuronLayer()
-	:m_size(0), m_output_ref(m_output), m_delta_ref(m_delta)
-{
-
-}
-
 NeuronLayer::NeuronLayer(int p_size, int p_size_beneath)
 	:m_size(p_size), m_output_ref(m_output), m_delta_ref(m_delta)
 {
@@ -42,6 +36,13 @@ void NeuronLayer::calculateDelta(const vector<double *> &p_delta_ref)
 
 	for(int a = 0; a < m_size; a++){
 		m_neurons[a].calculateDelta(p_delta_ref);
+	}
+}
+
+void NeuronLayer::initializeWeights(double p_rndabs)
+{
+	for(int a = 0; a < m_size; a++){
+		m_neurons[a].initializeWeights(p_rndabs);
 	}
 }
 

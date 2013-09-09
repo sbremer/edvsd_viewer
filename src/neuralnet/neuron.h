@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <stdlib.h>
+
 using namespace std;
 
 #include "neuralnet_functions.h"
@@ -14,6 +16,7 @@ public:
 	Neuron();
 	void calculateOutput(const vector<double const*> &p_input);
 	void calculateDelta(const vector<double *> &p_delta_ref);
+	void initializeWeights(double p_rndabs);
 	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
 	//Dummy, never used
@@ -31,6 +34,8 @@ private:
 	double m_bias;
 	double m_output;
 	const ActivationFunction m_activation_function;
+
+	static double generateRandom(double p_rndabs);
 };
 
 #endif // NEURON_H
