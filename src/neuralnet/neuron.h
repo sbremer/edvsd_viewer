@@ -24,7 +24,7 @@ public:
 		return *this;
 	}
 
-	double const * const m_output_ref;
+	double const * const getOutputRef();
 	double m_delta;
 
 private:

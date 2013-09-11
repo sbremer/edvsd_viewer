@@ -27,7 +27,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	//Todo: Add feature for manipolation of replay speed
-	int c = m_fileprocessor->readEventsByTime(33*20);
+	int c = m_fileprocessor->readEventsByTime(33*5);
 	//int c = m_fileprocessor->readEvents(10);
 //	if(c!=0)
 //		cout << c << endl;
@@ -113,4 +113,10 @@ void EDVSD_Viewer::on_action_White_Black_triggered()
 	m_ui->action_White_Black->setEnabled(false);
 	if(m_visualizer!=NULL)
 		m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);
+}
+
+void EDVSD_Viewer::on_actionDump_NNData_triggered()
+{
+	if(m_detection != NULL)
+		m_detection->dumpNNData();
 }

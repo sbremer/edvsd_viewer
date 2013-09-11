@@ -34,6 +34,8 @@ private slots:
 
 	void on_action_White_Black_triggered();
 
+	void on_actionDump_NNData_triggered();
+
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;

@@ -44,6 +44,7 @@
      <addaction name="action_White_Black"/>
     </widget>
     <addaction name="menu_Mode"/>
+    <addaction name="actionDump_NNData"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Settings"/>
@@ -103,6 +104,14 @@
    </property>
    <property name="text">
     <string>&amp;White/Black</string>
+   </property>
+  </action>
+  <action name="actionDump_NNData">
+   <property name="text">
+    <string>Dump NNData</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

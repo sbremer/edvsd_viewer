@@ -1,7 +1,11 @@
 #include "neuronlayer.h"
 
+//For Debugging
+#include "iostream"
+using namespace std;
+
 NeuronLayer::NeuronLayer(int p_size, int p_size_beneath)
-	:m_size(p_size), m_output_ref(m_output), m_delta_ref(m_delta)
+	:m_size(p_size)
 {
 	m_neurons.reserve(m_size);
 	m_output.resize(m_size);
@@ -9,9 +13,19 @@ NeuronLayer::NeuronLayer(int p_size, int p_size_beneath)
 
 	for(int a = 0; a < m_size; a++){
 		m_neurons.push_back(Neuron(p_size_beneath));
-		m_output[a] = m_neurons[a].m_output_ref;
+		m_output[a] = m_neurons[a].getOutputRef();
 		m_delta[a] = &(m_neurons[a].m_delta);
 	}
+}
+
+const vector<double const*> &NeuronLayer::getOutputRef()
+{
+	return m_output;
+}
+
+const vector<double*> &NeuronLayer::getDeltaRef()
+{
+	return m_delta;
 }
 
 void NeuronLayer::calculateOutput(const vector<const double *> &p_input)

@@ -1,21 +1,32 @@
 #include "neuron.h"
 
+//For Debugging
+#include "iostream"
+using namespace std;
+
 Neuron::Neuron()
-	:m_size(0), m_activation_function(Function_Tanh), m_output_ref(&m_output)
+	:m_size(0), m_activation_function(Function_Tanh)
 {
 
 }
 
 Neuron::Neuron(int p_size)
-	:m_size(p_size), m_activation_function(Function_Tanh), m_output_ref(&m_output)
+	:m_size(p_size), m_activation_function(Function_Tanh)
 {
 	m_weights.resize(m_size);
+}
+
+double const * const Neuron::getOutputRef()
+{
+	return &m_output;
 }
 
 void Neuron::calculateOutput(const vector<const double *> &p_input)
 {
 	m_net = 0.0;
 	m_net += m_bias;
+
+	//cout << *(p_input.at(0)) << endl;
 
 	for(int a = 0; a < m_size; a++){
 		m_net += *(p_input[a]) * m_weights[a];
@@ -37,7 +48,7 @@ void Neuron::initializeWeights(double p_rndabs)
 		m_weights[a] = generateRandom(p_rndabs);
 	}
 
-	m_bias = generateRandom(4*p_rndabs);
+	m_bias = generateRandom(2*p_rndabs);
 }
 
 void Neuron::updateWeights(const vector<const double *> &p_input, double p_learnrate)

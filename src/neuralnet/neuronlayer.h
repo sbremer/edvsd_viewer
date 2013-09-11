@@ -17,8 +17,8 @@ public:
 	void initializeWeights(double p_rndabs);
 	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
-	const vector<double const*> &m_output_ref;
-	const vector<double*> &m_delta_ref;
+	const vector<double const*> &getOutputRef();
+	const vector<double*> &getDeltaRef();
 
 	//Dummy, never used
 	NeuronLayer& operator= (const NeuronLayer& p_value){

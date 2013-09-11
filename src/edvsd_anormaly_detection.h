@@ -51,6 +51,8 @@ public:
 
 	void setDebugPainter(QPainter *p_painter);
 
+	void dumpNNData();
+
 	void analyzeEvents(EDVS_Event *p_buffer, int p_n);
 
 public slots:
@@ -73,7 +75,7 @@ private:
 	NeuralNet m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
 	int m_time_comp;
 
-	QFile m_output_file;
+	QFile m_output_file, m_output_file2;
 
 	static int NeuralNet_XY[2];
 	static int NeuralNet_ATan[2];

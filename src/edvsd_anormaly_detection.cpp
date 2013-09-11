@@ -9,11 +9,16 @@ EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
 	system("rm data.dat");
 	m_output_file.setFileName("data.dat");
 	m_output_file.open(QIODevice::WriteOnly);
+
+	system("rm data2.dat");
+	m_output_file2.setFileName("data2.dat");
+	m_output_file2.open(QIODevice::WriteOnly);
 }
 
 EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
 {
 	m_output_file.close();
+	m_output_file2.close();
 }
 
 int EDVSD_Anormaly_Detection::NeuralNet_XY[2] = {2, 1};
@@ -22,6 +27,28 @@ int EDVSD_Anormaly_Detection::NeuralNet_ATan[2] = {4, 1};
 void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 {
 	m_painter = p_painter;
+}
+
+void EDVSD_Anormaly_Detection::dumpNNData()
+{
+	double t = -2.2;
+
+	while(t <= 2.2){
+		double x = m_neuralnet_x.calculate(&t);
+		double y = m_neuralnet_y.calculate(&t);
+		double atan = 0;//m_neuralnet_atan.calculate(&t);
+
+		QString cmd;
+		cmd += QString::number(t) + "\t";
+		cmd += QString::number(x) + "\t";
+		cmd += QString::number(y) + "\t";
+		cmd += QString::number(atan) + "\n";
+		m_output_file2.write(cmd.toLocal8Bit().data());
+
+		t += 0.1;
+	}
+	m_output_file2.flush();
+	cout << "Dumped" << endl;
 }
 
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
@@ -210,10 +237,52 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
+	m_neuralnet_x.initialize(1.0);
+	m_neuralnet_y.initialize(1.0);
+	//m_neuralnet_atan.initialize(1.0);
+
+	for(int a = 0; a < p_n; a++){
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+
+		if(map == 0){
+			continue;
+		}
+
+		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
+			m_time_comp = m_tracking.getDurationMin();
+		}
+
+		if(m_time_comp != -1 && map->ts != -1){
+			double x = (map->points[0].x + map->points[1].x) / 2.0;
+			double y = (map->points[0].y + map->points[1].y) / 2.0;
+			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
+			double t = (double)p_buffer[a].t - map->ts;
+
+			x = (x - 64) / 32;
+			y = (y - 64) / 32;
+			atan = atan;
+			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
+
+			QString cmd;
+			cmd += QString::number(t) + "\t";
+			cmd += QString::number(x) + "\t";
+			cmd += QString::number(y) + "\t";
+			cmd += QString::number(atan) + "\n";
+			m_output_file.write(cmd.toLocal8Bit().data());
+
+			m_neuralnet_x.train(&t, &x);
+			m_neuralnet_y.train(&t, &y);
+			//m_neuralnet_atan.train(&t, &atan);
+
+
+		}
+	}
+	dumpNNData();
 }
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
+	return;
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
 	for(int a = 0; a < p_n; a++){
@@ -231,15 +300,28 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
+			double t = (double)p_buffer[a].t - map->ts;
+
+			x = (x - 64) / 32;
+			y = (y - 64) / 32;
+			atan = atan;
+			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
 
 			QString cmd;
-			cmd += QString::number(p_buffer[a].t - map->ts) + "\t";
+			cmd += QString::number(t) + "\t";
 			cmd += QString::number(x) + "\t";
 			cmd += QString::number(y) + "\t";
 			cmd += QString::number(atan) + "\n";
 			m_output_file.write(cmd.toLocal8Bit().data());
+
+//			m_neuralnet_x.train(&t, &x);
+//			m_neuralnet_y.train(&t, &y);
+//			m_neuralnet_atan.train(&t, &atan);
+
+
 		}
 	}
+
 	for(int a = 0; a < m_tracking.getListLength(); a++){
 		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
 		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
