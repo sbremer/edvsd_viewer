@@ -1,17 +1,14 @@
-#ifndef PARTICLES_H
-#define PARTICLES_H
+#ifndef POINTF_H
+#define POINTF_H
 
 #ifdef QT
 #include <QPointF>
 #endif
 
-#include <vector>
 #include <math.h>
 
-using namespace std;
-
 struct PointF{
-	double x,y;
+	double x, y;
 
 	PointF()
 	{
@@ -25,10 +22,20 @@ struct PointF{
 	}
 
 #ifdef QT
-	PointF(QPointF p_point)
+	PointF(const QPointF& p_point)
 	{
 		x = p_point.x();
 		y = p_point.y();
+	}
+
+	QPointF toQPointF()
+	{
+		return QPointF(x, y);
+	}
+
+	static QPointF toQPointF(const PointF& p_point)
+	{
+		return QPointF(p_point.x, p_point.y);
 	}
 #endif
 
@@ -99,19 +106,4 @@ struct PointF{
 	}
 };
 
-template <int N>
-struct Particle{
-	vector<PointF> points;
-	int ts;
-
-	Particle(PointF p_point = PointF(), int p_ts = -1)
-	{
-		points.resize(N);
-		for(int a=0;a<N;a++){
-			points[a] = p_point;
-		}
-		ts = p_ts;
-	}
-};
-
-#endif // PARTICLES_H
+#endif // POINTF_H

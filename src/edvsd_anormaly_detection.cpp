@@ -3,8 +3,8 @@
 #include <iostream>
 using namespace std;
 
-EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent) :
-	QObject(parent)
+EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
+	:QObject(parent), m_neuralnet_x(2, NeuralNet_XY, 1), m_neuralnet_y(2, NeuralNet_XY, 1), m_neuralnet_atan(2, NeuralNet_ATan, 1)//, m_tracking()
 {
 	system("rm data.dat");
 	m_output_file.setFileName("data.dat");
@@ -15,6 +15,9 @@ EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
 {
 	m_output_file.close();
 }
+
+int EDVSD_Anormaly_Detection::NeuralNet_XY[2] = {2, 1};
+int EDVSD_Anormaly_Detection::NeuralNet_ATan[2] = {4, 1};
 
 void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 {
@@ -196,16 +199,55 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
 		//cout << *i << endl;
 		if(i!=m_endevents.begin()){
-			cout << "\t" << (*i-*(i-1)) << endl;
+			//cout << "\t" << (*i-*(i-1)) << endl;
 		}
 	}
 
 //	QPointF *tmp = new QPointF[2];
 //	tmp[0] = tmp[1] = m_motions.at(0).start;
-	tracker.append(Particle2(m_motions.at(0).start));
-	spawn = -1;
+//	tracker.append(Particle2(m_motions.at(0).start));
+//	spawn = -1;
+
+	m_time_comp = -1;
+	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
 }
 
+void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
+{
+	m_painter->fillRect(0,0,128,128,Qt::transparent);
+
+	for(int a = 0; a < p_n; a++){
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+
+		if(map == 0){
+			continue;
+		}
+
+		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
+			m_time_comp = m_tracking.getDurationMin();
+		}
+
+		if(m_time_comp != -1 && map->ts != -1){
+			double x = (map->points[0].x + map->points[1].x) / 2.0;
+			double y = (map->points[0].y + map->points[1].y) / 2.0;
+			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
+
+			QString cmd;
+			cmd += QString::number(p_buffer[a].t - map->ts) + "\t";
+			cmd += QString::number(x) + "\t";
+			cmd += QString::number(y) + "\t";
+			cmd += QString::number(atan) + "\n";
+			m_output_file.write(cmd.toLocal8Bit().data());
+		}
+	}
+	for(int a = 0; a < m_tracking.getListLength(); a++){
+		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
+		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
+		m_painter->drawLine(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]));
+	}
+}
+
+/*
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
@@ -295,6 +337,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 	}
 
 }
+*/
 
 double EDVSD_Anormaly_Detection::getDistance(QPointF p_p1, QPointF p_p2)
 {

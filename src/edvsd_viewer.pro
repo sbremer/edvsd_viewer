@@ -32,6 +32,8 @@ HEADERS  += edvsd_viewer.h \
     neuralnet/neuron.h \
     neuralnet/neuralnet_functions.h \
     detection/kohonentracking.h \
-    detection/particles.h
+    detection/kohonentracking_helper.h \
+    detection/pointf.h \
+    detection/kohonenmap.h
 
 FORMS    += edvsd_viewer.ui
