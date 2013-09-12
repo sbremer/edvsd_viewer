@@ -12,8 +12,9 @@ using namespace std;
 class Neuron
 {
 public:
-	Neuron(int p_size);
 	Neuron();
+	Neuron(int p_size);
+	Neuron(int p_size, ActivationFunction p_actication_function);
 	void calculateOutput(const vector<double const*> &p_input);
 	void calculateDelta(const vector<double *> &p_delta_ref);
 	void initializeWeights(double p_rndabs);

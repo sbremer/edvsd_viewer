@@ -14,6 +14,8 @@ void KohonenTracking<N>::initialize(PointF p_start, PointF p_end, bool p_trackpo
 	m_end = p_end;
 	m_trackpolarity = p_trackpolarity;
 
+	m_tracker.clear();
+
 	m_tracker.push_back(m_start);
 	m_iterator = m_tracker.begin();
 	m_iterator_at = 0;

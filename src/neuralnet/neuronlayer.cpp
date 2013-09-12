@@ -18,6 +18,20 @@ NeuronLayer::NeuronLayer(int p_size, int p_size_beneath)
 	}
 }
 
+NeuronLayer::NeuronLayer(int p_size, int p_size_beneath, ActivationFunction	p_activation_function)
+	:m_size(p_size)
+{
+	m_neurons.reserve(m_size);
+	m_output.resize(m_size);
+	m_delta.resize(m_size);
+
+	for(int a = 0; a < m_size; a++){
+		m_neurons.push_back(Neuron(p_size_beneath, p_activation_function));
+		m_output[a] = m_neurons[a].getOutputRef();
+		m_delta[a] = &(m_neurons[a].m_delta);
+	}
+}
+
 const vector<double const*> &NeuronLayer::getOutputRef()
 {
 	return m_output;
@@ -38,7 +52,7 @@ void NeuronLayer::calculateOutput(const vector<const double *> &p_input)
 void NeuronLayer::calculateError(const vector<double const*> &p_exp_output)
 {
 	for(int a = 0; a < m_size; a++){
-		*(m_delta[a]) = *(m_output[a]) - *(p_exp_output[a]);
+		*(m_delta[a]) =  *(p_exp_output[a]) - *(m_output[a]);
 	}
 }
 
@@ -57,6 +71,11 @@ void NeuronLayer::initializeWeights(double p_rndabs)
 {
 	for(int a = 0; a < m_size; a++){
 		m_neurons[a].initializeWeights(p_rndabs);
+	}
+
+	for(int a = 0; a < m_size; a++){
+		m_output[a] = m_neurons[a].getOutputRef();
+		m_delta[a] = &(m_neurons[a].m_delta);
 	}
 }
 

@@ -11,6 +11,7 @@ class NeuronLayer
 {
 public:
 	NeuronLayer(int p_size, int p_size_beneath);
+	NeuronLayer(int p_size, int p_size_beneath, ActivationFunction p_activation_function);
 	void calculateOutput(const vector<double const*> &p_input);
 	void calculateError(const vector<double const*> &p_exp_output);
 	void calculateDelta(const vector<double*> &p_delta_ref);

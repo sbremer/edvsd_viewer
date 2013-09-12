@@ -20,6 +20,8 @@ NeuralNet::NeuralNet(int p_size, int p_layersize[], int p_inputsize)
 	for(int a = 0; a < m_size; a++){
 		if(a == 0)
 			m_layers.push_back(NeuronLayer(m_layersize[a], m_inputsize));
+		else if(a == m_size -1)
+			m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1], Function_Linear));
 		else
 			m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1]));
 	}
@@ -28,6 +30,8 @@ NeuralNet::NeuralNet(int p_size, int p_layersize[], int p_inputsize)
 void NeuralNet::initialize(double p_rndabs)
 {
 	initializeWeights(p_rndabs);
+
+	m_learnrate = 0.3;
 
 	for(int a = 0; a < m_inputsize; a++){
 		m_input_ptr[a] = &(m_input[a]);
@@ -58,7 +62,8 @@ double NeuralNet::train(double p_input[], double p_exp_output[])
 
 	calculateDelta(exp_output);
 
-	updateWeights(m_input_ptr, 0.1);
+	updateWeights(m_input_ptr, m_learnrate);
+	m_learnrate *= 0.999;
 }
 
 void NeuralNet::calculateOutput(const vector<const double *> &p_input)

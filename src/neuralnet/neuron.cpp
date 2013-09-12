@@ -16,6 +16,12 @@ Neuron::Neuron(int p_size)
 	m_weights.resize(m_size);
 }
 
+Neuron::Neuron(int p_size, ActivationFunction p_actication_function)
+	:m_size(p_size), m_activation_function(p_actication_function)
+{
+	m_weights.resize(m_size);
+}
+
 double const * const Neuron::getOutputRef()
 {
 	return &m_output;
@@ -48,7 +54,7 @@ void Neuron::initializeWeights(double p_rndabs)
 		m_weights[a] = generateRandom(p_rndabs);
 	}
 
-	m_bias = generateRandom(2*p_rndabs);
+	m_bias = generateRandom(2.0);
 }
 
 void Neuron::updateWeights(const vector<const double *> &p_input, double p_learnrate)

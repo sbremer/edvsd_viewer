@@ -24,6 +24,8 @@ private:
 	const vector<int> m_layersize;
 	const int m_inputsize;
 
+	double m_learnrate;
+
 	void calculateOutput(const vector<double const *> &p_input);
 	void calculateDelta(const vector<double const *> &p_exp_output);
 	void initializeWeights(double p_rndabs);

@@ -77,8 +77,8 @@ private:
 
 	QFile m_output_file, m_output_file2;
 
-	static int NeuralNet_XY[2];
-	static int NeuralNet_ATan[2];
+	static int NeuralNet_XY[];
+	static int NeuralNet_ATan[];
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H

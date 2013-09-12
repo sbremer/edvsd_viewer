@@ -4,7 +4,7 @@
 using namespace std;
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
-	:QObject(parent), m_neuralnet_x(2, NeuralNet_XY, 1), m_neuralnet_y(2, NeuralNet_XY, 1), m_neuralnet_atan(2, NeuralNet_ATan, 1)//, m_tracking()
+	:QObject(parent), m_neuralnet_x(3, NeuralNet_XY, 1), m_neuralnet_y(3, NeuralNet_XY, 1), m_neuralnet_atan(2, NeuralNet_ATan, 1)//, m_tracking()
 {
 	system("rm data.dat");
 	m_output_file.setFileName("data.dat");
@@ -21,7 +21,7 @@ EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
 	m_output_file2.close();
 }
 
-int EDVSD_Anormaly_Detection::NeuralNet_XY[2] = {2, 1};
+int EDVSD_Anormaly_Detection::NeuralNet_XY[3] = {12, 3, 1};
 int EDVSD_Anormaly_Detection::NeuralNet_ATan[2] = {4, 1};
 
 void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
@@ -33,7 +33,7 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 {
 	double t = -2.2;
 
-	while(t <= 2.2){
+	while(t <= 2.6){
 		double x = m_neuralnet_x.calculate(&t);
 		double y = m_neuralnet_y.calculate(&t);
 		double atan = 0;//m_neuralnet_atan.calculate(&t);
@@ -45,9 +45,10 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 		cmd += QString::number(atan) + "\n";
 		m_output_file2.write(cmd.toLocal8Bit().data());
 
-		t += 0.1;
+		t += 0.05;
 	}
 	m_output_file2.flush();
+	system("gnuplot -p -e \"load 'plot_xy.plt';\"");
 	cout << "Dumped" << endl;
 }
 
@@ -237,8 +238,8 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
-	m_neuralnet_x.initialize(1.0);
-	m_neuralnet_y.initialize(1.0);
+	m_neuralnet_x.initialize(0.07); //0.04
+	m_neuralnet_y.initialize(0.07);
 	//m_neuralnet_atan.initialize(1.0);
 
 	for(int a = 0; a < p_n; a++){
@@ -258,10 +259,10 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
 			double t = (double)p_buffer[a].t - map->ts;
 
-			x = (x - 64) / 32;
-			y = (y - 64) / 32;
+			x = (x - 64) / 64;
+			y = (y - 64) / 64;
 			atan = atan;
-			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
+			t = (t - m_time_comp / 2.0) / (m_time_comp / 4.0);
 
 			QString cmd;
 			cmd += QString::number(t) + "\t";
@@ -277,12 +278,16 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 		}
 	}
+
+	m_output_file.flush();
 	dumpNNData();
+
+	m_time_comp = -1;
+	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
 }
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
-	return;
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
 	for(int a = 0; a < p_n; a++){
@@ -307,12 +312,12 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 			atan = atan;
 			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
 
-			QString cmd;
-			cmd += QString::number(t) + "\t";
-			cmd += QString::number(x) + "\t";
-			cmd += QString::number(y) + "\t";
-			cmd += QString::number(atan) + "\n";
-			m_output_file.write(cmd.toLocal8Bit().data());
+//			QString cmd;
+//			cmd += QString::number(t) + "\t";
+//			cmd += QString::number(x) + "\t";
+//			cmd += QString::number(y) + "\t";
+//			cmd += QString::number(atan) + "\n";
+//			m_output_file.write(cmd.toLocal8Bit().data());
 
 //			m_neuralnet_x.train(&t, &x);
 //			m_neuralnet_y.train(&t, &y);
