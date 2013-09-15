@@ -14,21 +14,19 @@ using namespace std;
 class NeuralNet
 {
 public:
-	NeuralNet(int p_size, int p_layersize[], int p_inputsize);
-	void initialize(double p_rndabs);
+	NeuralNet(int p_size, int p_layersize[], int p_inputsize, bool p_linear_output);
+	void initialize(double p_rndabs, double p_rndabsbias);
 	double calculate(double p_input[]);
-	double train(double p_input[], double p_exp_output[]);
+	double train(double p_input[], double p_exp_output[], double p_learnrate);
 
 private:
 	const int m_size;
 	const vector<int> m_layersize;
 	const int m_inputsize;
 
-	double m_learnrate;
-
 	void calculateOutput(const vector<double const *> &p_input);
 	void calculateDelta(const vector<double const *> &p_exp_output);
-	void initializeWeights(double p_rndabs);
+	void initializeWeights(double p_rndabs, double p_rndabsbias);
 	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
 	vector<NeuronLayer> m_layers;

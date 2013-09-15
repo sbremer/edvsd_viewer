@@ -20,7 +20,9 @@ SOURCES += main.cpp\
 	neuralnet/neuralnet.cpp \
     neuralnet/neuronlayer.cpp \
     neuralnet/neuron.cpp \
-    detection/kohonentracking.cpp
+	kohonentracking/kohonentracking.cpp \
+    output/gnuplot_output.cpp \
+    neuralnet_driver/neuralnet_driver.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -31,9 +33,11 @@ HEADERS  += edvsd_viewer.h \
     neuralnet/neuronlayer.h \
     neuralnet/neuron.h \
     neuralnet/neuralnet_functions.h \
-    detection/kohonentracking.h \
-    detection/kohonentracking_helper.h \
-    detection/pointf.h \
-    detection/kohonenmap.h
+	kohonentracking/kohonentracking.h \
+	kohonentracking/kohonentracking_helper.h \
+	kohonentracking/pointf.h \
+	kohonentracking/kohonenmap.h \
+    output/gnuplot_output.h \
+    neuralnet_driver/neuralnet_driver.h
 
 FORMS    += edvsd_viewer.ui

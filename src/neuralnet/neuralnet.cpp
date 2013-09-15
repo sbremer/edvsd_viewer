@@ -4,7 +4,7 @@
 #include "iostream"
 using namespace std;
 
-NeuralNet::NeuralNet(int p_size, int p_layersize[], int p_inputsize)
+NeuralNet::NeuralNet(int p_size, int p_layersize[], int p_inputsize, bool p_linear_output)
 	:m_size(p_size), m_layersize(p_layersize, p_layersize + p_size), m_inputsize(p_inputsize)
 {
 	srand(time(0));
@@ -18,20 +18,34 @@ NeuralNet::NeuralNet(int p_size, int p_layersize[], int p_inputsize)
 	}
 
 	for(int a = 0; a < m_size; a++){
-		if(a == 0)
+		if(a == 0 && a == m_size -1){
+			if(p_linear_output){
+				m_layers.push_back(NeuronLayer(m_layersize[a], m_inputsize, Function_Linear));
+			}
+			else{
+				m_layers.push_back(NeuronLayer(m_layersize[a], m_inputsize));
+			}
+		}
+		else if(a == 0){
 			m_layers.push_back(NeuronLayer(m_layersize[a], m_inputsize));
-		else if(a == m_size -1)
-			m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1], Function_Linear));
-		else
+		}
+		else if(a == m_size -1){
+			if(p_linear_output){
+				m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1], Function_Linear));
+			}
+			else{
+				m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1]));
+			}
+		}
+		else{
 			m_layers.push_back(NeuronLayer(m_layersize[a], m_layersize[a-1]));
+		}
 	}
 }
 
-void NeuralNet::initialize(double p_rndabs)
+void NeuralNet::initialize(double p_rndabs, double p_rndabsbias)
 {
-	initializeWeights(p_rndabs);
-
-	m_learnrate = 0.3;
+	initializeWeights(p_rndabs, p_rndabsbias);
 
 	for(int a = 0; a < m_inputsize; a++){
 		m_input_ptr[a] = &(m_input[a]);
@@ -47,7 +61,7 @@ double NeuralNet::calculate(double p_input[])
 	return *(m_layers[m_size-1].getOutputRef()[0]);
 }
 
-double NeuralNet::train(double p_input[], double p_exp_output[])
+double NeuralNet::train(double p_input[], double p_exp_output[], double p_learnrate)
 {
 	m_input.assign(p_input, p_input + m_inputsize);
 
@@ -62,8 +76,15 @@ double NeuralNet::train(double p_input[], double p_exp_output[])
 
 	calculateDelta(exp_output);
 
-	updateWeights(m_input_ptr, m_learnrate);
-	m_learnrate *= 0.999;
+	updateWeights(m_input_ptr, p_learnrate);
+
+	double error = 0;
+	for(int a = 0; a < m_layersize[m_size-1]; a++){
+		double delta = *(m_layers[m_size-1].getDeltaRef()[a]);
+		delta *= 100;
+		error += delta * delta;
+	}
+	return error;
 }
 
 void NeuralNet::calculateOutput(const vector<const double *> &p_input)
@@ -84,10 +105,10 @@ void NeuralNet::calculateDelta(const vector<const double *> &p_exp_output)
 	}
 }
 
-void NeuralNet::initializeWeights(double p_rndabs)
+void NeuralNet::initializeWeights(double p_rndabs, double p_rndabsbias)
 {
 	for(int a = 0; a < m_size; a++){
-		m_layers[a].initializeWeights(p_rndabs);
+		m_layers[a].initializeWeights(p_rndabs, p_rndabsbias);
 	}
 }
 

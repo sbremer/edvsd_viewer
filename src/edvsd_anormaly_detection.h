@@ -6,12 +6,10 @@
 #include <QPainter>
 #include <qmath.h>
 
-#include <QFile>
-
 #include "edvsd.h"
-#include "detection/pointf.h"
-#include "detection/kohonentracking.h"
-#include "neuralnet/neuralnet.h"
+#include "kohonentracking/pointf.h"
+#include "kohonentracking/kohonentracking.h"
+#include "neuralnet_driver/neuralnet_driver.h"
 
 struct MotionF{
 	QPointF start,end;
@@ -22,24 +20,6 @@ struct MotionF{
 		else return false;
 	}
 };
-
-/*
-template <int N>
-struct Particle{
-	QPointF point[N];
-	int ts;
-
-	Particle(QPointF p_point = QPointF(), int p_ts = -1)
-	{
-		for(int a=0;a<N;a++){
-			point[a] = p_point;
-		}
-		ts = p_ts;
-	}
-};
-*/
-
-//typedef KohonenMap<2> Particle2;
 
 class EDVSD_Anormaly_Detection : public QObject
 {
@@ -72,13 +52,10 @@ private:
 	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 
 	KohonenTracking<2> m_tracking;
-	NeuralNet m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
+	NeuralNet_Driver m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
 	int m_time_comp;
 
-	QFile m_output_file, m_output_file2;
-
-	static int NeuralNet_XY[];
-	static int NeuralNet_ATan[];
+	GnuPlot_Output m_output_xy, m_output_nn, m_output_error;
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H

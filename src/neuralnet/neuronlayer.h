@@ -15,7 +15,7 @@ public:
 	void calculateOutput(const vector<double const*> &p_input);
 	void calculateError(const vector<double const*> &p_exp_output);
 	void calculateDelta(const vector<double*> &p_delta_ref);
-	void initializeWeights(double p_rndabs);
+	void initializeWeights(double p_rndabs, double p_rndabsbias);
 	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
 	const vector<double const*> &getOutputRef();

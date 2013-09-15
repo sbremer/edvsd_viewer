@@ -126,6 +126,7 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 			m_duration_min = p_ts - pointmin->ts;
 		}
 		m_tracker.erase(pointmin);
+		return 0;
 	}
 
 	return &(*pointmin);

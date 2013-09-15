@@ -48,13 +48,13 @@ void Neuron::calculateDelta(const vector<double *> &p_delta_ref)
 	}
 }
 
-void Neuron::initializeWeights(double p_rndabs)
+void Neuron::initializeWeights(double p_rndabs, double p_rndabsbias)
 {
 	for(int a = 0; a < m_size; a++){
 		m_weights[a] = generateRandom(p_rndabs);
 	}
 
-	m_bias = generateRandom(2.0);
+	m_bias = generateRandom(p_rndabsbias);
 }
 
 void Neuron::updateWeights(const vector<const double *> &p_input, double p_learnrate)

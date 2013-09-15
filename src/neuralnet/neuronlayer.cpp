@@ -67,10 +67,10 @@ void NeuronLayer::calculateDelta(const vector<double *> &p_delta_ref)
 	}
 }
 
-void NeuronLayer::initializeWeights(double p_rndabs)
+void NeuronLayer::initializeWeights(double p_rndabs, double p_rndabsbias)
 {
 	for(int a = 0; a < m_size; a++){
-		m_neurons[a].initializeWeights(p_rndabs);
+		m_neurons[a].initializeWeights(p_rndabs, p_rndabsbias);
 	}
 
 	for(int a = 0; a < m_size; a++){

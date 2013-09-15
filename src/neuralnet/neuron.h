@@ -17,7 +17,7 @@ public:
 	Neuron(int p_size, ActivationFunction p_actication_function);
 	void calculateOutput(const vector<double const*> &p_input);
 	void calculateDelta(const vector<double *> &p_delta_ref);
-	void initializeWeights(double p_rndabs);
+	void initializeWeights(double p_rndabs, double p_rndabsbias);
 	void updateWeights(const vector<const double *> &p_input, double p_learnrate);
 
 	//Dummy, never used
