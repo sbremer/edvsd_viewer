@@ -99,11 +99,11 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 	for(int a = 1; a <= m_neighbors; a++){
 		if(particlemin + a < N){
 			PointF *pn = &(pointmin->points[particlemin + a]);
-			*pn += (delta * fact + (*p - *pn) * 0.01) * m_function(a);
+			*pn += (delta * fact + (p_event - *pn) * 0.01) * m_function(a);
 		}
 		if(particlemin - a >= 0){
 			PointF *pn = &(pointmin->points[particlemin - a]);
-			*pn += (delta * fact + (*p - *pn) * 0.01) * m_function(a);
+			*pn += (delta * fact + (p_event - *pn) * 0.01) * m_function(a);
 		}
 	}
 

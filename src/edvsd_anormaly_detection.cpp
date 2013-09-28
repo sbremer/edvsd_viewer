@@ -24,14 +24,16 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 	double t = -2.2;
 
 	while(t <= 2.6){
-		m_output_nn.writeData(3, t, m_neuralnet_x.calculate(t), m_neuralnet_y.calculate(t));
+		m_output_nn.writeData(4, t, m_neuralnet_x.calculate(t), m_neuralnet_y.calculate(t), m_neuralnet_atan.calculate(t));
 		t += 0.05;
 	}
 
 	m_output_xy.flush();
 	m_output_nn.flush();
-	system("gnuplot -p -e \"load 'plot_xy.plt';\"");
-	system("gnuplot -p -e \"load 'plot_error.plt';\"");
+
+//	system("gnuplot -p -e \"load 'plot_xy.plt';\"");
+//	system("gnuplot -p -e \"load 'plot_tan.plt';\"");
+//	system("gnuplot -p -e \"load 'plot_error.plt';\"");
 }
 
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
@@ -241,14 +243,14 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			atan = atan;
 			t = (t - m_time_comp / 2.0) / (m_time_comp / 4.0);
 
-			m_output_xy.writeData(3, t, x, y);
+			m_output_xy.writeData(4, t, x, y, atan);
 
 			m_neuralnet_x.train(t, x);
 			m_neuralnet_y.train(t, y);
-			//m_neuralnet_atan.train(&t, &atan);
+			m_neuralnet_atan.train(t, atan);
 
 			if(a > writeerror + 50){
-				m_output_error.writeData(5, (double)(a-writeerror), m_neuralnet_x.getLastError(), m_neuralnet_y.getLastError(), m_neuralnet_x.getPerformance(), m_neuralnet_y.getPerformance());
+				m_output_error.writeData(7, (double)(a-writeerror), m_neuralnet_x.getLastError(), m_neuralnet_y.getLastError(), m_neuralnet_x.getPerformance(), m_neuralnet_y.getPerformance(), m_neuralnet_atan.getLastError(), m_neuralnet_atan.getPerformance());
 			}
 		}
 	}

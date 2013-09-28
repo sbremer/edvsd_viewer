@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     neuralnet/neuron.cpp \
 	kohonentracking/kohonentracking.cpp \
     output/gnuplot_output.cpp \
-    neuralnet_driver/neuralnet_driver.cpp
+    neuralnet_driver/neuralnet_driver.cpp \
+    geneticalgorithm/geneticalgoritm.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -38,6 +39,7 @@ HEADERS  += edvsd_viewer.h \
 	kohonentracking/pointf.h \
 	kohonentracking/kohonenmap.h \
     output/gnuplot_output.h \
-    neuralnet_driver/neuralnet_driver.h
+    neuralnet_driver/neuralnet_driver.h \
+    geneticalgorithm/geneticalgoritm.h
 
 FORMS    += edvsd_viewer.ui

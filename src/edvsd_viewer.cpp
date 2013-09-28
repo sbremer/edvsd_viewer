@@ -27,7 +27,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	//Todo: Add feature for manipolation of replay speed
-	int c = m_fileprocessor->readEventsByTime(33*30);
+	int c = m_fileprocessor->readEventsByTime(33*10);
 	//int c = m_fileprocessor->readEvents(10);
 //	if(c!=0)
 //		cout << c << endl;
