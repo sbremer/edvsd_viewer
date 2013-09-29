@@ -19,9 +19,9 @@ struct Candidate{
 		}
 	}
 
-	double generateRandom(double p_min, double p_max)
+	static double generateRandom(double p_min, double p_max)
 	{
-		return (rand()%1000000) / 1000000.0 * (p_max - p_min) + p_min;
+		return (rand() % 1000000) / 1000000.0 * (p_max - p_min) + p_min;
 	}
 
 	bool operator < (const Candidate& rhs) const
@@ -56,7 +56,14 @@ private:
 	void calculateFitness();
 	int selectFittest();
 	void generatePopulation(int p_surviving);
-	Candidate generateCandidate();
+	Candidate generateCandidate(int p_surviving);
+	void mutatePopulation();
+	void mutateCandidate(Candidate* p_candidate);
+
+	static const double m_mutation_rate;
+	static const double m_mutation_intensity;
+	static const double m_crossover_rate;
+	static const int m_parents;
 };
 
 #endif // GENETICALGORITM_H
