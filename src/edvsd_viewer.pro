@@ -23,7 +23,8 @@ SOURCES += main.cpp\
 	kohonentracking/kohonentracking.cpp \
     output/gnuplot_output.cpp \
     neuralnet_driver/neuralnet_driver.cpp \
-    geneticalgorithm/geneticalgoritm.cpp
+    geneticalgorithm/geneticalgoritm.cpp \
+    startendtracker/startendtracker.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -36,10 +37,12 @@ HEADERS  += edvsd_viewer.h \
     neuralnet/neuralnet_functions.h \
 	kohonentracking/kohonentracking.h \
 	kohonentracking/kohonentracking_helper.h \
-	kohonentracking/pointf.h \
+	helper/pointf.h \
 	kohonentracking/kohonenmap.h \
     output/gnuplot_output.h \
     neuralnet_driver/neuralnet_driver.h \
-    geneticalgorithm/geneticalgoritm.h
+    geneticalgorithm/geneticalgoritm.h \
+    startendtracker/startendtracker.h \
+    helper/motionf.h
 
 FORMS    += edvsd_viewer.ui

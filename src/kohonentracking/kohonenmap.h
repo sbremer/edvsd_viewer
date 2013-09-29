@@ -2,7 +2,7 @@
 #define KOHONENMAP_H
 
 #include <vector>
-#include "pointf.h"
+#include "helper/pointf.h"
 
 using namespace std;
 

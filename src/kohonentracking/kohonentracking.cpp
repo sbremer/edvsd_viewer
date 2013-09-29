@@ -2,7 +2,16 @@
 
 template <int N>
 KohonenTracking<N>::KohonenTracking()
-	:m_size(N), m_function(Function_Exponential), m_neighbors(1), m_start(PointF()), m_end(PointF()), m_spawn(-1), m_trackpolarity(false), m_duration_min(1000000)
+	:m_size(N), m_function(Function_Exponential), m_neighbors(1), m_start(PointF()), m_end(PointF()), m_spawn(-1), m_trackpolarity(false), m_duration_min(1000000),
+	  m_start_dist(4.0), m_end_dist(4.0), m_attraction_fact(3.0), m_attraction_pow(3.0), m_attraction_max(0.3), m_neighbor_attraction(0.01)
+{
+
+}
+
+template <int N>
+KohonenTracking<N>::KohonenTracking(double p_start_dist, double p_end_dist, double p_attraction_fact, double p_attraction_pow, double p_attraction_max, double p_neighbor_attraction)
+	:m_size(N), m_function(Function_Exponential), m_neighbors(1), m_start(PointF()), m_end(PointF()), m_spawn(-1), m_trackpolarity(false), m_duration_min(1000000),
+	  m_start_dist(p_start_dist), m_end_dist(p_end_dist), m_attraction_fact(p_attraction_fact), m_attraction_pow(p_attraction_pow), m_attraction_max(p_attraction_max), m_neighbor_attraction(p_neighbor_attraction)
 {
 
 }
@@ -62,9 +71,6 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 	if(p_polarity != m_trackpolarity)
 		return 0;
 
-	const double End_Dist = 4.0;
-	const double Start_Dist = 4.0;
-
 	bool atstart = false;
 
 	typename list<KohonenMap<N> >::iterator pointmin;
@@ -79,7 +85,7 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 				pointmin = i;
 				particlemin = a;
 			}
-			if(PointF::getDistance(i->points[a], m_start) < 2.0){
+			if(PointF::getDistance(i->points[a], m_start) < m_start_dist){
 				atstart = true;
 			}
 		}
@@ -91,23 +97,23 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 	PointF *p = &(pointmin->points[particlemin]);
 
 	PointF delta = p_event-*p;
-	double fact = 3.0 / pow(PointF().getDistance(delta), 3.0);
-	fact = min(0.3, fact);
+	double fact = m_attraction_fact / pow(PointF().getDistance(delta), m_attraction_pow);
+	fact = min(m_attraction_max, fact);
 
 	*p += delta*fact;
 
 	for(int a = 1; a <= m_neighbors; a++){
 		if(particlemin + a < N){
 			PointF *pn = &(pointmin->points[particlemin + a]);
-			*pn += (delta * fact + (p_event - *pn) * 0.01) * m_function(a);
+			*pn += (delta * fact + (p_event - *pn) * m_neighbor_attraction) * m_function(a);
 		}
 		if(particlemin - a >= 0){
 			PointF *pn = &(pointmin->points[particlemin - a]);
-			*pn += (delta * fact + (p_event - *pn) * 0.01) * m_function(a);
+			*pn += (delta * fact + (p_event - *pn) * m_neighbor_attraction) * m_function(a);
 		}
 	}
 
-	if((*p).getDistance(m_start) > Start_Dist && pointmin->ts == -1){
+	if((*p).getDistance(m_start) > m_start_dist && pointmin->ts == -1){
 		pointmin->ts = p_ts;
 	}
 
@@ -121,7 +127,7 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 		m_tracker.push_back(KohonenMap<N>(m_start));
 	}
 
-	if((*p).getDistance(m_end) < End_Dist || (pointmin->ts != -1 && p_ts - pointmin->ts > 1.5 * m_duration_min)){
+	if((*p).getDistance(m_end) < m_end_dist || (pointmin->ts != -1 && p_ts - pointmin->ts > 1.5 * m_duration_min)){
 		if(p_ts - pointmin->ts < m_duration_min){
 			m_duration_min = p_ts - pointmin->ts;
 		}

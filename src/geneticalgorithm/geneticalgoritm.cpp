@@ -83,6 +83,7 @@ void GeneticAlgoritm::mutatePopulation()
 
 void GeneticAlgoritm::mutateCandidate(Candidate *p_candidate)
 {
+	//Todo: mutate depending on position in sorted vector
 	for(int a = 0; a < m_chromosome_size; a++){
 		if((rand() % 10000) / 10000.0 <= m_mutation_rate){
 			double mutation = p_candidate->chromosomes[a] + m_mutation_intensity;

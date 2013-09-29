@@ -7,7 +7,7 @@
 #include <qmath.h>
 
 #include "edvsd.h"
-#include "kohonentracking/pointf.h"
+#include "helper/pointf.h"
 #include "kohonentracking/kohonentracking.h"
 #include "neuralnet_driver/neuralnet_driver.h"
 
