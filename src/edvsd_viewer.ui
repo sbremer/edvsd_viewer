@@ -46,8 +46,15 @@
     <addaction name="menu_Mode"/>
     <addaction name="actionDump_NNData"/>
    </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>&amp;Run</string>
+    </property>
+    <addaction name="action_GA"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Settings"/>
+   <addaction name="menuRun"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="mouseTracking">
@@ -78,7 +85,7 @@
   </action>
   <action name="actionE_xit">
    <property name="text">
-    <string>E&amp;xit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -112,6 +119,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="action_GA">
+   <property name="text">
+    <string>&amp;GA</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

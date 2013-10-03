@@ -63,10 +63,10 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		m_visualizer = new EDVSD_Visualizer(this, m_fileprocessor->getSizeX(), m_fileprocessor->getSizeY());
 		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
-		m_detection = new EDVSD_Anormaly_Detection();
-		m_detection->setDebugPainter(m_visualizer->getDebugPainter());
+		//m_detection = new EDVSD_Anormaly_Detection();
+		//m_detection->setDebugPainter(m_visualizer->getDebugPainter());
 
-		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
+		//connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
 
 		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
 				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
@@ -78,7 +78,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		if(m_ui->action_White_Black->isChecked())m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);
 		m_visualizer->show();
 
-		m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+		//m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
 
 
 //		QFile output(filename+".txt");
@@ -119,4 +119,18 @@ void EDVSD_Viewer::on_actionDump_NNData_triggered()
 {
 	if(m_detection != NULL)
 		m_detection->dumpNNData();
+}
+
+void EDVSD_Viewer::on_action_GA_triggered()
+{
+	EDVS_Event *buffer_raw = m_fileprocessor->getEventPtr();
+	vector<EventF> buffer;
+	buffer.resize(m_fileprocessor->getTotalEvents());
+
+	for(int a = 0; a < m_fileprocessor->getTotalEvents(); a++){
+		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+	}
+
+	GeneticAlgorithm_Driver driver(&(buffer[0]), m_fileprocessor->getTotalEvents(), 0.5);
+	driver.runGeneticAlgorithm();
 }

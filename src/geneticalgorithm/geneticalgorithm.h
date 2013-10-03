@@ -1,5 +1,5 @@
-#ifndef GENETICALGORITM_H
-#define GENETICALGORITM_H
+#ifndef GENETICALGORITHM_H
+#define GENETICALGORITHM_H
 
 #include <vector>
 #include <algorithm>
@@ -38,12 +38,13 @@ struct Candidate{
 	double fitness;
 };
 
-class GeneticAlgoritm
+class GeneticAlgorithm
 {
 public:
-	GeneticAlgoritm(int p_population_size, int p_chromosome_size, vector<double> p_min_val, vector<double> p_max_val, double (*p_fitness)(vector<double>));
+	GeneticAlgorithm();
+	GeneticAlgorithm(int p_population_size, int p_chromosome_size, vector<double> p_min_val, vector<double> p_max_val, double (*p_fitness)(vector<double>));
 
-	vector<double> runEvolution(double p_fitness_goal);
+	vector<double> runEvolution(double p_fitness_goal, int p_max_runs);
 
 private:
 	const int m_population_size;
@@ -66,4 +67,4 @@ private:
 	static const int m_parents;
 };
 
-#endif // GENETICALGORITM_H
+#endif // GENETICALGORITHM_H

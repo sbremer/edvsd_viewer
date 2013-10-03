@@ -8,6 +8,8 @@
 #include "edvsd_fileprocessor.h"
 #include "edvsd_anormaly_detection.h"
 
+#include "genetricalgorithm_driver/geneticalgorithm_driver.h"
+
 namespace Ui {
 class EDVSD_Viewer;
 }
@@ -35,6 +37,8 @@ private slots:
 	void on_action_White_Black_triggered();
 
 	void on_actionDump_NNData_triggered();
+
+	void on_action_GA_triggered();
 
 private:
 	Ui::EDVSD_Viewer *m_ui;

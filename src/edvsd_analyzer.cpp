@@ -1,12 +1,15 @@
 #include "edvsd_analyzer.h"
 
 EDVSD_Analyzer::EDVSD_Analyzer(vector<double> p_param)
-	:m_startendtracker(p_param[0], p_param[1], p_param[2], p_param[3], p_param[4]), m_kohonentracker(p_param[5], p_param[6], p_param[7], p_param[8], p_param[9], p_param[10])
+	:m_startendtracker(p_param[0], p_param[1], p_param[2], p_param[3], p_param[4]),
+	  m_kohonentracker(p_param[5], p_param[6], p_param[7], p_param[8], p_param[9], p_param[10]),
+	  m_neuralnet_x(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15]),
+	  m_neuralnet_y(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15])
 {
 //	m_startendtracker = StartEndTracker(p_param[0], p_param[1], p_param[2], p_param[3], p_param[4]);
 //	m_kohonentracker = KohonenTracking<2>(p_param[5], p_param[6], p_param[7], p_param[8], p_param[9], p_param[10]);
-	m_neuralnet_x = NeuralNet_Driver(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15]);
-	m_neuralnet_y = NeuralNet_Driver(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15]);
+//	m_neuralnet_x = NeuralNet_Driver(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15]);
+//	m_neuralnet_y = NeuralNet_Driver(p_param[11], p_param[12], p_param[13], p_param[14], p_param[15]);
 }
 
 double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)

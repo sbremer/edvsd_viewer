@@ -164,8 +164,8 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(EventF p_event)
 		}
 	}
 
-//	if(distmin = 1000)
-//		return 0;
+	if(distmin == 1000)
+		return 0;
 
 	PointF *p = &(pointmin->points[particlemin]);
 
