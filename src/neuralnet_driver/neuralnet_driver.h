@@ -8,6 +8,7 @@ class NeuralNet_Driver
 {
 public:
 	NeuralNet_Driver();
+	NeuralNet_Driver(double p_learnrate, double p_learnrate_reduction, double p_random, double p_random_bias, double p_neurons);
 	~NeuralNet_Driver();
 
 	void train(double t, double x);

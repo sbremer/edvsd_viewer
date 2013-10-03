@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     output/gnuplot_output.cpp \
     neuralnet_driver/neuralnet_driver.cpp \
     geneticalgorithm/geneticalgoritm.cpp \
-    startendtracker/startendtracker.cpp
+    startendtracker/startendtracker.cpp \
+    edvsd_analyzer.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -43,6 +44,8 @@ HEADERS  += edvsd_viewer.h \
     neuralnet_driver/neuralnet_driver.h \
     geneticalgorithm/geneticalgoritm.h \
     startendtracker/startendtracker.h \
-    helper/motionf.h
+    helper/motionf.h \
+    edvsd_analyzer.h \
+    helper/eventf.h
 
 FORMS    += edvsd_viewer.ui

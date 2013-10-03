@@ -27,7 +27,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	//Todo: Add feature for manipolation of replay speed
-	int c = m_fileprocessor->readEventsByTime(33*10);
+	int c = m_fileprocessor->readEventsByTime(33*30);
 	//int c = m_fileprocessor->readEvents(10);
 //	if(c!=0)
 //		cout << c << endl;
@@ -74,7 +74,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 				+ " TSRes(in byte): " + QString::number((int)(m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0))
 				+ " TE: " + QString::number(m_fileprocessor->getTotalEvents()));
 		m_visualizer->move(0,26);
-		m_visualizer->setScaler(3.0);
+		m_visualizer->setScaler(5.0);
 		if(m_ui->action_White_Black->isChecked())m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);
 		m_visualizer->show();
 

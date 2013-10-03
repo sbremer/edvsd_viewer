@@ -138,4 +138,77 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 	return &(*pointmin);
 }
 
+template <int N>
+const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(EventF p_event)
+{
+	if(p_event.polarity != m_trackpolarity)
+		return 0;
+
+	bool atstart = false;
+
+	typename list<KohonenMap<N> >::iterator pointmin;
+	double distmin = 1000;
+	int particlemin;
+
+	for(typename list<KohonenMap<N> >::iterator i = m_tracker.begin(); i != m_tracker.end(); i++){
+		for(int a = 0; a < N; a++){
+			double dist = PointF::getDistance(p_event.position, i->points[a]);
+			if(dist<distmin){
+				distmin = dist;
+				pointmin = i;
+				particlemin = a;
+			}
+			if(PointF::getDistance(i->points[a], m_start) < m_start_dist){
+				atstart = true;
+			}
+		}
+	}
+
+//	if(distmin = 1000)
+//		return 0;
+
+	PointF *p = &(pointmin->points[particlemin]);
+
+	PointF delta = p_event.position-*p;
+	double fact = m_attraction_fact / pow(PointF().getDistance(delta), m_attraction_pow);
+	fact = min(m_attraction_max, fact);
+
+	*p += delta*fact;
+
+	for(int a = 1; a <= m_neighbors; a++){
+		if(particlemin + a < N){
+			PointF *pn = &(pointmin->points[particlemin + a]);
+			*pn += (delta * fact + (p_event.position - *pn) * m_neighbor_attraction) * m_function(a);
+		}
+		if(particlemin - a >= 0){
+			PointF *pn = &(pointmin->points[particlemin - a]);
+			*pn += (delta * fact + (p_event.position - *pn) * m_neighbor_attraction) * m_function(a);
+		}
+	}
+
+	if((*p).getDistance(m_start) > m_start_dist && pointmin->ts == -1){
+		pointmin->ts = p_event.ts;
+	}
+
+	if(!atstart && m_spawn == -1){
+		m_spawn = p_event.ts + 2000;
+		//tracker.append(Particle2(m_motions.at(0).start));
+	}
+
+	if(m_spawn != -1 && p_event.ts >= m_spawn){
+		m_spawn = -1;
+		m_tracker.push_back(KohonenMap<N>(m_start));
+	}
+
+	if((*p).getDistance(m_end) < m_end_dist || (pointmin->ts != -1 && p_event.ts - pointmin->ts > 1.5 * m_duration_min)){
+		if(p_event.ts - pointmin->ts < m_duration_min){
+			m_duration_min = p_event.ts - pointmin->ts;
+		}
+		m_tracker.erase(pointmin);
+		return 0;
+	}
+
+	return &(*pointmin);
+}
+
 template class KohonenTracking<2>;

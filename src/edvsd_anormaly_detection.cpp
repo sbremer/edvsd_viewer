@@ -4,7 +4,7 @@
 using namespace std;
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
-	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat")
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_startendtracker()
 {
 
 }
@@ -31,182 +31,192 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 	m_output_xy.flush();
 	m_output_nn.flush();
 
-//	system("gnuplot -p -e \"load 'plot_xy.plt';\"");
+	system("gnuplot -p -e \"load 'plot_xy.plt';\"");
 //	system("gnuplot -p -e \"load 'plot_tan.plt';\"");
 //	system("gnuplot -p -e \"load 'plot_error.plt';\"");
 }
 
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
 {
-	const double Tracker_Factor = 2.5;
-	const double Tracker_Pow = 3.2;
-	const double Seperator_Dist = 1.0;
+//	const double Tracker_Factor = 2.5;
+//	const double Tracker_Pow = 3.2;
+//	const double Seperator_Dist = 1.0;
 
-	QPointF point_cloud_revers[13*13];
+//	QPointF point_cloud_revers[13*13];
 
-	for(int x=0;x<=12;x++){
-		for(int y=0;y<=12;y++){
-			point_cloud_revers[y*13+x] = QPointF(3.0+x*10, 3.0+y*10);
-		}
-	}
+//	for(int x=0;x<=12;x++){
+//		for(int y=0;y<=12;y++){
+//			point_cloud_revers[y*13+x] = QPointF(3.0+x*10, 3.0+y*10);
+//		}
+//	}
 
-	//Track Motion (revers to find motion startpoint)
-	for(int a=p_n-1;a>=0;a--){
-		if(!p_buffer[a].p)continue;
-		for(int x=0;x<=12;x++){
-			for(int y=0;y<=12;y++){
-				EDVS_Event event = p_buffer[a];
-				QPointF tmp;
-				QPointF point = point_cloud_revers[y*13+x];
-				double fact = Tracker_Factor/qPow(qSqrt((event.x-point.x())*(event.x-point.x())+(event.y-point.y())*(event.y-point.y())), Tracker_Pow);
-				fact = qMin(1.0, fact);
-				tmp.setX(point.x()*(1.0-fact)+event.x*fact);
-				tmp.setY(point.y()*(1.0-fact)+event.y*fact);
-				//m_painter->drawLine(QPointF(3.0+x*10, 3.0+y*10),tmp);
-				point_cloud_revers[y*13+x] = tmp;
-			}
-		}
-	}
+//	//Track Motion (revers to find motion startpoint)
+//	for(int a=p_n-1;a>=0;a--){
+//		if(!p_buffer[a].p)continue;
+//		m_painter->fillRect(0,0,128,128,Qt::transparent);
+//		for(int x=0;x<=12;x++){
+//			for(int y=0;y<=12;y++){
+//				EDVS_Event event = p_buffer[a];
+//				QPointF tmp;
+//				QPointF point = point_cloud_revers[y*13+x];
+//				double fact = Tracker_Factor/qPow(qSqrt((event.x-point.x())*(event.x-point.x())+(event.y-point.y())*(event.y-point.y())), Tracker_Pow);
+//				fact = qMin(1.0, fact);
+//				tmp.setX(point.x()*(1.0-fact)+event.x*fact);
+//				tmp.setY(point.y()*(1.0-fact)+event.y*fact);
+//				//m_painter->drawLine(point_cloud_revers[y*13+x], tmp);
+//				point_cloud_revers[y*13+x] = tmp;
+//			}
+//		}
+//	}
 
-	//Filter moved points
-	QList<QPointF> points;
-	for(int x=0;x<=12;x++){
-		for(int y=0;y<=12;y++){
-			if(getDistance(QPointF(3.0+x*10, 3.0+y*10), point_cloud_revers[y*13+x])>2){
-				QPointF tmp;
-				tmp = point_cloud_revers[y*13+x];
-				points.append(tmp);
-			}
-		}
-	}
+//	//Filter moved points
+//	QList<QPointF> points;
+//	for(int x=0;x<=12;x++){
+//		for(int y=0;y<=12;y++){
+//			m_painter->drawLine(point_cloud_revers[y*13+x], QPointF(3.0+x*10, 3.0+y*10));
+//			if(getDistance(QPointF(3.0+x*10, 3.0+y*10), point_cloud_revers[y*13+x])>2){
+//				QPointF tmp;
+//				tmp = point_cloud_revers[y*13+x];
+//				points.append(tmp);
+//			}
+//		}
+//	}
 
-	QList<MotionF> startpoints;
+//	QList<MotionF> startpoints;
 
-	//Find startpoints (
-	MotionF tmp;
-	tmp.start = points.takeFirst();
-	tmp.num = 1;
-	startpoints.append(tmp);
+//	//Find startpoints (
+//	MotionF tmp;
+//	tmp.start = points.takeFirst();
+//	tmp.num = 1;
+//	startpoints.append(tmp);
 
-	while(!points.isEmpty()){
-		MotionF tmp;
-		tmp.start = points.takeFirst();
-		bool found = false;
-		for(QList<MotionF>::iterator i = startpoints.begin(); i!= startpoints.end(); i++){
-			if(getDistance(tmp.start, i->start)<Seperator_Dist){
-				found = true;
-				i->num++;
-				break;
-			}
-		}
-		if(!found){
-			tmp.num = 1;
-			startpoints.append(tmp);
-		}
-	}
+//	while(!points.isEmpty()){
+//		MotionF tmp;
+//		tmp.start = points.takeFirst();
+//		bool found = false;
+//		for(QList<MotionF>::iterator i = startpoints.begin(); i!= startpoints.end(); i++){
+//			if(getDistance(tmp.start, i->start)<Seperator_Dist){
+//				found = true;
+//				i->num++;
+//				break;
+//			}
+//		}
+//		if(!found){
+//			tmp.num = 1;
+//			startpoints.append(tmp);
+//		}
+//	}
 
-	//Filter single start points
-	for(QList<MotionF>::iterator i = startpoints.begin(); i!= startpoints.end();){
-		if(i->num<2){
-			i = startpoints.erase(i);
-		}
-		else{
-			i++;
-		}
-	}
-	return startpoints;
+//	//Filter single start points
+//	for(QList<MotionF>::iterator i = startpoints.begin(); i!= startpoints.end();){
+//		if(i->num<2){
+//			i = startpoints.erase(i);
+//		}
+//		else{
+//			i++;
+//		}
+//	}
+//	return startpoints;
 }
 
 QList<MotionF> EDVSD_Anormaly_Detection::analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions)
 {
-	const double Tracker_Factor = 2.0;
-	const double Tracker_Pow = 3.3;
+//	const double Tracker_Factor = 2.0;
+//	const double Tracker_Pow = 3.3;
 
-	//Track motion (forward, find endpoints)
-	for(QList<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
-		QPointF tracker = i->start;
+//	//Track motion (forward, find endpoints)
+//	for(QList<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
+//		QPointF tracker = i->start;
 
-		for(int a=0;a<p_n;a++){
-			if(!p_buffer[a].p)continue;
-			EDVS_Event event = p_buffer[a];
-			QPointF tmp;
-			QPointF point = tracker;
-			double fact = Tracker_Factor/qPow(qSqrt((event.x-point.x())*(event.x-point.x())+(event.y-point.y())*(event.y-point.y())), Tracker_Pow);
-			fact = qMin(1.0, fact);
-			tmp.setX(point.x()*(1.0-fact)+event.x*fact);
-			tmp.setY(point.y()*(1.0-fact)+event.y*fact);
-			//m_painter->drawLine(*i,tmp);
-			tracker = tmp;
-		}
+//		for(int a=0;a<p_n;a++){
+//			if(!p_buffer[a].p)continue;
+//			EDVS_Event event = p_buffer[a];
+//			QPointF tmp;
+//			QPointF point = tracker;
+//			double fact = Tracker_Factor/qPow(qSqrt((event.x-point.x())*(event.x-point.x())+(event.y-point.y())*(event.y-point.y())), Tracker_Pow);
+//			fact = qMin(1.0, fact);
+//			tmp.setX(point.x()*(1.0-fact)+event.x*fact);
+//			tmp.setY(point.y()*(1.0-fact)+event.y*fact);
+//			//m_painter->drawLine(*i,tmp);
+//			tracker = tmp;
+//		}
 
-		i->end = tracker;
-	}
-	return p_motions;
+//		i->end = tracker;
+//	}
+//	return p_motions;
 }
 
 QList<quint32> EDVSD_Anormaly_Detection::analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions)
 {
-	QList<quint32> endtimestamps;
+//	QList<quint32> endtimestamps;
 
-	//Motion Tracking
-	for(QList<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
-		QList<QPointF> tracker;
-		tracker.append(i->start);
+//	//Motion Tracking
+//	for(QList<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
+//		QList<QPointF> tracker;
+//		tracker.append(i->start);
 
-		for(int a=0;a<p_n;a++){
-			if(!p_buffer[a].p)continue;
-			bool atstart = false;
+//		for(int a=0;a<p_n;a++){
+//			if(!p_buffer[a].p)continue;
+//			bool atstart = false;
 
-			//Find closest point to event
-			QPointF event = QPointF((double)(p_buffer[a].x), (double)(p_buffer[a].y));
-			double distmin = 1000;
-			QList<QPointF>::iterator pointmin;
-			for(QList<QPointF>::iterator j = tracker.begin(); j!=tracker.end();j++){
-				double dist = getDistance(event, *j);
-				if(dist<distmin){
-					distmin = dist;
-					pointmin = j;
-				}
-				if(getDistance(*j,i->start)<10.0){
-					atstart = true;
-				}
-			}
+//			//Find closest point to event
+//			QPointF event = QPointF((double)(p_buffer[a].x), (double)(p_buffer[a].y));
+//			double distmin = 1000;
+//			QList<QPointF>::iterator pointmin;
+//			for(QList<QPointF>::iterator j = tracker.begin(); j!=tracker.end();j++){
+//				double dist = getDistance(event, *j);
+//				if(dist<distmin){
+//					distmin = dist;
+//					pointmin = j;
+//				}
+//				if(getDistance(*j,i->start)<10.0){
+//					atstart = true;
+//				}
+//			}
 
-			QPointF tmp;
-			QPointF point = *pointmin;
-			double fact = 3.0/qPow(getDistance(event, point), 2.0);
-			fact = qMin(1.0, fact);
-			tmp.setX(point.x()*(1.0-fact)+event.x()*fact);
-			tmp.setY(point.y()*(1.0-fact)+event.y()*fact);
-			*pointmin = tmp;
+//			QPointF tmp;
+//			QPointF point = *pointmin;
+//			double fact = 3.0/qPow(getDistance(event, point), 2.0);
+//			fact = qMin(1.0, fact);
+//			tmp.setX(point.x()*(1.0-fact)+event.x()*fact);
+//			tmp.setY(point.y()*(1.0-fact)+event.y()*fact);
+//			*pointmin = tmp;
 
-			if(getDistance(tmp,i->end)<5.0){
-				tracker.erase(pointmin);
-				endtimestamps.append(p_buffer[a].t);
-			}
+//			if(getDistance(tmp,i->end)<5.0){
+//				tracker.erase(pointmin);
+//				endtimestamps.append(p_buffer[a].t);
+//			}
 
-			if(!atstart){
-				tracker.append(i->start);
-			}
-		}
-	}
-	return endtimestamps;
+//			if(!atstart){
+//				tracker.append(i->start);
+//			}
+//		}
+//	}
+//	return endtimestamps;
 }
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 {
-	m_motions = analyzeMotionStartpoints(p_buffer, p_n);
+//	m_motions = analyzeMotionStartpoints(p_buffer, p_n);
+//	m_motions = analyzeMotionEndpoints(p_buffer, p_n, m_motions);
+//	m_endevents = analyzeMotion(p_buffer, p_n, m_motions);
 
-	m_motions = analyzeMotionEndpoints(p_buffer, p_n, m_motions);
+	list<MotionF> motions = m_startendtracker.trackPoints(p_buffer, p_n);
 
-	m_endevents = analyzeMotion(p_buffer, p_n, m_motions);
+	for(list<MotionF>::iterator i = motions.begin(); i!= motions.end(); i++){
+		m_motions.append(*i);
+	}
+
+	cout << m_motions.size() << endl;
 
 	//draw start and endpoint
 	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
-		m_painter->drawEllipse(i->start,1.0,1.0);
-		m_painter->drawEllipse(i->end,1.0,1.0);
-		m_painter->drawLine(i->start, i->end);
+		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
+		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
+		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
 	}
+
+	return;
 
 	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
 		//cout << *i << endl;
@@ -263,6 +273,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
+	return;
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
 	for(int a = 0; a < p_n; a++){

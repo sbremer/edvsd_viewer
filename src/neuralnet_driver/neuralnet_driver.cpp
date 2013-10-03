@@ -17,6 +17,23 @@ NeuralNet_Driver::NeuralNet_Driver()
 	m_performance = 1000;
 }
 
+NeuralNet_Driver::NeuralNet_Driver(double p_learnrate, double p_learnrate_reduction, double p_random, double p_random_bias, double p_neurons)
+{
+	const int size = 3;
+	int layers[size] = {(int)p_neurons, 4, 1};
+	m_learnrate = p_learnrate;
+	m_learnrate_reduction = 1 - p_learnrate_reduction;
+	double rnd = p_random;
+	double rnd_bias = p_random_bias;
+
+	m_nn = new NeuralNet(size, layers, 1, true);
+
+	m_nn->initialize(rnd, rnd_bias);
+
+	m_error = 0;
+	m_performance = 1000;
+}
+
 NeuralNet_Driver::~NeuralNet_Driver()
 {
 	delete m_nn;

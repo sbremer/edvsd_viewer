@@ -8,18 +8,20 @@
 
 #include "edvsd.h"
 #include "helper/pointf.h"
+#include "helper/motionf.h"
+#include "startendtracker/startendtracker.h"
 #include "kohonentracking/kohonentracking.h"
 #include "neuralnet_driver/neuralnet_driver.h"
 
-struct MotionF{
-	QPointF start,end;
-	int num;
+//struct MotionF{
+//	QPointF start,end;
+//	int num;
 
-	bool operator==(MotionF a) const{
-		if(a.start.x()==start.x() && a.start.y()==start.y())return true;
-		else return false;
-	}
-};
+//	bool operator==(MotionF a) const{
+//		if(a.start.x()==start.x() && a.start.y()==start.y())return true;
+//		else return false;
+//	}
+//};
 
 class EDVSD_Anormaly_Detection : public QObject
 {
@@ -40,6 +42,8 @@ public slots:
 
 private:
 	QPainter *m_painter;
+
+	StartEndTracker m_startendtracker;
 
 	QList<MotionF> m_motions;
 
