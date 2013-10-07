@@ -22,7 +22,7 @@ NeuralNet_Driver::NeuralNet_Driver(double p_learnrate, double p_learnrate_reduct
 	const int size = 3;
 	int neurons = (int)p_neurons;
 	if(neurons < 1) neurons = 1;
-	int layers[size] = {3, 4, 1};
+	int layers[size] = {neurons, 4, 1};
 	m_learnrate = p_learnrate;
 	m_learnrate_reduction = 1 - p_learnrate_reduction;
 	double rnd = p_random;

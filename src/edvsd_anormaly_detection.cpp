@@ -216,7 +216,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
 	}
 
-	return;
+	//return;
 
 	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
 		//cout << *i << endl;

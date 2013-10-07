@@ -53,7 +53,7 @@ GeneticAlgorithm_Driver::~GeneticAlgorithm_Driver()
 void GeneticAlgorithm_Driver::runGeneticAlgorithm()
 {
 	driver = this;
-	vector<double> best = m_genetic_algorithm->runEvolution(1000.0, 10);
+	vector<double> best = m_genetic_algorithm->runEvolution(10000.0, 30);
 	for(int a = 0; a < m_size; a++){
 		cout << "best[" << a << "] = " << best[a] << ";" << endl;
 	}
@@ -61,7 +61,7 @@ void GeneticAlgorithm_Driver::runGeneticAlgorithm()
 
 double GeneticAlgorithm_Driver::evaluatePerformance(vector<double> p_settings)
 {
-	int runs = 3;
+	int runs = 5;
 	double performance = 0;
 	for(int a = 0; a < runs; a++){
 		EDVSD_Analyzer analyzer(p_settings);

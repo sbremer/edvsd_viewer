@@ -31,9 +31,6 @@ vector<double> GeneticAlgorithm::runEvolution(double p_fitness_goal, int p_max_r
 	do{
 		calculateFitness();
 		int surviving = selectFittest();
-		generatePopulation(surviving);
-		mutatePopulation();
-		runs++;
 
 		for(int a = 0; a < m_population_size; a++){
 			cout << "Run: " << runs << " Cand:" << a << "   Performance: " << m_population[a].fitness << endl;
@@ -41,6 +38,9 @@ vector<double> GeneticAlgorithm::runEvolution(double p_fitness_goal, int p_max_r
 		//cout << "Run: " << runs << "   Performance: " << m_population[m_population_size-1].fitness << endl;
 		flush(cout);
 
+		generatePopulation(surviving);
+		mutatePopulation();
+		runs++;
 	}
 	while(m_population[m_population_size-1].fitness < p_fitness_goal && runs < p_max_runs);
 
