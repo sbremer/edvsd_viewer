@@ -55,7 +55,7 @@ double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)
 		}
 	}
 	m_output.flush();
-	int an = system("gnuplot -e \"load 'plot_xy.plt';\" > log 2>&1");
+	int an = system("gnuplot -e \"load 'fit_xy.plt';\" > log 2>&1");
 
 
 	FILE * file = popen("grep \"final sum of squares of residuals :\" log", "r");
@@ -80,6 +80,9 @@ double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)
 
 	//grep "final sum of squares of residuals :" log
 	//cout << "Sum: " << sum << endl;
+	if(sum == 0)
+		sum = 1000;
+
 	return 1000 / sum;
 	//return 1000.0 / (m_neuralnet_x.getPerformance() + m_neuralnet_y.getPerformance());
 }

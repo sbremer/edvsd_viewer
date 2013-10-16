@@ -10,19 +10,19 @@ GeneticAlgorithm::GeneticAlgorithm()
 }
 
 GeneticAlgorithm::GeneticAlgorithm(const int p_population_size, const int p_chromosome_size, vector<double> p_min_val, vector<double> p_max_val, double (*p_fitness)(vector<double>))
-	:m_population_size(p_population_size), m_chromosome_size(p_chromosome_size), m_evaluate_fitness(p_fitness)
+	:m_population_size(p_population_size), m_chromosome_size(p_chromosome_size), m_evaluate_fitness(p_fitness), m_min_val(p_min_val), m_max_val(p_max_val)
 {
 	m_population.reserve(m_population_size);
 
 	for(int a = 0; a < m_population_size; a++){
 		m_population.push_back(Candidate(m_chromosome_size));
-		m_population[a].initiate(p_min_val, p_max_val);
+		m_population[a].initiate(m_min_val, m_max_val);
 	}
 }
 
 const double GeneticAlgorithm::m_mutation_rate = 0.1;
-const double GeneticAlgorithm::m_mutation_intensity = 0.05;
-const double GeneticAlgorithm::m_crossover_rate = 0.3;
+const double GeneticAlgorithm::m_mutation_intensity = 0.08;
+const double GeneticAlgorithm::m_crossover_rate = 0.4;
 const int GeneticAlgorithm::m_parents = 2;
 
 vector<double> GeneticAlgorithm::runEvolution(double p_fitness_goal, int p_max_runs)
@@ -35,6 +35,7 @@ vector<double> GeneticAlgorithm::runEvolution(double p_fitness_goal, int p_max_r
 		for(int a = 0; a < m_population_size; a++){
 			cout << "Run: " << runs << " Cand:" << a << "   Performance: " << m_population[a].fitness << endl;
 		}
+		cout << endl;
 		//cout << "Run: " << runs << "   Performance: " << m_population[m_population_size-1].fitness << endl;
 		flush(cout);
 
@@ -63,7 +64,10 @@ int GeneticAlgorithm::selectFittest()
 void GeneticAlgorithm::generatePopulation(int p_surviving)
 {
 	for(int a = 0; a < p_surviving; a++){
-		m_population[a] = generateCandidate(p_surviving);
+		if(a < p_surviving / 5)
+			m_population[a].initiate(m_min_val, m_max_val);
+		else
+			m_population[a] = generateCandidate(p_surviving);
 	}
 }
 
@@ -72,10 +76,10 @@ Candidate GeneticAlgorithm::generateCandidate(int p_surviving)
 	Candidate candidate(m_chromosome_size);
 	Candidate *parent[m_parents];
 
-	int parentrange = m_population_size - p_surviving;
+	//int parentrange = m_population_size - p_surviving;
 	for(int a = 0; a < m_parents; a++){
 		//Todo: Logarithmic
-		parent[a] = &(m_population[rand() % parentrange]);
+		parent[a] = &(m_population[m_population_size - (rand() % p_surviving + 1)]);
 	}
 
 	for(int a = 0; a < m_chromosome_size; a++){
@@ -92,7 +96,7 @@ Candidate GeneticAlgorithm::generateCandidate(int p_surviving)
 
 void GeneticAlgorithm::mutatePopulation()
 {
-	for(int a = 0; a < m_population_size; a++){
+	for(int a = 0; a < m_population_size * 4 / 5; a++){
 		mutateCandidate(&(m_population[a]));
 	}
 }

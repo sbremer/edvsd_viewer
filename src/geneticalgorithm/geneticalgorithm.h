@@ -54,6 +54,9 @@ private:
 
 	vector<Candidate> m_population;
 
+	vector<double> m_min_val;
+	vector<double> m_max_val;
+
 	void calculateFitness();
 	int selectFittest();
 	void generatePopulation(int p_surviving);
