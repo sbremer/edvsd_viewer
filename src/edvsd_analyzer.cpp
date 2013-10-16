@@ -25,6 +25,8 @@ double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)
 
 	int writeerror = -1;
 
+	int points = 0;
+
 	for(int a = 0; a < p_n; a++){
 		const KohonenMap<2>* map = m_kohonentracker.analyzeEvent(p_buffer[a]);
 
@@ -49,6 +51,7 @@ double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)
 			t = (t - time_comp / 2.0) / (time_comp / 4.0);
 
 			m_output.writeData(3, t, x, y);
+			points++;
 			//m_neuralnet_x.train(t, x);
 			//m_neuralnet_y.train(t, y);
 			//m_neuralnet_atan.train(t, angle);
@@ -83,6 +86,6 @@ double EDVSD_Analyzer::analyze(EventF *p_buffer, int p_n)
 	if(sum == 0)
 		sum = 1000;
 
-	return 1000 / sum;
+	return pow((double)points, 3) * time_comp / sum / 10000000000000.0;
 	//return 1000.0 / (m_neuralnet_x.getPerformance() + m_neuralnet_y.getPerformance());
 }

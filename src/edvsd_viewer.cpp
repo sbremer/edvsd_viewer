@@ -12,6 +12,34 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 	m_fileprocessor = new EDVSD_FileProcessor();
 	m_visualizer = NULL;
 	m_detection = NULL;
+
+	m_tracking_param.resize(11);
+
+	m_tracking_param[0] = 1.1913;
+	m_tracking_param[1] = 2.74705;
+	m_tracking_param[2] = 1.25569;
+	m_tracking_param[3] = 1.59563;
+	m_tracking_param[4] = 1.81224;
+	m_tracking_param[5] = 5.34258;
+	m_tracking_param[6] = 3.06822;
+	m_tracking_param[7] = 3.02685;
+	m_tracking_param[8] = 4.08552;
+	m_tracking_param[9] = 0.242627;
+	m_tracking_param[10] = 0.0107901;
+
+	//		tracking_param[0] = 2.5; //StartEndTracker::m_attraction_fact_start
+	//		tracking_param[1] = 3.2; //StartEndTracker::m_attraction_pow_start
+	//		tracking_param[2] = 1.0; //StartEndTracker::m_dist
+	//		tracking_param[3] = 2.0; //StartEndTracker::m_attraction_fact_end
+	//		tracking_param[4] = 3.3; //StartEndTracker::m_attraction_pow_end
+
+	//		tracking_param[5] = 4.0; //KohonenTracking::m_start_dist
+	//		tracking_param[6] = 4.0; //KohonenTracking::m_end_dist
+	//		tracking_param[7] = 3.0; //KohonenTracking::m_attraction_fact
+	//		tracking_param[8] = 3.0; //KohonenTracking::m_attraction_pow
+	//		tracking_param[9] = 0.3; //KohonenTracking::m_attraction_max
+	//		tracking_param[10] = 0.01; //KohonenTracking::m_neighbor_attraction
+
 }
 
 EDVSD_Viewer::~EDVSD_Viewer()
@@ -63,10 +91,11 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		m_visualizer = new EDVSD_Visualizer(this, m_fileprocessor->getSizeX(), m_fileprocessor->getSizeY());
 		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
-		m_detection = new EDVSD_Anormaly_Detection();
+
+		m_detection = new EDVSD_Anormaly_Detection(NULL, m_tracking_param);
 		m_detection->setDebugPainter(m_visualizer->getDebugPainter());
 
-		//connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
+		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
 
 		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
 				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
@@ -78,7 +107,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		if(m_ui->action_White_Black->isChecked())m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);
 		m_visualizer->show();
 
-		//m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+		m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
 
 
 //		QFile output(filename+".txt");
@@ -132,5 +161,5 @@ void EDVSD_Viewer::on_action_GA_triggered()
 	}
 
 	GeneticAlgorithm_Driver driver(&(buffer[0]), m_fileprocessor->getTotalEvents(), 0.5);
-	driver.runGeneticAlgorithm();
+	m_tracking_param = driver.runGeneticAlgorithm();
 }

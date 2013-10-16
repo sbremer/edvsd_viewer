@@ -29,6 +29,7 @@ class EDVSD_Anormaly_Detection : public QObject
 
 public:
 	explicit EDVSD_Anormaly_Detection(QObject *parent = 0);
+	explicit EDVSD_Anormaly_Detection(QObject *parent, vector<double> p_tracking_param);
 	~EDVSD_Anormaly_Detection();
 
 	void setDebugPainter(QPainter *p_painter);
@@ -55,6 +56,7 @@ private:
 	QList<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 
+	vector<double> m_tracking_param;
 	KohonenTracking<2> m_tracking;
 	NeuralNet_Driver m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
 	int m_time_comp;
