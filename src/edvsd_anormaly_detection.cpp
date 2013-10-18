@@ -9,6 +9,14 @@ EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
 
 }
 
+EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent, vector<double> p_tracking_param)
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_tracking_param(p_tracking_param),
+	  m_startendtracker(p_tracking_param[0], p_tracking_param[1], p_tracking_param[2], p_tracking_param[3], p_tracking_param[4]),
+	  m_tracking(p_tracking_param[5], p_tracking_param[6], p_tracking_param[7], p_tracking_param[8], p_tracking_param[9], p_tracking_param[10])
+{
+
+}
+
 EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
 {
 
@@ -197,33 +205,42 @@ QList<quint32> EDVSD_Anormaly_Detection::analyzeMotion(EDVS_Event *p_buffer, int
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 {
+
+	EDVS_Event *buffer_raw = p_buffer;
+	vector<EventF> buffer;
+	buffer.resize(p_n);
+
+	for(int a = 0; a < p_n; a++){
+		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+	}
+
 //	m_motions = analyzeMotionStartpoints(p_buffer, p_n);
 //	m_motions = analyzeMotionEndpoints(p_buffer, p_n, m_motions);
 //	m_endevents = analyzeMotion(p_buffer, p_n, m_motions);
 
-	list<MotionF> motions = m_startendtracker.trackPoints(p_buffer, p_n);
+	list<MotionF> motions = m_startendtracker.trackPoints(&(buffer[0]), p_n);
 
-	for(list<MotionF>::iterator i = motions.begin(); i!= motions.end(); i++){
+	for(list<MotionF>::iterator i = motions.begin(); i != motions.end(); i++){
 		m_motions.append(*i);
 	}
 
-	cout << m_motions.size() << endl;
+//	cout << m_motions.size() << endl;
 
-	//draw start and endpoint
-	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
-		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
-		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
-		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
-	}
+//	//draw start and endpoint
+//	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
+//		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
+//		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
+//		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
+//	}
 
 	//return;
 
-	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
-		//cout << *i << endl;
-		if(i!=m_endevents.begin()){
-			//cout << "\t" << (*i-*(i-1)) << endl;
-		}
-	}
+//	for(QList<quint32>::iterator i = m_endevents.begin(); i!=m_endevents.end(); i++){
+//		//cout << *i << endl;
+//		if(i!=m_endevents.begin()){
+//			//cout << "\t" << (*i-*(i-1)) << endl;
+//		}
+//	}
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
@@ -231,7 +248,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 	int writeerror = -1;
 
 	for(int a = 0; a < p_n; a++){
-		const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
 
 		if(map == 0){
 			continue;
@@ -255,13 +272,13 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 			m_output_xy.writeData(4, t, x, y, atan);
 
-			m_neuralnet_x.train(t, x);
-			m_neuralnet_y.train(t, y);
-			m_neuralnet_atan.train(t, atan);
+//			m_neuralnet_x.train(t, x);
+//			m_neuralnet_y.train(t, y);
+//			m_neuralnet_atan.train(t, atan);
 
-			if(a > writeerror + 50){
-				m_output_error.writeData(7, (double)(a-writeerror), m_neuralnet_x.getLastError(), m_neuralnet_y.getLastError(), m_neuralnet_x.getPerformance(), m_neuralnet_y.getPerformance(), m_neuralnet_atan.getLastError(), m_neuralnet_atan.getPerformance());
-			}
+//			if(a > writeerror + 50){
+//				m_output_error.writeData(7, (double)(a-writeerror), m_neuralnet_x.getLastError(), m_neuralnet_y.getLastError(), m_neuralnet_x.getPerformance(), m_neuralnet_y.getPerformance(), m_neuralnet_atan.getLastError(), m_neuralnet_atan.getPerformance());
+//			}
 		}
 	}
 
@@ -273,8 +290,23 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
-	return;
+
+//	EDVS_Event *buffer_raw = p_buffer;
+//	vector<EventF> buffer;
+//	buffer.resize(p_n);
+
+//	for(int a = 0; a < p_n; a++){
+//		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+//	}
+
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
+
+	//draw start and endpoint
+	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
+		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
+		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
+		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
+	}
 
 	for(int a = 0; a < p_n; a++){
 		const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));

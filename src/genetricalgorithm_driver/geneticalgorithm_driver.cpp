@@ -42,7 +42,7 @@ GeneticAlgorithm_Driver::GeneticAlgorithm_Driver(EventF *p_buffer, int p_n, doub
 		m_max[a] = m_setup[a] * (1.0 + p_deviation);
 	}
 
-	m_genetic_algorithm = new GeneticAlgorithm(15, m_size, m_min, m_max, &evaluatePerformance_Wrapper);
+	m_genetic_algorithm = new GeneticAlgorithm(25, m_size, m_min, m_max, &evaluatePerformance_Wrapper);
 }
 
 GeneticAlgorithm_Driver::~GeneticAlgorithm_Driver()
@@ -50,13 +50,15 @@ GeneticAlgorithm_Driver::~GeneticAlgorithm_Driver()
 	delete m_genetic_algorithm;
 }
 
-void GeneticAlgorithm_Driver::runGeneticAlgorithm()
+vector<double> GeneticAlgorithm_Driver::runGeneticAlgorithm()
 {
 	driver = this;
-	vector<double> best = m_genetic_algorithm->runEvolution(30000.0, 30);
+	vector<double> best = m_genetic_algorithm->runEvolution(99999999999999999999.9, 15);
 	for(int a = 0; a < m_size; a++){
-		cout << "best[" << a << "] = " << best[a] << ";" << endl;
+		cout << "m_tracking_param[" << a << "] = " << best[a] << ";" << endl;
 	}
+
+	return best;
 }
 
 double GeneticAlgorithm_Driver::evaluatePerformance(vector<double> p_settings)

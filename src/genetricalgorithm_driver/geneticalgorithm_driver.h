@@ -15,7 +15,7 @@ class GeneticAlgorithm_Driver
 public:
 	GeneticAlgorithm_Driver(EventF *p_buffer, int p_n, double p_deviation);
 	~GeneticAlgorithm_Driver();
-	void runGeneticAlgorithm();
+	vector<double> runGeneticAlgorithm();
 
 	double evaluatePerformance(vector<double> p_settings);
 

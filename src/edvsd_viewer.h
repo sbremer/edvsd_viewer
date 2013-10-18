@@ -46,6 +46,8 @@ private:
 	EDVSD_FileProcessor *m_fileprocessor;
 	EDVSD_Anormaly_Detection *m_detection;
 
+	vector<double> m_tracking_param;
+
 
 };
 
