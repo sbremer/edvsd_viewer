@@ -58,6 +58,7 @@ private:
 	const int m_dim;
 
 	list<Vertex> m_vertices;
+	list<Edge> m_edges;
 };
 
 #endif // GROWINGNEURALGAS_H

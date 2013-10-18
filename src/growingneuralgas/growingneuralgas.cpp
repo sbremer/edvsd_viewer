@@ -14,14 +14,16 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	double distmin = INFINITY;
 
 	for(list<Vertex>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
-		if(iter->getDistance(p_input) < distmin){
+		double dist = iter->getDistance(p_input);
+		if(dist < distmin){
 			s2 = s1;
 			s1 = &(*iter);
+			distmin = dist;
 		}
 	}
 
 	//Calculate error for s1
-	s1->error = distmin * distmin;
+	s1->error += distmin * distmin;
 
 	//Adjusting position of s1
 	for(int a = 0; a < m_dim; a++){
@@ -52,14 +54,45 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	}
 
 	if(edge != 0){
+		//Set age to zero
 		edge->age = 0;
 	}
 	else{
-		edge = new Edge(s1, s2);
+		//Create edge between s1 and s2
+		m_edges.push_back(Edge(s1, s2));
+		edge = &(m_edges.back());
 		s1->edges.push_back(edge);
 		s2->edges.push_back(edge);
 	}
 
-	//Remove edges older than ...
+	//Remove edges older than ... (Maybe not every iteration?)
+	for(list<Edge>::iterator iter = m_edges.begin(); iter != m_edges.end(); iter++){
+		if(iter->age > 10){
+			iter->vertex1->edges.remove(&(*iter));
+			iter->vertex2->edges.remove(&(*iter));
 
+			//Remove points if no edges left
+			if(iter->vertex1->edges.size() == 0){
+				m_edges.remove(*(iter->vertex1));
+			}
+			if(iter->vertex2->edges.size() == 0){
+				m_edges.remove(*(iter->vertex2));
+			}
+		}
+	}
+
+	//Add vertex
+	if(true){
+		Vertex *q = 0;
+		double errormax = 0;
+
+		for(list<Vertex>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
+			if(iter->error > errormin){
+				q = &(*iter);
+				errormax = iter->error;
+			}
+		}
+
+
+	}
 }
