@@ -29,6 +29,12 @@ struct Vertex{
 		error = 0.0;
 	}
 
+	Vertex(vector<double> p_position)
+		:position(p_position)
+	{
+
+	}
+
 	double getDistance(vector<double> p_input)
 	{
 		double dist = 0;
@@ -57,8 +63,8 @@ public:
 private:
 	const int m_dim;
 
-	list<Vertex> m_vertices;
-	list<Edge> m_edges;
+	list<Vertex*> m_vertices;
+	list<Edge*> m_edges;
 };
 
 #endif // GROWINGNEURALGAS_H
