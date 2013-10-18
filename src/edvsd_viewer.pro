@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     startendtracker/startendtracker.cpp \
     edvsd_analyzer.cpp \
     genetricalgorithm_driver/geneticalgorithm_driver.cpp \
-    geneticalgorithm/geneticalgorithm.cpp
+    geneticalgorithm/geneticalgorithm.cpp \
+	growingneuralgas/growingneuralgas.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -48,6 +49,7 @@ HEADERS  += edvsd_viewer.h \
     edvsd_analyzer.h \
     helper/eventf.h \
     genetricalgorithm_driver/geneticalgorithm_driver.h \
-    geneticalgorithm/geneticalgorithm.h
+    geneticalgorithm/geneticalgorithm.h \
+	growingneuralgas/growingneuralgas.h
 
 FORMS    += edvsd_viewer.ui
