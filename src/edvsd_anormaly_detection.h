@@ -12,6 +12,7 @@
 #include "startendtracker/startendtracker.h"
 #include "kohonentracking/kohonentracking.h"
 #include "neuralnet_driver/neuralnet_driver.h"
+#include "growingneuralgar_driver/growingneuralgas_driver.h"
 
 //struct MotionF{
 //	QPointF start,end;
@@ -52,9 +53,9 @@ private:
 
 	QList<quint32> m_endevents;
 
-	QList<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
-	QList<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
-	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
+//	QList<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
+//	QList<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
+//	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
 
 	vector<double> m_tracking_param;
 	KohonenTracking<2> m_tracking;

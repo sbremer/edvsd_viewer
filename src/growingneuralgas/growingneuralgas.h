@@ -60,8 +60,21 @@ public:
 
 	void learn(vector<double> p_input);
 
+	int getDimension();
+	const list<Vertex*> &getVertices();
+	const list<Edge*> &getEdges();
+
 private:
 	const int m_dim;
+
+	int m_iterations;
+
+	double m_attraction_fact_first;
+	double m_attraction_fact_neighbors;
+	int m_max_age;
+	int m_generate_neuron;
+	double m_error_reduction;
+	double m_error_reduction_new;
 
 	list<Vertex*> m_vertices;
 	list<Edge*> m_edges;

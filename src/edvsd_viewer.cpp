@@ -92,7 +92,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
 
-		m_detection = new EDVSD_Anormaly_Detection(NULL, m_tracking_param);
+		m_detection = new EDVSD_Anormaly_Detection();//NULL, m_tracking_param);
 		m_detection->setDebugPainter(m_visualizer->getDebugPainter());
 
 		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
