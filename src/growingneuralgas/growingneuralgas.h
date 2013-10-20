@@ -76,6 +76,7 @@ private:
 	double m_attraction_fact_neighbors;
 	int m_max_age;
 	int m_generate_neuron;
+	int m_max_vertices;
 	double m_error_reduction;
 	double m_error_reduction_new;
 

@@ -22,4 +22,22 @@ void GrowingNeuralGas_Driver::dumpData()
 	}
 
 	output.flush();
+
+	GnuPlot_Output output2("gnge.dat");
+
+	const list<Edge*> &edges = m_gng.getEdges();
+
+	for(list<Edge*>::const_iterator iter = edges.begin(); iter != edges.end(); iter++){
+		vector<double> data;
+//		for(int a = 0; a < m_gng.getDimension(); a++){
+//			data.push_back((*iter)->vertex1->position[a]);
+//		}
+//		for(int a = 0; a < m_gng.getDimension(); a++){
+//			data.push_back((*iter)->vertex2->position[a]);
+//		}
+		output2.writeData((*iter)->vertex1->position);
+		output2.writeData((*iter)->vertex2->position);
+		output2.writeData(0);
+		output2.writeData(0);
+	}
 }

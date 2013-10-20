@@ -1,7 +1,8 @@
 #include "growingneuralgas.h"
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.08), m_max_age(20), m_generate_neuron(20), m_max_vertices(1000000), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
+	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
 
@@ -9,18 +10,24 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 	vector<double> init(m_dim);
 
 	for(int a = 0; a < m_dim; a++){
-		init[a] = m_rand.randomDouble(0.0, 1.0);
+		init[a] = m_rand.randomDouble(-1.0, 1.0);
 	}
 
 	Vertex *vert1 = new Vertex(init);
 	m_vertices.push_back(vert1);
 
 	for(int a = 0; a < m_dim; a++){
-		init[a] = m_rand.randomDouble(0.0, 1.0);
+		init[a] = m_rand.randomDouble(-1.0, 1.0);
 	}
 
 	Vertex *vert2 = new Vertex(init);
 	m_vertices.push_back(vert2);
+
+	Edge *edge = new Edge(vert1, vert2);
+
+	vert1->edges.push_back(edge);
+	vert2->edges.push_back(edge);
+	m_edges.push_back(edge);
 }
 
 void GrowingNeuralGas::learn(vector<double> p_input)
@@ -35,6 +42,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 		//Reduce error of all vertices
 		(*iter)->error *= m_error_reduction;
+
 		double dist = (*iter)->getDistance(p_input);
 		if(dist < distmin){
 			s2 = s1;
@@ -115,7 +123,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	}
 
 	//Add vertex
-	if(m_iterations % m_generate_neuron == 0){
+	if(m_iterations % m_generate_neuron == 0 && m_vertices.size() < m_max_vertices){
 		Vertex *q = 0;
 		double errormax = 0;
 
