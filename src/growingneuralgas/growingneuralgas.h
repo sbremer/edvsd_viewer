@@ -5,6 +5,8 @@
 #include <list>
 #include <math.h>
 
+#include "random/random.h"
+
 using namespace std;
 
 struct Vertex;
@@ -66,6 +68,7 @@ public:
 
 private:
 	const int m_dim;
+	Random m_rand;
 
 	int m_iterations;
 

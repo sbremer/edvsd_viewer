@@ -29,6 +29,16 @@ void GnuPlot_Output::writeData(int p_args, ...)
 	//m_file.flush();
 }
 
+void GnuPlot_Output::writeData(const vector<double> &p_data)
+{
+	QString data;
+	for(int a = 0; a < p_data.size(); a++){
+		data += QString::number(p_data[a]) + "\t";
+	}
+	data += "\n";
+	m_file.write(data.toLocal8Bit().data());
+}
+
 void GnuPlot_Output::flush()
 {
 	m_file.flush();

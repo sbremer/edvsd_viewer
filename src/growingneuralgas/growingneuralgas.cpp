@@ -1,21 +1,23 @@
 #include "growingneuralgas.h"
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5)
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
 
 	//Initiate
-	vector<double> init(2);
+	vector<double> init(m_dim);
 
-	init[0] = 0.1;
-	init[1] = -0.3;
+	for(int a = 0; a < m_dim; a++){
+		init[a] = m_rand.randomDouble(0.0, 1.0);
+	}
 
 	Vertex *vert1 = new Vertex(init);
 	m_vertices.push_back(vert1);
 
-	init[0] = -0.5;
-	init[1] = 0.7;
+	for(int a = 0; a < m_dim; a++){
+		init[a] = m_rand.randomDouble(0.0, 1.0);
+	}
 
 	Vertex *vert2 = new Vertex(init);
 	m_vertices.push_back(vert2);
@@ -55,6 +57,8 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	}
 
 	//Increase age of edges of s1 + Adjust position of neighbor vertices
+	//Check for edge between s1 and s2, create if nonexistant, set age to zero if existant
+	Edge *edge = 0;
 	for(list<Edge*>::iterator iter = s1->edges.begin(); iter != s1->edges.end(); iter++){
 		(*iter)->age++;
 
@@ -66,11 +70,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 				(*iter)->vertex2->position[a] += m_attraction_fact_neighbors * (p_input[a] - (*iter)->vertex2->position[a]);
 			}
 		}
-	}
 
-	//Check for edge between s1 and s2, create if nonexistant, set age to zero if existant
-	Edge *edge = 0;
-	for(list<Edge*>::iterator iter = s1->edges.begin(); iter != s1->edges.end(); iter++){
 		if((*iter)->vertex1 == s2 || (*iter)->vertex2){
 			edge = (*iter);
 			break;

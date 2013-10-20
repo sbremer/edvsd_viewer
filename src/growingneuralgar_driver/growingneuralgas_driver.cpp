@@ -18,7 +18,7 @@ void GrowingNeuralGas_Driver::dumpData()
 	const list<Vertex*> &vertices = m_gng.getVertices();
 
 	for(list<Vertex*>::const_iterator iter = vertices.begin(); iter != vertices.end(); iter++){
-		output.writeData(2, (*iter)->position[0], (*iter)->position[1]);
+		output.writeData((*iter)->position);
 	}
 
 	output.flush();

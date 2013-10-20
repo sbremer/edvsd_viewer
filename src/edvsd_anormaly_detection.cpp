@@ -84,7 +84,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	int writeerror = -1;
 
-	GrowingNeuralGas_Driver gngd(2);
+	GrowingNeuralGas_Driver gngd(3);
 
 	for(int a = 0; a < p_n; a++){
 		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
@@ -111,9 +111,10 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 			m_output_xy.writeData(4, t, x, y, atan);
 
-			vector<double> data(2);
+			vector<double> data(3);
 			data[0] = x;
 			data[1] = y;
+			data[2] = atan;
 
 			gngd.learn(data);
 
@@ -131,7 +132,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	gngd.dumpData();
 	m_output_xy.flush();
-	system("gnuplot -p -e \"load 'plot_gng.plt';\"");
+	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
