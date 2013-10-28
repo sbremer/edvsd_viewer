@@ -40,6 +40,8 @@ private slots:
 
 	void on_action_GA_triggered();
 
+	void on_action_Testopen_File_triggered();
+
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;

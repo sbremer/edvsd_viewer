@@ -5,7 +5,7 @@
 #include <list>
 #include <math.h>
 
-#include "random/random.h"
+#include "helper/random.h"
 
 using namespace std;
 
@@ -26,9 +26,9 @@ struct Edge{
 
 struct Vertex{
 	Vertex(int p_dim)
-		:position(p_dim)
+		:position(p_dim), error(0.0), utility(0.0)
 	{
-		error = 0.0;
+
 	}
 
 	Vertex(vector<double> p_position)
@@ -53,6 +53,7 @@ struct Vertex{
 	vector<double> position;
 	list<Edge*> edges;
 	double error;
+	double utility;
 };
 
 class GrowingNeuralGas
@@ -61,6 +62,7 @@ public:
 	GrowingNeuralGas(int p_dim);
 
 	void learn(vector<double> p_input);
+	double test(vector<double> p_input);
 
 	int getDimension();
 	const list<Vertex*> &getVertices();

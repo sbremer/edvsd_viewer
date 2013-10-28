@@ -1,7 +1,7 @@
 #include "growingneuralgas.h"
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.08), m_max_age(20), m_generate_neuron(20), m_max_vertices(1000000), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.1), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
@@ -32,6 +32,13 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 
 void GrowingNeuralGas::learn(vector<double> p_input)
 {
+	if(m_iterations == 200){
+		m_attraction_fact_first = 0.2;
+		m_attraction_fact_neighbors = 0.008;
+	}
+	m_attraction_fact_first *= 0.999;
+	m_attraction_fact_neighbors *= 0.999;
+
 	//Find first (s1) and second (s1) closest vertex
 	Vertex *s1 = 0;
 	Vertex *s2 = 0;
@@ -42,6 +49,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 		//Reduce error of all vertices
 		(*iter)->error *= m_error_reduction;
+		(*iter)->utility *= m_error_reduction;
 
 		double dist = (*iter)->getDistance(p_input);
 		if(dist < distmin){
@@ -58,6 +66,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 	//Calculate error for s1
 	s1->error += distmin * distmin;
+	s1->utility += distmin2 * distmin2 - distmin * distmin;
 
 	//Adjusting position of s1
 	for(int a = 0; a < m_dim; a++){
@@ -73,13 +82,21 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 		for(int a = 0; a < m_dim; a++){
 			if((*iter)->vertex1 != s1){
 				(*iter)->vertex1->position[a] += m_attraction_fact_neighbors * (p_input[a] - (*iter)->vertex1->position[a]);
+				if((*iter)->vertex1->utility == 0){
+					(*iter)->vertex1->utility = 0.001;
+				}
 			}
 			else{
 				(*iter)->vertex2->position[a] += m_attraction_fact_neighbors * (p_input[a] - (*iter)->vertex2->position[a]);
+				if((*iter)->vertex2->utility == 0){
+					(*iter)->vertex2->utility = 0.001;
+				}
 			}
 		}
+	}
 
-		if((*iter)->vertex1 == s2 || (*iter)->vertex2){
+	for(list<Edge*>::iterator iter = s1->edges.begin(); iter != s1->edges.end(); iter++){
+		if((*iter)->vertex1 == s2 || (*iter)->vertex2 == s2){
 			edge = (*iter);
 			break;
 		}
@@ -99,6 +116,10 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 	//Remove edges older than ... (Maybe not every iteration?)
 	for(list<Edge*>::iterator iter = m_edges.begin(); iter != m_edges.end(); /*iter++*/){
+//		if(m_iterations % 50 == 0){
+//			(*iter)->age++;
+//		}
+
 		if((*iter)->age > m_max_age){
 			(*iter)->vertex1->edges.remove(*iter);
 			(*iter)->vertex2->edges.remove(*iter);
@@ -122,6 +143,41 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 		}
 	}
 
+//	//Remove vertices
+//	if(m_iterations % (m_generate_neuron*20) == 0 && m_iterations > 300){
+//		for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); /*iter++*/){
+//			if((*iter)->utility == 0.0){
+
+//				for(list<Edge*>::iterator iter2 = (*iter)->edges.begin(); iter2 != (*iter)->edges.end(); iter2++){
+//					if((*iter2)->vertex1 != (*iter)){
+//						(*iter2)->vertex1->edges.remove((*iter2));
+//						if((*iter2)->vertex1->edges.size() == 0){
+//							m_vertices.remove((*iter2)->vertex1);
+//							delete (*iter2)->vertex1;
+//						}
+//					}
+//					else{
+//						(*iter2)->vertex2->edges.remove((*iter2));
+//						if((*iter2)->vertex2->edges.size() == 0){
+//							m_vertices.remove((*iter2)->vertex2);
+//							delete (*iter2)->vertex2;
+//						}
+//					}
+
+//					m_edges.remove((*iter2));
+//					delete (*iter2);
+//				}
+
+//				delete *iter;
+//				iter = m_vertices.erase(iter);
+//				//break;
+//			}
+//			else{
+//				iter++;
+//			}
+//		}
+//	}
+
 	//Add vertex
 	if(m_iterations % m_generate_neuron == 0 && m_vertices.size() < m_max_vertices){
 		Vertex *q = 0;
@@ -132,6 +188,8 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 				q = *iter;
 				errormax = (*iter)->error;
 			}
+
+			//(*iter)->utility = 0.0;
 		}
 
 		Vertex *f = 0;
@@ -184,6 +242,11 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 		f->edges.push_back(nf);
 	}
 	m_iterations++;
+}
+
+double GrowingNeuralGas::test(vector<double> p_input)
+{
+
 }
 
 int GrowingNeuralGas::getDimension()

@@ -43,7 +43,7 @@ int KohonenTracking<N>::getListLength()
 }
 
 template <int N>
-const KohonenMap<N>* KohonenTracking<N>::getKohonenMap(int p_at)
+KohonenMap<N> *KohonenTracking<N>::getKohonenMap(int p_at)
 {
 	if(p_at < m_iterator_at){
 		m_iterator = m_tracker.begin();
@@ -66,7 +66,33 @@ const KohonenMap<N>* KohonenTracking<N>::getKohonenMap(int p_at)
 }
 
 template <int N>
-const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts)
+double KohonenTracking<N>::getTrackerDistance(const KohonenMap<N> *p_tracker)
+{
+	double distmin = INFINITY;
+	double distmin2 = INFINITY;
+	for(typename list<KohonenMap<N> >::iterator iter = m_tracker.begin(); iter != m_tracker.end(); iter++){
+		if(&*iter == p_tracker){
+			continue;
+		}
+		double dist = PointF::getDistance(p_tracker->points[0], iter->points[0]);
+		if(dist < distmin){
+			distmin2 = distmin;
+			distmin = dist;
+		}
+		else if(dist < distmin2){
+			distmin2 = dist;
+		}
+	}
+
+	distmin += distmin2;
+	if(distmin == INFINITY){
+		distmin = 0;
+	}
+	return distmin;
+}
+
+template <int N>
+KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts)
 {
 	if(p_polarity != m_trackpolarity)
 		return 0;
@@ -139,7 +165,7 @@ const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_po
 }
 
 template <int N>
-const KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(EventF p_event)
+KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
 {
 	if(p_event.polarity != m_trackpolarity)
 		return 0;

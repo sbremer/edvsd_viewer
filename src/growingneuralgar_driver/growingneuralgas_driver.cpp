@@ -11,6 +11,11 @@ void GrowingNeuralGas_Driver::learn(vector<double> p_input)
 	m_gng.learn(p_input);
 }
 
+double GrowingNeuralGas_Driver::test(vector<double> p_input)
+{
+	return m_gng.test(p_input);
+}
+
 void GrowingNeuralGas_Driver::dumpData()
 {
 	GnuPlot_Output output("gng.dat");

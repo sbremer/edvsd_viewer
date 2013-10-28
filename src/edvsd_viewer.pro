@@ -29,7 +29,7 @@ SOURCES += main.cpp\
     geneticalgorithm/geneticalgorithm.cpp \
 	growingneuralgas/growingneuralgas.cpp \
     growingneuralgar_driver/growingneuralgas_driver.cpp \
-    random/random.cpp
+	helper/random.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -54,6 +54,6 @@ HEADERS  += edvsd_viewer.h \
     geneticalgorithm/geneticalgorithm.h \
 	growingneuralgas/growingneuralgas.h \
     growingneuralgar_driver/growingneuralgas_driver.h \
-    random/random.h
+	helper/random.h
 
 FORMS    += edvsd_viewer.ui

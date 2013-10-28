@@ -14,16 +14,6 @@
 #include "neuralnet_driver/neuralnet_driver.h"
 #include "growingneuralgar_driver/growingneuralgas_driver.h"
 
-//struct MotionF{
-//	QPointF start,end;
-//	int num;
-
-//	bool operator==(MotionF a) const{
-//		if(a.start.x()==start.x() && a.start.y()==start.y())return true;
-//		else return false;
-//	}
-//};
-
 class EDVSD_Anormaly_Detection : public QObject
 {
 	Q_OBJECT
@@ -38,9 +28,11 @@ public:
 	void dumpNNData();
 
 	void analyzeEvents(EDVS_Event *p_buffer, int p_n);
+	void testEvents(EDVS_Event *p_buffer, int p_n);
 
 public slots:
 	void analyzeLiveEvents(EDVS_Event *p_buffer, int p_n);
+	void testLiveEvents(EDVS_Event *p_buffer, int p_n);
 
 private:
 	QPainter *m_painter;
@@ -53,14 +45,15 @@ private:
 
 	QList<quint32> m_endevents;
 
-//	QList<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
-//	QList<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
-//	QList<quint32> analyzeMotion(EDVS_Event *p_buffer, int p_n, QList<MotionF> p_motions);
-
 	vector<double> m_tracking_param;
 	KohonenTracking<2> m_tracking;
 	NeuralNet_Driver m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
 	int m_time_comp;
+
+	const int m_gngd_dimension;
+	GrowingNeuralGas_Driver m_gngd;
+
+	const double m_error_reduction;
 
 	GnuPlot_Output m_output_xy, m_output_nn, m_output_error;
 };

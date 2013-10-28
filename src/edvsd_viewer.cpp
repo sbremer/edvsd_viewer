@@ -163,3 +163,44 @@ void EDVSD_Viewer::on_action_GA_triggered()
 	GeneticAlgorithm_Driver driver(&(buffer[0]), m_fileprocessor->getTotalEvents(), 0.5);
 	m_tracking_param = driver.runGeneticAlgorithm();
 }
+
+void EDVSD_Viewer::on_action_Testopen_File_triggered()
+{
+	QString filename = QFileDialog::getOpenFileName(this, "Load dvsd file", "", "*.dvsd");
+	if(filename.length()<1)return;
+	m_fileprocessor->closeFile();
+	if(m_fileprocessor->loadFile(filename)){
+
+		m_detection->testEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+
+		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
+		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(testLiveEvents(EDVS_Event*,int)));
+		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(testLiveEvents(EDVS_Event*,int)));
+	}
+	else{
+		m_ui->statusBar->showMessage("\nUnable to open " + filename + "!");
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

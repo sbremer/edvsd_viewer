@@ -13,6 +13,7 @@ class GrowingNeuralGas_Driver
 public:
 	GrowingNeuralGas_Driver(int p_dim);
 	void learn(vector<double> p_input);
+	double test(vector<double> p_input);
 	void dumpData();
 
 private:
