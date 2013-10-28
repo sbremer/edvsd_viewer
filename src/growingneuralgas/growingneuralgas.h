@@ -26,15 +26,20 @@ struct Edge{
 
 struct Vertex{
 	Vertex(int p_dim)
-		:position(p_dim), error(0.0), utility(0.0)
+		:position(p_dim), error(0.0), utility(0.0), error_dim(p_dim)
 	{
-
+		for(int a = 0; a < p_dim; a++){
+			position[a] = 0.0;
+			error_dim[a] = 1.0;
+		}
 	}
 
 	Vertex(vector<double> p_position)
-		:position(p_position)
+		:position(p_position), error(0.0), utility(0.0), error_dim(p_position.size())
 	{
-
+		for(int a = 0; a < position.size(); a++){
+			error_dim[a] = 1.0;
+		}
 	}
 
 	double getDistance(vector<double> p_input)
@@ -53,6 +58,7 @@ struct Vertex{
 	vector<double> position;
 	list<Edge*> edges;
 	double error;
+	vector<double> error_dim;
 	double utility;
 };
 
@@ -81,6 +87,8 @@ private:
 	int m_max_vertices;
 	double m_error_reduction;
 	double m_error_reduction_new;
+
+	double m_error_reduction_dim;
 
 	list<Vertex*> m_vertices;
 	list<Edge*> m_edges;

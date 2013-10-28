@@ -1,7 +1,7 @@
 #include "growingneuralgas.h"
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.1), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.1), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.1), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
@@ -71,6 +71,8 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	//Adjusting position of s1
 	for(int a = 0; a < m_dim; a++){
 		s1->position[a] += m_attraction_fact_first * (p_input[a] - s1->position[a]);
+
+		s1->error_dim[a] = (s1->position[a] - p_input[a])*(s1->position[a] - p_input[a]) * m_error_reduction_dim + (1.0 - m_error_reduction_dim) * s1->error_dim[a];
 	}
 
 	//Increase age of edges of s1 + Adjust position of neighbor vertices
@@ -246,7 +248,29 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 double GrowingNeuralGas::test(vector<double> p_input)
 {
+	//Find first (s1) and second (s1) closest vertex
+	Vertex *s1 = 0;
+	double distmin = INFINITY;
 
+	for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
+		double dist = (*iter)->getDistance(p_input);
+		if(dist < distmin){
+			s1 = *iter;
+			distmin = dist;
+		}
+	}
+
+	double error = 0.0;
+
+	for(int a = 0; a < m_dim; a++){
+		if(s1->error_dim[a] != 0.0){
+			error += (s1->position[a] - p_input[a])*(s1->position[a] - p_input[a]) / s1->error_dim[a];
+		}
+	}
+
+	error /= m_dim;
+
+	return error;
 }
 
 int GrowingNeuralGas::getDimension()

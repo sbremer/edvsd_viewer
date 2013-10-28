@@ -139,7 +139,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	m_gngd.dumpData();
 	m_output_xy.flush();
-	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
+	//system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
@@ -216,7 +216,7 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
 
-	m_painter->setFont(QFont("Helvetica", 4));
+	m_painter->setFont(QFont("Helvetica", 3));
 }
 
 void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
@@ -229,12 +229,6 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			continue;
 		}
 
-		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
-			m_time_comp = m_tracking.getDurationMin();
-			//writeerror = a;
-		}
-
-		if(m_time_comp != -1 && map->ts != -1){
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
@@ -258,9 +252,10 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 
 			double error = m_gngd.test(data);
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
+			map->error = error;
 
 			m_output_xy.writeData(data);
-		}
+
 	}
 
 	for(int a = 0; a < m_tracking.getListLength(); a++){
