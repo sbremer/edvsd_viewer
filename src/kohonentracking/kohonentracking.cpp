@@ -28,6 +28,8 @@ void KohonenTracking<N>::initialize(PointF p_start, PointF p_end, bool p_trackpo
 	m_tracker.push_back(m_start);
 	m_iterator = m_tracker.begin();
 	m_iterator_at = 0;
+
+	m_spawn = -1;
 }
 
 template <int N>
@@ -92,7 +94,7 @@ double KohonenTracking<N>::getTrackerDistance(const KohonenMap<N> *p_tracker)
 }
 
 template <int N>
-KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts)
+KohonenMap<N> * KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts)
 {
 	if(p_polarity != m_trackpolarity)
 		return 0;
@@ -144,8 +146,8 @@ KohonenMap<N>	* KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity
 	}
 
 	if(!atstart && m_spawn == -1){
-		m_spawn = p_ts + 2000;
-		//tracker.append(Particle2(m_motions.at(0).start));
+		m_spawn = p_ts + 1000;
+		//m_tracker.push_back(KohonenMap<N>(m_start));
 	}
 
 	if(m_spawn != -1 && p_ts >= m_spawn){
@@ -190,8 +192,9 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
 		}
 	}
 
-	if(distmin == 1000)
+	if(distmin == 1000){
 		return 0;
+	}
 
 	PointF *p = &(pointmin->points[particlemin]);
 
@@ -217,8 +220,8 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
 	}
 
 	if(!atstart && m_spawn == -1){
-		m_spawn = p_event.ts + 2000;
-		//tracker.append(Particle2(m_motions.at(0).start));
+		m_spawn = p_event.ts + 1000;
+		//m_tracker.push_back(KohonenMap<N>(m_start));
 	}
 
 	if(m_spawn != -1 && p_event.ts >= m_spawn){

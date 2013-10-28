@@ -4,13 +4,13 @@
 using namespace std;
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
-	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_startendtracker(), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.1)
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_startendtracker(), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.02)
 {
 
 }
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent, vector<double> p_tracking_param)
-	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_tracking_param(p_tracking_param), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.1),
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_tracking_param(p_tracking_param), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.02),
 	  m_startendtracker(p_tracking_param[0], p_tracking_param[1], p_tracking_param[2], p_tracking_param[3], p_tracking_param[4]),
 	  m_tracking(p_tracking_param[5], p_tracking_param[6], p_tracking_param[7], p_tracking_param[8], p_tracking_param[9], p_tracking_param[10])
 {
@@ -84,9 +84,6 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 	int writeerror = -1;
 
-	int dimension = 3;
-	GrowingNeuralGas_Driver m_gngd(dimension);
-
 	for(int a = 0; a < p_n; a++){
 		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
 
@@ -115,7 +112,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 			//m_output_xy.writeData(5, t, x, y, atan, distmin);
 
-			vector<double> data(dimension);
+			vector<double> data(m_gngd_dimension);
 			data[0] = x;
 			data[1] = y;
 			data[2] = atan;
@@ -148,13 +145,13 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
 
-//	EDVS_Event *buffer_raw = p_buffer;
-//	vector<EventF> buffer;
-//	buffer.resize(p_n);
+	EDVS_Event *buffer_raw = p_buffer;
+	vector<EventF> buffer;
+	buffer.resize(p_n);
 
-//	for(int a = 0; a < p_n; a++){
-//		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-//	}
+	for(int a = 0; a < p_n; a++){
+		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+	}
 
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
@@ -166,7 +163,8 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 	}
 
 	for(int a = 0; a < p_n; a++){
-		const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+		//const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
 //		if(map == 0){
 //			continue;
 //		}
@@ -223,8 +221,18 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 {
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
+	EDVS_Event *buffer_raw = p_buffer;
+	vector<EventF> buffer;
+	buffer.resize(p_n);
+
 	for(int a = 0; a < p_n; a++){
-		KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+	}
+
+	for(int a = 0; a < p_n; a++){
+		KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+		//KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+
 		if(map == 0){
 			continue;
 		}
@@ -252,7 +260,7 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 
 			double error = m_gngd.test(data);
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
-			map->error = error;
+			//map->error = error;
 
 			m_output_xy.writeData(data);
 
