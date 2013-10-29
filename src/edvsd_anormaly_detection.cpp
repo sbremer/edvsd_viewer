@@ -116,7 +116,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			data[0] = x;
 			data[1] = y;
 			data[2] = atan;
-			//data[3] = ;
+			data[2] = (double)m_tracking.getListLength();
 
 			m_gngd.learn(data);
 

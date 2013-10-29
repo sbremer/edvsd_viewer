@@ -1,0 +1,1 @@
+plot 'error.dat' using 1:2 title 'X_err', 'error.dat' using 1:3 title 'Y_err', 'error.dat' using 1:4 title 'X_perf', 'error.dat' using 1:5 title 'Y_perf', 'error.dat' using 1:6 title 'Tan_err', 'error.dat' using 1:7 title 'Tan_perf'

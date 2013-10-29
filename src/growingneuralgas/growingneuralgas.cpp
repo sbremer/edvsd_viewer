@@ -118,9 +118,9 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 
 	//Remove edges older than ... (Maybe not every iteration?)
 	for(list<Edge*>::iterator iter = m_edges.begin(); iter != m_edges.end(); /*iter++*/){
-//		if(m_iterations % 50 == 0){
-//			(*iter)->age++;
-//		}
+		if(m_iterations % 50 == 0){
+			(*iter)->age++;
+		}
 
 		if((*iter)->age > m_max_age){
 			(*iter)->vertex1->edges.remove(*iter);
