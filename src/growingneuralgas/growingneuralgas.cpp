@@ -229,9 +229,10 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 		Vertex *n = new Vertex(new_pos);
 		m_vertices.push_back(n);
 
-		n->error = (q->error + f->error) / 2.0;
+		//n->error = (q->error + f->error) / 2.0;
 		q->error *= m_error_reduction_new;
 		f->error *= m_error_reduction_new;
+		n->error = q->error;
 
 		Edge *qn = new Edge(q, n);
 		m_edges.push_back(qn);
