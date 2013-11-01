@@ -275,7 +275,7 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 			//map->error = error;
 
 			//m_output_xy.writeData(data);
-			if(map->error > 0.8)
+			//if(map->error > 0.8)
 			m_output_error.writeData(1, map->error);
 		}
 	}

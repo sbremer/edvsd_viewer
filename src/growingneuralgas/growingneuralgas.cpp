@@ -72,7 +72,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	for(int a = 0; a < m_dim; a++){
 		s1->position[a] += m_attraction_fact_first * (p_input[a] - s1->position[a]);
 
-		s1->error_dim[a] = (s1->position[a] - p_input[a])*(s1->position[a] - p_input[a]) * m_error_reduction_dim + (1.0 - m_error_reduction_dim) * s1->error_dim[a];
+		s1->error_dim[a] = fabs(s1->position[a] - p_input[a]) * m_error_reduction_dim + (1.0 - m_error_reduction_dim) * s1->error_dim[a];
 	}
 
 	//Increase age of edges of s1 + Adjust position of neighbor vertices
@@ -251,13 +251,21 @@ double GrowingNeuralGas::test(vector<double> p_input)
 {
 	//Find first (s1) and second (s1) closest vertex
 	Vertex *s1 = 0;
+	Vertex *s2 = 0;
 	double distmin = INFINITY;
+	double distmin2 = INFINITY;
 
 	for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
 		double dist = (*iter)->getDistance(p_input);
 		if(dist < distmin){
+			s2 = s1;
 			s1 = *iter;
+			distmin2 = distmin;
 			distmin = dist;
+		}
+		else if(dist < distmin2){
+			s2 = *iter;
+			distmin2 = dist;
 		}
 	}
 
@@ -265,11 +273,12 @@ double GrowingNeuralGas::test(vector<double> p_input)
 
 	for(int a = 0; a < m_dim; a++){
 		if(s1->error_dim[a] != 0.0){
-			error += fabs(s1->position[a] - p_input[a]);//*(s1->position[a] - p_input[a]);// / s1->error_dim[a];
+			error += fabs(s1->position[a] - p_input[a]);// / s1->error_dim[a];
+			//error += fabs(s2->position[a] - p_input[a]) / 2.0;
 		}
 	}
 
-	error /= m_dim;
+	error /= m_dim * 2;
 
 	return error;
 }
