@@ -271,14 +271,16 @@ double GrowingNeuralGas::test(vector<double> p_input)
 
 	double error = 0.0;
 
-	for(int a = 0; a < m_dim; a++){
-		if(s1->error_dim[a] != 0.0){
-			error += fabs(s1->position[a] - p_input[a]);// / s1->error_dim[a];
-			//error += fabs(s2->position[a] - p_input[a]) / 2.0;
-		}
-	}
+//	for(int a = 0; a < m_dim; a++){
+//		if(s1->error_dim[a] != 0.0){
+//			error += fabs(s1->position[a] - p_input[a]);// / s1->error_dim[a];
+//			//error += fabs(s2->position[a] - p_input[a]) / 2.0;
+//		}
+//	}
 
-	error /= m_dim * 2;
+//	error /= m_dim;
+
+	error = distmin;
 
 	return error;
 }
