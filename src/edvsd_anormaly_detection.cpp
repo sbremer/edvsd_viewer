@@ -347,7 +347,8 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 	}
 	if(m_time_comp != -1){
 		for(int a = 0; a < m_tracking.getListLength(); a++){
-			KohonenMap<2>* iter = m_tracking.getKohonenMap(a);
+			KohonenMap<2>* iter = 0;
+			iter = m_tracking.getKohonenMap(a);
 			if(m_tracking.getKohonenMap(a)->ts == -1 || m_tracking.getKohonenMap(a)->error < 1.0){
 				continue;
 			}

@@ -48,6 +48,15 @@ int KohonenTracking<N>::getListLength()
 template <int N>
 KohonenMap<N> *KohonenTracking<N>::getKohonenMap(int p_at)
 {
+	typename list<KohonenMap<N> >::iterator iter = m_tracker.begin();
+
+	for(int a = 0; a < p_at; a++){
+		iter++;
+		if(iter == m_tracker.end())return 0;
+	}
+
+	return &*iter;
+
 	if(p_at < m_iterator_at){
 		m_iterator = m_tracker.begin();
 		m_iterator_at = 0;
