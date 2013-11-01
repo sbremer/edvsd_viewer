@@ -14,6 +14,7 @@ public:
 	~GnuPlot_Output();
 	void writeData(int p_args, ...);
 	void writeData(const vector<double> &p_data);
+	void clear();
 	void flush();
 
 private:

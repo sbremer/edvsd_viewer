@@ -30,6 +30,7 @@ void KohonenTracking<N>::initialize(PointF p_start, PointF p_end, bool p_trackpo
 	m_iterator_at = 0;
 
 	m_spawn = -1;
+	m_duration_min = 1000000;
 }
 
 template <int N>
@@ -73,7 +74,7 @@ double KohonenTracking<N>::getTrackerDistance(const KohonenMap<N> *p_tracker)
 	double distmin = INFINITY;
 	double distmin2 = INFINITY;
 	for(typename list<KohonenMap<N> >::iterator iter = m_tracker.begin(); iter != m_tracker.end(); iter++){
-		if(&*iter == p_tracker){
+		if(&*iter == p_tracker || iter->ts == -1){
 			continue;
 		}
 		double dist = PointF::getDistance(p_tracker->points[0], iter->points[0]);
@@ -86,7 +87,7 @@ double KohonenTracking<N>::getTrackerDistance(const KohonenMap<N> *p_tracker)
 		}
 	}
 
-	distmin += distmin2;
+//    distmin += distmin2;
 	if(distmin == INFINITY){
 		distmin = 0;
 	}

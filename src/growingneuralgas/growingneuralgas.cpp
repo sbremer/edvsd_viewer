@@ -1,7 +1,7 @@
 #include "growingneuralgas.h"
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.1), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.1), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
@@ -32,12 +32,12 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 
 void GrowingNeuralGas::learn(vector<double> p_input)
 {
-	if(m_iterations == 200){
-		m_attraction_fact_first = 0.2;
-		m_attraction_fact_neighbors = 0.008;
-	}
-	m_attraction_fact_first *= 0.999;
-	m_attraction_fact_neighbors *= 0.999;
+//	if(m_iterations == 200){
+//		m_attraction_fact_first = 0.2;
+//		m_attraction_fact_neighbors = 0.008;
+//	}
+//	m_attraction_fact_first *= 0.999;
+//	m_attraction_fact_neighbors *= 0.999;
 
 	//Find first (s1) and second (s1) closest vertex
 	Vertex *s1 = 0;
@@ -119,7 +119,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	//Remove edges older than ... (Maybe not every iteration?)
 	for(list<Edge*>::iterator iter = m_edges.begin(); iter != m_edges.end(); /*iter++*/){
 		if(m_iterations % 50 == 0){
-			(*iter)->age++;
+//			(*iter)->age++;
 		}
 
 		if((*iter)->age > m_max_age){
@@ -265,7 +265,7 @@ double GrowingNeuralGas::test(vector<double> p_input)
 
 	for(int a = 0; a < m_dim; a++){
 		if(s1->error_dim[a] != 0.0){
-			error += (s1->position[a] - p_input[a])*(s1->position[a] - p_input[a]) / s1->error_dim[a];
+			error += fabs(s1->position[a] - p_input[a]);//*(s1->position[a] - p_input[a]);// / s1->error_dim[a];
 		}
 	}
 

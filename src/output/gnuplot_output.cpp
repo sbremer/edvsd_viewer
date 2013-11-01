@@ -39,6 +39,13 @@ void GnuPlot_Output::writeData(const vector<double> &p_data)
 	m_file.write(data.toLocal8Bit().data());
 }
 
+void GnuPlot_Output::clear()
+{
+	m_file.close();
+	m_file.remove();
+	m_file.open(QIODevice::WriteOnly);
+}
+
 void GnuPlot_Output::flush()
 {
 	m_file.flush();

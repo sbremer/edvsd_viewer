@@ -53,7 +53,7 @@ GeneticAlgorithm_Driver::~GeneticAlgorithm_Driver()
 vector<double> GeneticAlgorithm_Driver::runGeneticAlgorithm()
 {
 	driver = this;
-	vector<double> best = m_genetic_algorithm->runEvolution(99999999999999999999.9, 15);
+    vector<double> best = m_genetic_algorithm->runEvolution(99999999999999999999.9, 25);
 	for(int a = 0; a < m_size; a++){
 		cout << "m_tracking_param[" << a << "] = " << best[a] << ";" << endl;
 	}

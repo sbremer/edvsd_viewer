@@ -15,17 +15,17 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 
 	m_tracking_param.resize(11);
 
-	m_tracking_param[0] = 1.1913;
-	m_tracking_param[1] = 2.74705;
-	m_tracking_param[2] = 1.25569;
-	m_tracking_param[3] = 1.59563;
-	m_tracking_param[4] = 1.81224;
-	m_tracking_param[5] = 5.34258;
-	m_tracking_param[6] = 3.06822;
-	m_tracking_param[7] = 3.02685;
-	m_tracking_param[8] = 4.08552;
-	m_tracking_param[9] = 0.242627;
-	m_tracking_param[10] = 0.0107901;
+    m_tracking_param[0] = 2.29423;
+    m_tracking_param[1] = 4.86432;
+    m_tracking_param[2] = 0.85372;
+    m_tracking_param[3] = 1.6532;
+    m_tracking_param[4] = 4.82759;
+    m_tracking_param[5] = 4.01561;
+    m_tracking_param[6] = 4.84066;
+	m_tracking_param[7] = 2.5;//1.94633;
+    m_tracking_param[8] = 3.96409;
+    m_tracking_param[9] = 0.133502;
+    m_tracking_param[10] = 0.0117267;
 
 	//		tracking_param[0] = 2.5; //StartEndTracker::m_attraction_fact_start
 	//		tracking_param[1] = 3.2; //StartEndTracker::m_attraction_pow_start

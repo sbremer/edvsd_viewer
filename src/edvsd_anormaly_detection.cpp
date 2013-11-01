@@ -4,13 +4,16 @@
 using namespace std;
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
-	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_startendtracker(), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.02)
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"),
+	  m_startendtracker(), m_gngd_dimension(5), m_gngd(m_gngd_dimension), m_error_reduction(0.01)
 {
 
 }
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent, vector<double> p_tracking_param)
-	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"), m_tracking_param(p_tracking_param), m_gngd_dimension(3), m_gngd(m_gngd_dimension), m_error_reduction(0.02),
+	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"),
+	  m_tracking_param(p_tracking_param), m_gngd_dimension(5), m_gngd(m_gngd_dimension), m_error_reduction(0.01),
+
 	  m_startendtracker(p_tracking_param[0], p_tracking_param[1], p_tracking_param[2], p_tracking_param[3], p_tracking_param[4]),
 	  m_tracking(p_tracking_param[5], p_tracking_param[6], p_tracking_param[7], p_tracking_param[8], p_tracking_param[9], p_tracking_param[10])
 {
@@ -113,10 +116,23 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			//m_output_xy.writeData(5, t, x, y, atan, distmin);
 
 			vector<double> data(m_gngd_dimension);
-			data[0] = x;
-			data[1] = y;
-			data[2] = atan;
-			data[2] = (double)m_tracking.getListLength();
+			int i = 0;
+
+			data[i++] = x;
+			data[i++] = y;
+			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+			//data[i++] = (double)m_tracking.getListLength() / 10.0;
+			data[i++] = atan / 2.0;
+			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+
+
+//			data[0] = x;
+//			data[1] = y;
+//            //data[2] = atan;
+//            //data[2] = (double)m_tracking.getListLength() / 10.0;
+//            data[2] = m_tracking.getTrackerDistance(map) / 128.0;
+//            data[3] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+//            data[4] = atan;
 
 			m_gngd.learn(data);
 
@@ -214,6 +230,62 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
 
+	m_output_error.clear();
+
+	for(int a = 0; a < p_n; a++){
+		KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+
+		if(map == 0){
+			continue;
+		}
+
+		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
+			m_time_comp = m_tracking.getDurationMin();
+		}
+
+		if(m_time_comp != -1 && map->ts != -1 && buffer[a].ts - map->ts > 2000){
+			double x = (map->points[0].x + map->points[1].x) / 2.0;
+			double y = (map->points[0].y + map->points[1].y) / 2.0;
+			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
+			double t = (double)p_buffer[a].t - map->ts;
+
+			x = (x - 64) / 64;
+			y = (y - 64) / 64;
+			atan = atan;
+			t = (t - m_time_comp / 2.0) / (m_time_comp / 4.0);
+
+
+			//double distmin = m_tracking.getTrackerDistance(map);
+
+			//m_output_xy.writeData(5, t, x, y, atan, distmin);
+
+			vector<double> data(m_gngd_dimension);
+			int i = 0;
+
+			data[i++] = x;
+			data[i++] = y;
+			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+			//data[i++] = (double)m_tracking.getListLength() / 10.0;
+			data[i++] = atan / 2.0;
+			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+
+			double error = m_gngd.test(data) * 100;
+			//error = error * error;
+			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
+			//map->error = error;
+
+			//m_output_xy.writeData(data);
+			if(map->error > 0.8)
+			m_output_error.writeData(1, map->error);
+		}
+	}
+
+	m_output_error.flush();
+	system("gnuplot -p -e \"load 'plot_error_hist.plt';\"");
+
+	m_time_comp = -1;
+	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
+
 	m_painter->setFont(QFont("Helvetica", 3));
 }
 
@@ -237,6 +309,11 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			continue;
 		}
 
+		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
+			m_time_comp = m_tracking.getDurationMin();
+		}
+
+		if(m_time_comp != -1 && map->ts != -1){
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
@@ -251,26 +328,35 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			//double distmin = m_tracking.getTrackerDistance(map);
 
 			//m_output_xy.writeData(5, t, x, y, atan, distmin);
-
 			vector<double> data(m_gngd_dimension);
-			data[0] = x;
-			data[1] = y;
-			data[2] = atan;
-			//data[3] = ;
+			int i = 0;
 
-			double error = m_gngd.test(data);
+			data[i++] = x;
+			data[i++] = y;
+			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+			//data[i++] = (double)m_tracking.getListLength() / 10.0;
+			data[i++] = atan / 2.0;
+			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+
+			double error = m_gngd.test(data) * 100;
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
 
-			m_output_xy.writeData(data);
-
+			//m_output_xy.writeData(data);
+		}
 	}
+	if(m_time_comp != -1){
+		for(int a = 0; a < m_tracking.getListLength(); a++){
+			KohonenMap<2>* iter = m_tracking.getKohonenMap(a);
+			if(m_tracking.getKohonenMap(a)->ts == -1 || m_tracking.getKohonenMap(a)->error < 1.0){
+				continue;
+			}
 
-	for(int a = 0; a < m_tracking.getListLength(); a++){
-		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
-		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
-		m_painter->drawLine(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]));
-		m_painter->drawText(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), QString::number(m_tracking.getKohonenMap(a)->error, 'f', 3));
+			m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
+			m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
+			m_painter->drawLine(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]));
+			m_painter->drawText(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), QString::number(m_tracking.getKohonenMap(a)->error, 'f', 3));
+		}
 	}
 }
 
