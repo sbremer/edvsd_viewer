@@ -1,5 +1,8 @@
 #include "kohonentracking.h"
 
+#include <iostream>
+using namespace std;
+
 template <int N>
 KohonenTracking<N>::KohonenTracking()
 	:m_size(N), m_function(Function_Exponential), m_neighbors(1), m_start(PointF()), m_end(PointF()), m_spawn(-1), m_trackpolarity(false), m_duration_min(1000000),
@@ -168,6 +171,9 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity
 	if((*p).getDistance(m_end) < m_end_dist || (pointmin->ts != -1 && p_ts - pointmin->ts > 1.5 * m_duration_min)){
 		if(p_ts - pointmin->ts < m_duration_min){
 			m_duration_min = p_ts - pointmin->ts;
+		}
+		if(pointmin->errorsum > 0){
+			cout << pointmin->errorsum/(double)pointmin->events << endl;
 		}
 		m_tracker.erase(pointmin);
 		return 0;

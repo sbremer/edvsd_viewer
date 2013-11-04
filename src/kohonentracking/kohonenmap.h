@@ -12,8 +12,11 @@ struct KohonenMap{
 	int ts;
 	double error;
 
+	int events;
+	double errorsum;
+
 	KohonenMap(PointF p_point = PointF(), int p_ts = -1)
-		:error(0.0)
+		:error(0.0), events(0), errorsum(0.0)
 	{
 		points.resize(N);
 		for(int a=0;a<N;a++){

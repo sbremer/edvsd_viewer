@@ -274,6 +274,9 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
 
+			map->errorsum += map->error;
+			map->events++;
+
 			//m_output_xy.writeData(data);
 			if(map->error > 1.5)
 			m_output_error.writeData(1, map->error);
