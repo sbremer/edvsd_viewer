@@ -13,7 +13,7 @@ struct KohonenMap{
 	double error;
 
 	KohonenMap(PointF p_point = PointF(), int p_ts = -1)
-		:error(0.0)
+		:error(0.02)
 	{
 		points.resize(N);
 		for(int a=0;a<N;a++){

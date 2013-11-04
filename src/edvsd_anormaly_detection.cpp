@@ -5,7 +5,7 @@ using namespace std;
 
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
 	:QObject(parent), m_neuralnet_x(), m_neuralnet_y(), m_neuralnet_atan(), m_output_xy("data.dat"), m_output_nn("data2.dat"), m_output_error("error.dat"),
-	  m_startendtracker(), m_gngd_dimension(5), m_gngd(m_gngd_dimension), m_error_reduction(0.01)
+	  m_startendtracker(), m_gngd_dimension(5), m_gngd(m_gngd_dimension), m_error_reduction(0.04)
 {
 
 }
@@ -232,12 +232,16 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 
 	m_output_error.clear();
 
+	int errorsamples = 0;
+	int samples = 0;
+
 	for(int a = 0; a < p_n; a++){
 		KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
 
 		if(map == 0){
 			continue;
 		}
+		samples++;
 
 		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
 			m_time_comp = m_tracking.getDurationMin();
@@ -269,19 +273,22 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 			data[i++] = atan / 2.0;
 			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
-			double error = m_gngd.test(data) * 100;
+			double error = m_gngd.test(data);
 			//error = error * error;
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
 
 			//m_output_xy.writeData(data);
-			if(map->error > 1.5)
+			//if(map->error > 0.015)
 			m_output_error.writeData(1, map->error);
+			if(map->error > 0.03)errorsamples++;
 		}
 	}
 
 	m_output_error.flush();
 	system("gnuplot -p -e \"load 'plot_error_hist.plt';\"");
+
+	cout << "Error: " << (double)errorsamples / (double)samples << endl;
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
@@ -338,7 +345,7 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			data[i++] = atan / 2.0;
 			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
-			double error = m_gngd.test(data) * 100;
+			double error = m_gngd.test(data);
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
 
@@ -349,7 +356,7 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 		for(int a = 0; a < m_tracking.getListLength(); a++){
 			KohonenMap<2>* iter = 0;
 			iter = m_tracking.getKohonenMap(a);
-			if(m_tracking.getKohonenMap(a)->ts == -1 || m_tracking.getKohonenMap(a)->error < 2.0){
+			if(m_tracking.getKohonenMap(a)->ts == -1 || m_tracking.getKohonenMap(a)->error < 0.03){
 				continue;
 			}
 
