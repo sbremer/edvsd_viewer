@@ -106,6 +106,7 @@ double KohonenTracking<N>::getTrackerDistance(const KohonenMap<N> *p_tracker)
 	return distmin;
 }
 
+/*
 template <int N>
 KohonenMap<N> * KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts)
 {
@@ -172,15 +173,14 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(PointF p_event, bool p_polarity
 		if(p_ts - pointmin->ts < m_duration_min){
 			m_duration_min = p_ts - pointmin->ts;
 		}
-		if(pointmin->errorsum > 0){
-			cout << pointmin->errorsum/(double)pointmin->events << endl;
-		}
+
 		m_tracker.erase(pointmin);
 		return 0;
 	}
 
 	return &(*pointmin);
 }
+*/
 
 template <int N>
 KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
@@ -248,6 +248,9 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
 	if((*p).getDistance(m_end) < m_end_dist || (pointmin->ts != -1 && p_event.ts - pointmin->ts > 1.5 * m_duration_min)){
 		if(p_event.ts - pointmin->ts < m_duration_min){
 			m_duration_min = p_event.ts - pointmin->ts;
+		}
+		if(pointmin->errorsum > 0){
+			cout << pointmin->errorsum/(double)pointmin->events << endl;
 		}
 		m_tracker.erase(pointmin);
 		return 0;

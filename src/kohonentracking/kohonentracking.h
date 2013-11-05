@@ -18,7 +18,7 @@ public:
 	KohonenTracking();
 	KohonenTracking(double p_start_dist, double p_end_dist, double p_attraction_fact, double p_attraction_pow, double p_attraction_max, double p_neighbor_attraction);
 	void initialize(PointF p_start, PointF p_end, bool p_trackpolarity);
-	KohonenMap<N> *analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts);
+	//KohonenMap<N> *analyzeEvent(PointF p_event, bool p_polarity, unsigned int p_ts);
 	KohonenMap<N> *analyzeEvent(EventF p_event);
 	KohonenMap<N> *getKohonenMap(int p_at);
 	double getTrackerDistance(const KohonenMap<N> * p_tracker);
