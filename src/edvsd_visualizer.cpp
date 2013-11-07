@@ -13,6 +13,8 @@ EDVSD_Visualizer::EDVSD_Visualizer(QWidget *p_parent, int p_size_x, int p_size_y
 	m_mode = EDVS_Visualization_Mode_Green_Red;
 	m_fade = 30;
 
+	m_paused = false;
+
 	this->resize((int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler));
 
 	m_image = new QImage(m_size_x, m_size_y, QImage::Format_RGB32);
@@ -49,7 +51,16 @@ const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFF00FF00, 0xFFFF0000, 0xFF0
 void EDVSD_Visualizer::start()
 {
 	m_timer->start(33);
-//	m_timer->start(200);
+}
+
+void EDVSD_Visualizer::setPaused(bool p_paused)
+{
+	m_paused = p_paused;
+
+	if(m_paused)
+		m_timer->stop();
+	else
+		m_timer->start(33);
 }
 
 void EDVSD_Visualizer::setScaler(double p_scaler)
@@ -104,7 +115,8 @@ void EDVSD_Visualizer::displayFrame()
 void EDVSD_Visualizer::paintEvent(QPaintEvent *p_paintevent)
 {
 	QPainter painter (this);
-	fadeImage();
+	if(!m_paused)
+		fadeImage();
 	QPixmap buffer = QPixmap::fromImage(*m_image, Qt::ThresholdDither);
 	painter.drawPixmap(0, 0, (int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler), buffer, 0, 0, m_size_x, m_size_y);
 	painter.drawPixmap(0, 0, *m_debug_pixmap);
@@ -120,7 +132,8 @@ void EDVSD_Visualizer::paintEvent(QPaintEvent *p_paintevent)
 //	m_debug_painter->scale(m_scaler, m_scaler);
 
 	p_paintevent->accept();
-	emit loadEventData();
+	if(!m_paused)
+		emit loadEventData();
 }
 
 void EDVSD_Visualizer::fadeImage()

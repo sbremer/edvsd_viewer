@@ -35,6 +35,8 @@ public:
 
 	void start();
 
+	void setPaused(bool p_paused);
+
 	QPainter *getDebugPainter();
 
 private:
@@ -49,6 +51,9 @@ private:
 
 	QPixmap *m_debug_pixmap;
 	QPainter *m_debug_painter;
+
+	bool m_paused;
+
 
 	void fadeImage();
 

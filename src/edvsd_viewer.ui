@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>26</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -46,6 +46,7 @@
     </widget>
     <addaction name="menu_Mode"/>
     <addaction name="actionDump_NNData"/>
+    <addaction name="action_Pause"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -136,6 +137,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="action_Pause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

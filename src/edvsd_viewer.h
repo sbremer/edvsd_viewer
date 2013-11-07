@@ -42,6 +42,8 @@ private slots:
 
 	void on_action_Testopen_File_triggered();
 
+	void on_action_Pause_triggered();
+
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;
@@ -49,7 +51,6 @@ private:
 	EDVSD_Anormaly_Detection *m_detection;
 
 	vector<double> m_tracking_param;
-
 
 };
 

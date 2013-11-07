@@ -54,11 +54,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 
 void EDVSD_Viewer::loadEventData()
 {
-	//Todo: Add feature for manipolation of replay speed
 	int c = m_fileprocessor->readEventsByTime(33*15);
-	//int c = m_fileprocessor->readEvents(10);
-//	if(c!=0)
-//		cout << c << endl;
 }
 
 void EDVSD_Viewer::on_actionE_xit_triggered()
@@ -182,25 +178,7 @@ void EDVSD_Viewer::on_action_Testopen_File_triggered()
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void EDVSD_Viewer::on_action_Pause_triggered()
+{
+	m_visualizer->setPaused(m_ui->action_Pause->isChecked());
+}
