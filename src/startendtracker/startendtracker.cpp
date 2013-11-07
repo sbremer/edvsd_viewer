@@ -12,13 +12,13 @@ StartEndTracker::StartEndTracker(double p_attraction_fact_start, double p_attrac
 
 }
 
-list<MotionF> StartEndTracker::trackPoints(EDVS_Event *p_buffer, int p_n)
+/*list<MotionF> StartEndTracker::trackPoints(EDVS_Event *p_buffer, int p_n)
 {
 	list<MotionF> motions;
 	motions = analyzeMotionStartpoints(p_buffer, p_n);
 	motions = analyzeMotionEndpoints(p_buffer, p_n, motions);
 	return motions;
-}
+}*/
 
 list<MotionF> StartEndTracker::trackPoints(EventF *p_buffer, int p_n)
 {
@@ -28,7 +28,7 @@ list<MotionF> StartEndTracker::trackPoints(EventF *p_buffer, int p_n)
 	return motions;
 }
 
-list<MotionF> StartEndTracker::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
+/*list<MotionF> StartEndTracker::analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n)
 {
 	PointF point_cloud_revers[13*13];
 
@@ -104,7 +104,7 @@ list<MotionF> StartEndTracker::analyzeMotionStartpoints(EDVS_Event *p_buffer, in
 		}
 	}
 	return startpoints;
-}
+}*/
 
 list<MotionF> StartEndTracker::analyzeMotionStartpoints(EventF *p_buffer, int p_n)
 {
@@ -174,7 +174,7 @@ list<MotionF> StartEndTracker::analyzeMotionStartpoints(EventF *p_buffer, int p_
 
 	//Filter single start points
 	for(list<MotionF>::iterator i = startpoints.begin(); i!= startpoints.end();){
-		if(i->num<2){
+		if(i->num<30){
 			i = startpoints.erase(i);
 		}
 		else{
@@ -184,7 +184,7 @@ list<MotionF> StartEndTracker::analyzeMotionStartpoints(EventF *p_buffer, int p_
 	return startpoints;
 }
 
-list<MotionF> StartEndTracker::analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, list<MotionF> p_motions)
+/*list<MotionF> StartEndTracker::analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, list<MotionF> p_motions)
 {
 	//Track motion (forward, find endpoints)
 	for(list<MotionF>::iterator i = p_motions.begin(); i!= p_motions.end(); i++){
@@ -205,7 +205,7 @@ list<MotionF> StartEndTracker::analyzeMotionEndpoints(EDVS_Event *p_buffer, int 
 		i->end = tracker;
 	}
 	return p_motions;
-}
+}*/
 
 list<MotionF> StartEndTracker::analyzeMotionEndpoints(EventF *p_buffer, int p_n, list<MotionF> p_motions)
 {

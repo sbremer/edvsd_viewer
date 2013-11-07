@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QFile>
 
+#include "helper/random.h"
+
 #include "edvsd.h"
 
 #define EDVSD_BUFFER_SIZE 512

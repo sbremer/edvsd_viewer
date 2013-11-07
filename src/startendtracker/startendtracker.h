@@ -17,12 +17,12 @@ public:
 	StartEndTracker();
 	StartEndTracker(double p_attraction_fact_start, double p_attraction_pow_start, double p_dist, double p_attraction_fact_end, double p_attraction_pow_end);
 
-	list<MotionF> trackPoints(EDVS_Event *p_buffer, int p_n);
+	//list<MotionF> trackPoints(EDVS_Event *p_buffer, int p_n);
 	list<MotionF> trackPoints(EventF *p_buffer, int p_n);
 
 private:
-	list<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
-	list<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, list<MotionF> p_motions);
+	//list<MotionF> analyzeMotionStartpoints(EDVS_Event *p_buffer, int p_n);
+	//list<MotionF> analyzeMotionEndpoints(EDVS_Event *p_buffer, int p_n, list<MotionF> p_motions);
 
 	list<MotionF> analyzeMotionStartpoints(EventF *p_buffer, int p_n);
 	list<MotionF> analyzeMotionEndpoints(EventF *p_buffer, int p_n, list<MotionF> p_motions);

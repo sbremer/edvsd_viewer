@@ -208,7 +208,7 @@ KohonenMap<N> * KohonenTracking<N>::analyzeEvent(EventF p_event)
 		}
 	}
 
-	if(distmin == 1000){
+	if(distmin == 1000 || distmin > 5){
 		return 0;
 	}
 

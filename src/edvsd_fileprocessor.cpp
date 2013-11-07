@@ -92,6 +92,40 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 			m_eventptr[a].x = temp;
 		}
 
+		//Add random noise
+		double noise = 0;//40.0;
+		m_data.reserve(m_totalevents * (2.0 + noise) * sizeof(EDVS_Event) + 4);
+		m_eventptr = (EDVS_Event*)(m_data.data()+4);
+		Random rnd;
+		int added = 0;
+		int at = 0;
+		for(int a=0;a<m_totalevents;a++){
+			double rndval = rnd.randomDouble(0,1) + (int)noise;
+			while(rndval > 1.0){
+				EDVS_Event event;
+				event.p = m_eventptr[at].p;
+				event.t = m_eventptr[at].t;
+				event.x = (u_int8_t)rnd.randomDouble(0,128);
+				event.y = (u_int8_t)rnd.randomDouble(0,128);
+				m_data.insert((at) * sizeof(EDVS_Event) + 4, (char*)&event, sizeof(EDVS_Event));
+				at++;
+				added++;
+				rndval -= 1.0;
+			}
+			if(rndval < noise){
+				EDVS_Event event;
+				event.p = m_eventptr[at].p;
+				event.t = m_eventptr[at].t;
+				event.x = (u_int8_t)rnd.randomDouble(0,128);
+				event.y = (u_int8_t)rnd.randomDouble(0,128);
+				m_data.insert((at) * sizeof(EDVS_Event) + 4, (char*)&event, sizeof(EDVS_Event));
+				at++;
+				added++;
+			}
+			at++;
+		}
+		m_totalevents += added;
+
 		return true;
 	}
 }
