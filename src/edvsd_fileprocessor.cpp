@@ -93,7 +93,7 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		}
 
 		//Add random noise
-		double noise = 0;//40.0;
+        double noise = 0;//40.0;
 		m_data.reserve(m_totalevents * (2.0 + noise) * sizeof(EDVS_Event) + 4);
 		m_eventptr = (EDVS_Event*)(m_data.data()+4);
 		Random rnd;
