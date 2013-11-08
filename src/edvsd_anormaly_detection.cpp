@@ -120,9 +120,9 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 
 			data[i++] = x;
 			data[i++] = y;
-			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
-			//data[i++] = (double)m_tracking.getListLength() / 10.0;
 			data[i++] = atan / 2.0;
+			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+
 			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
 
@@ -153,8 +153,8 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 	m_gngd.dumpData();
 	m_output_xy.flush();
 
-    system("gnuplot -p -e \"load 'plot_xy.plt';\"");
-    //system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
+	//system("gnuplot -p -e \"load 'plot_xy.plt';\"");
+	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
 
 	m_time_comp = -1;
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
