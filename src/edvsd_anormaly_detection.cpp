@@ -118,12 +118,11 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			vector<double> data(m_gngd_dimension);
 			int i = 0;
 
-			data[i++] = x;
-			data[i++] = y;
-			data[i++] = atan / 2.0;
-			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
-
-			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+            data[i++] = x;
+            data[i++] = y;
+            data[i++] = atan / 2.0;
+            data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+            data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
 
 //			data[0] = x;
@@ -265,14 +264,13 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 
 			//m_output_xy.writeData(5, t, x, y, atan, distmin);
 
-			vector<double> data(m_gngd_dimension);
+            vector<double> data(m_gngd_dimension);
 			int i = 0;
 
 			data[i++] = x;
 			data[i++] = y;
+            data[i++] = atan / 2.0;
 			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
-			//data[i++] = (double)m_tracking.getListLength() / 10.0;
-			data[i++] = atan / 2.0;
 			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
 			double error = m_gngd.test(data);
@@ -343,12 +341,11 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			vector<double> data(m_gngd_dimension);
 			int i = 0;
 
-			data[i++] = x;
-			data[i++] = y;
-			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
-			//data[i++] = (double)m_tracking.getListLength() / 10.0;
-			data[i++] = atan / 2.0;
-			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
+            data[i++] = x;
+            data[i++] = y;
+            data[i++] = atan / 2.0;
+            data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
+            data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
 			double error = m_gngd.test(data);
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
