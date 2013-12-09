@@ -14,6 +14,8 @@
 #include "neuralnet_driver/neuralnet_driver.h"
 #include "growingneuralgar_driver/growingneuralgas_driver.h"
 
+#include "dyntracker/dyntracker.h"
+
 class EDVSD_Anormaly_Detection : public QObject
 {
 	Q_OBJECT
@@ -49,6 +51,8 @@ private:
 	KohonenTracking<2> m_tracking;
 	NeuralNet_Driver m_neuralnet_x, m_neuralnet_y, m_neuralnet_atan;
 	int m_time_comp;
+
+    DynTracker m_dyntracker;
 
 	const int m_gngd_dimension;
 	GrowingNeuralGas_Driver m_gngd;

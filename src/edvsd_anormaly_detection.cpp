@@ -49,6 +49,7 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 {
+	return;
 
 	EDVS_Event *buffer_raw = p_buffer;
 	vector<EventF> buffer;
@@ -169,6 +170,24 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 	for(int a = 0; a < p_n; a++){
 		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
 	}
+
+	for(int a = 0; a < p_n; a++){
+		if(buffer[a].polarity == false){
+			continue;
+		}
+
+		m_dyntracker.analyzeEvent(buffer[a]);
+	}
+
+	m_painter->fillRect(0,0,128,128,Qt::transparent);
+
+	for(list<TrackingUnit>::const_iterator iter = m_dyntracker.getTrackers().begin(); iter != m_dyntracker.getTrackers().end(); iter++){
+		m_painter->drawEllipse(PointF::toQPointF(iter->point), 1.0, 1.0);
+	}
+
+	m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getInitialTracker()), 0.5, 0.5);
+
+	return;
 
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
