@@ -91,7 +91,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		m_detection = new EDVSD_Anormaly_Detection();//NULL, m_tracking_param);
 		m_detection->setDebugPainter(m_visualizer->getDebugPainter());
 
-		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
+		connect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(analyzeLiveEvents(EventF*,int)));
 
 		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
 				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
@@ -103,7 +103,7 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 		if(m_ui->action_White_Black->isChecked())m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);
 		m_visualizer->show();
 
-		m_detection->analyzeEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+		m_detection->analyzeEvents(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents());
 
 
 //		QFile output(filename+".txt");
@@ -148,15 +148,7 @@ void EDVSD_Viewer::on_actionDump_NNData_triggered()
 
 void EDVSD_Viewer::on_action_GA_triggered()
 {
-	EDVS_Event *buffer_raw = m_fileprocessor->getEventPtr();
-	vector<EventF> buffer;
-	buffer.resize(m_fileprocessor->getTotalEvents());
-
-	for(int a = 0; a < m_fileprocessor->getTotalEvents(); a++){
-		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-	}
-
-	GeneticAlgorithm_Driver driver(&(buffer[0]), m_fileprocessor->getTotalEvents(), 0.5);
+	GeneticAlgorithm_Driver driver(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents(), 0.5);
 	m_tracking_param = driver.runGeneticAlgorithm();
 }
 
@@ -167,11 +159,11 @@ void EDVSD_Viewer::on_action_Testopen_File_triggered()
 	m_fileprocessor->closeFile();
 	if(m_fileprocessor->loadFile(filename)){
 
-		m_detection->testEvents(m_fileprocessor->getEventPtr(), m_fileprocessor->getTotalEvents());
+		m_detection->testEvents(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents());
 
-		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
-		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(testLiveEvents(EDVS_Event*,int)));
-		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(testLiveEvents(EDVS_Event*,int)));
+		disconnect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(analyzeLiveEvents(EventF*,int)));
+		disconnect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(testLiveEvents(EventF*,int)));
+		connect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(testLiveEvents(EventF*,int)));
 	}
 	else{
 		m_ui->statusBar->showMessage("\nUnable to open " + filename + "!");

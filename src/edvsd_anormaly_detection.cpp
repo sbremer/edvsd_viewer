@@ -47,19 +47,11 @@ void EDVSD_Anormaly_Detection::dumpNNData()
 //	system("gnuplot -p -e \"load 'plot_error.plt';\"");
 }
 
-void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
+void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
 	return;
 
-	EDVS_Event *buffer_raw = p_buffer;
-	vector<EventF> buffer;
-	buffer.resize(p_n);
-
-	for(int a = 0; a < p_n; a++){
-		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-	}
-
-	list<MotionF> motions = m_startendtracker.trackPoints(&(buffer[0]), p_n);
+	list<MotionF> motions = m_startendtracker.trackPoints(p_buffer, p_n);
 
 	for(list<MotionF>::iterator i = motions.begin(); i != motions.end(); i++){
 		m_motions.append(*i);
@@ -89,7 +81,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 	int writeerror = -1;
 
 	for(int a = 0; a < p_n; a++){
-		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
 
 		if(map == 0){
 			continue;
@@ -104,7 +96,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
-			double t = (double)p_buffer[a].t - map->ts;
+			double t = (double)p_buffer[a].ts - map->ts;
 
 			x = (x - 64) / 64;
 			y = (y - 64) / 64;
@@ -160,23 +152,14 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EDVS_Event *p_buffer, int p_n)
 	m_tracking.initialize(PointF(m_motions.at(0).start), PointF(m_motions.at(0).end), true);
 }
 
-void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
+void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 {
-
-	EDVS_Event *buffer_raw = p_buffer;
-	vector<EventF> buffer;
-	buffer.resize(p_n);
-
 	for(int a = 0; a < p_n; a++){
-		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-	}
-
-	for(int a = 0; a < p_n; a++){
-		if(buffer[a].polarity == false){
+		if(p_buffer[a].polarity == false){
 			continue;
 		}
 
-		m_dyntracker.analyzeEvent(buffer[a]);
+		m_dyntracker.analyzeEvent(p_buffer[a]);
 	}
 
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
@@ -199,7 +182,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 	}
 
 	for(int a = 0; a < p_n; a++){
-		const KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+		const KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
 		//const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
 //		if(map == 0){
 //			continue;
@@ -229,17 +212,9 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EDVS_Event *p_buffer, int p_n)
 	}
 }
 
-void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
+void EDVSD_Anormaly_Detection::testEvents(EventF *p_buffer, int p_n)
 {
-	EDVS_Event *buffer_raw = p_buffer;
-	vector<EventF> buffer;
-	buffer.resize(p_n);
-
-	for(int a = 0; a < p_n; a++){
-		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-	}
-
-	list<MotionF> motions = m_startendtracker.trackPoints(&(buffer[0]), p_n);
+	list<MotionF> motions = m_startendtracker.trackPoints(p_buffer, p_n);
 
 	m_motions.clear();
 
@@ -256,7 +231,7 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 	int samples = 0;
 
 	for(int a = 0; a < p_n; a++){
-		KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
+		KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
 
 		if(map == 0){
 			continue;
@@ -267,11 +242,11 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 			m_time_comp = m_tracking.getDurationMin();
 		}
 
-		if(m_time_comp != -1 && map->ts != -1 && buffer[a].ts - map->ts > 2000){
+		if(m_time_comp != -1 && map->ts != -1 && p_buffer[a].ts - map->ts > 2000){
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
-			double t = (double)p_buffer[a].t - map->ts;
+			double t = (double)p_buffer[a].ts - map->ts;
 
 			x = (x - 64) / 64;
 			y = (y - 64) / 64;
@@ -318,21 +293,12 @@ void EDVSD_Anormaly_Detection::testEvents(EDVS_Event *p_buffer, int p_n)
 	m_painter->setFont(QFont("Helvetica", 3));
 }
 
-void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
+void EDVSD_Anormaly_Detection::testLiveEvents(EventF *p_buffer, int p_n)
 {
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	EDVS_Event *buffer_raw = p_buffer;
-	vector<EventF> buffer;
-	buffer.resize(p_n);
-
 	for(int a = 0; a < p_n; a++){
-		buffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
-	}
-
-	for(int a = 0; a < p_n; a++){
-		KohonenMap<2>* map = m_tracking.analyzeEvent(buffer[a]);
-		//KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+		KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
 
 		if(map == 0){
 			continue;
@@ -346,7 +312,7 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EDVS_Event *p_buffer, int p_n)
 			double x = (map->points[0].x + map->points[1].x) / 2.0;
 			double y = (map->points[0].y + map->points[1].y) / 2.0;
 			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
-			double t = (double)p_buffer[a].t - map->ts;
+			double t = (double)p_buffer[a].ts - map->ts;
 
 			x = (x - 64) / 64;
 			y = (y - 64) / 64;

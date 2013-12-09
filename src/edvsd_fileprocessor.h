@@ -4,9 +4,14 @@
 #include <QObject>
 #include <QFile>
 
+#include <vector>
+
 #include "helper/random.h"
+#include "helper/eventf.h"
 
 #include "edvsd.h"
+
+using namespace std;
 
 #define EDVSD_BUFFER_SIZE 512
 
@@ -25,6 +30,7 @@ public:
 	EDVS_Timestamp_Resolution getTimestampResolution();
 
 	EDVS_Event *getEventPtr();
+	EventF *getEventPtrF();
 	int getTotalEvents();
 	int readEvents(unsigned int p_n);
 	int readEventsByTime(quint32 p_t);
@@ -41,10 +47,13 @@ private:
 	unsigned int m_size_x, m_size_y;
 	EDVS_Timestamp_Resolution m_timestampresolution;
 
+	vector<EventF> m_eventbuffer;
+
 	quint32 m_timestamp;
 	
 signals:
 	void eventsRead(EDVS_Event *p_buffer, int p_n);
+	void eventsReadF(EventF *p_buffer, int p_n);
 	
 public slots:
 	

@@ -29,12 +29,12 @@ public:
 
 	void dumpNNData();
 
-	void analyzeEvents(EDVS_Event *p_buffer, int p_n);
-	void testEvents(EDVS_Event *p_buffer, int p_n);
+	void analyzeEvents(EventF *p_buffer, int p_n);
+	void testEvents(EventF *p_buffer, int p_n);
 
 public slots:
-	void analyzeLiveEvents(EDVS_Event *p_buffer, int p_n);
-	void testLiveEvents(EDVS_Event *p_buffer, int p_n);
+	void analyzeLiveEvents(EventF *p_buffer, int p_n);
+	void testLiveEvents(EventF *p_buffer, int p_n);
 
 private:
 	QPainter *m_painter;

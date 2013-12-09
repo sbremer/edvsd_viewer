@@ -48,6 +48,11 @@ EDVS_Event* EDVSD_FileProcessor::getEventPtr()
 	return m_eventptr;
 }
 
+EventF* EDVSD_FileProcessor::getEventPtrF()
+{
+	return &(m_eventbuffer[0]);
+}
+
 int EDVSD_FileProcessor::getTotalEvents()
 {
 	if(!m_fileopen)return 0;
@@ -95,8 +100,17 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		//Add random noise
 		double noise = 0;//40.0;
 
-		if(noise == 0)return true;
+		if(noise == 0){
+			m_eventbuffer.resize(m_totalevents);
 
+			EDVS_Event *buffer_raw = m_eventptr;
+
+			for(int a = 0; a < m_totalevents; a++){
+				m_eventbuffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+			}
+
+			return true;
+		}
 		m_data.reserve(m_totalevents * (2.0 + noise) * sizeof(EDVS_Event) + 4);
 		m_eventptr = (EDVS_Event*)(m_data.data()+4);
 		Random rnd;
@@ -131,6 +145,14 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 
 		cout << added/(double)m_totalevents << "    " << added/(double)(m_totalevents-added) << endl;
 
+		m_eventbuffer.resize(m_totalevents);
+
+		EDVS_Event *buffer_raw = m_eventptr;
+
+		for(int a = 0; a < m_totalevents; a++){
+			m_eventbuffer[a] = EventF(buffer_raw[a].x, buffer_raw[a].y, buffer_raw[a].p, buffer_raw[a].t);
+		}
+
 		return true;
 	}
 }
@@ -156,11 +178,13 @@ int EDVSD_FileProcessor::readEvents(unsigned int p_n)
 	}
 	else if(m_totalevents-m_pos<p_n){
 		emit eventsRead(&(m_eventptr[m_pos]), m_totalevents-m_pos);
+		emit eventsReadF(&(m_eventbuffer[m_pos]), m_totalevents-m_pos);
 		m_pos = m_totalevents;
 		return m_totalevents-m_pos;
 	}
 	else{
 		emit eventsRead(&(m_eventptr[m_pos]), p_n);
+		emit eventsReadF(&(m_eventbuffer[m_pos]), p_n);
 		m_pos+=p_n;
 		return p_n;
 	}
@@ -200,6 +224,7 @@ int EDVSD_FileProcessor::readEventsByTime(quint32 p_t)
 	}
 	read = a-m_pos;
 	emit eventsRead(&(m_eventptr[m_pos]), read);
+	emit eventsReadF(&(m_eventbuffer[m_pos]), read);
 	m_pos=a;
 	m_timestamp = timestamp_new;
 	return read;

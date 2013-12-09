@@ -52,6 +52,8 @@ private:
 
 	vector<double> m_tracking_param;
 
+	vector<EventF> m_eventbuffer;
+
 };
 
 #endif // EDVSD_VIEWER_H
