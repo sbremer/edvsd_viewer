@@ -6,6 +6,7 @@
 #endif
 
 #include <math.h>
+#include <iostream>
 
 struct PointF{
 	double x, y;
@@ -111,5 +112,10 @@ struct PointF{
 		return sqrt((p_p1.x-p_p2.x)*(p_p1.x-p_p2.x)+(p_p1.y-p_p2.y)*(p_p1.y-p_p2.y));
 	}
 };
+
+inline std::ostream& operator << (std::ostream& os, const PointF& obj) {
+	os << "PointF(" << obj.x << ", " << obj.y << ")";
+	return os;
+}
 
 #endif // POINTF_H

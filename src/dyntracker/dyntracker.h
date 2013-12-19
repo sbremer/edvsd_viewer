@@ -9,6 +9,16 @@
 
 using namespace std;
 
+struct TrackingNode{
+	TrackingNode(PointF p_point)
+	{
+		point = p_point;
+	}
+
+	PointF point;
+	list<TrackingNode*> edges;
+};
+
 struct TrackingUnit{
 	TrackingUnit()
 	{
@@ -19,10 +29,13 @@ struct TrackingUnit{
 	TrackingUnit(PointF p_point)
 	{
 		point = p_point;
+		nodes.push_back(TrackingNode(point));
+		nodes.push_back(TrackingNode(point));
 		age = 0.0;
 	}
 
 	PointF point;
+	list<TrackingNode> nodes;
 	double age;
 };
 
