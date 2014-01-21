@@ -29,8 +29,18 @@ struct TrackingUnit{
 	TrackingUnit(PointF p_point)
 	{
 		point = p_point;
+
+	}
+
+	void initialize(){
 		nodes.push_back(TrackingNode(point));
 		nodes.push_back(TrackingNode(point));
+		list<TrackingNode>::iterator iter = nodes.begin();
+		TrackingNode *node1 = &*iter;
+		iter++;
+		TrackingNode *node2 = &*iter;
+		node1->edges.push_back(node2);
+		node2->edges.push_back(node1);
 		age = 0.0;
 	}
 
@@ -53,6 +63,11 @@ private:
 	PointF m_initial_tracker;
 	const double m_initial_inf;
 	double m_initial_ratio;
+
+	PointF m_test_init[13*13];
+	PointF m_test_init_move[13*13];
+	double m_test_init_n[13*13];
+	bool check_ini(int px, int py, double ref);
 
 	const double m_attraction_fact;
 	const double m_attraction_pow;

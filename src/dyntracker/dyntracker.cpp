@@ -4,10 +4,18 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_attraction_fact(3.0), m_attraction_pow(3.0), m_attraction_max(0.3), m_initial_inf(0.05)
+	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_initial_inf(0.05)
 {
 	m_initial_tracker = PointF(64.0, 64.0);
 	m_initial_ratio = 1.0;
+
+	for(int a = 0; a < 13; a++){
+		for(int b = 0; b < 13; b++){
+			m_test_init[a * 13 + b] = PointF(10 * a + 3, 10 * b + 3);
+			m_test_init_move[a * 13 + b] = PointF(10 * a + 3, 10 * b + 3);
+			m_test_init_n[a * 13 + b] = 0.0;
+		}
+	}
 }
 
 const list<TrackingUnit> &DynTracker::getTrackers()
@@ -18,6 +26,19 @@ const list<TrackingUnit> &DynTracker::getTrackers()
 PointF DynTracker::getInitialTracker()
 {
 	return m_initial_tracker;
+}
+
+bool DynTracker::check_ini(int px, int py, double ref)
+{
+   if(px >= 0 && px < 13 && py >= 0 && py < 13){
+	   if(m_test_init_n[13 * px + py] < ref - 5){
+		   return true;
+	   }
+   }
+   else{
+	   return true;
+   }
+   return false;
 }
 
 void DynTracker::analyzeEvent(EventF p_event)
@@ -50,34 +71,15 @@ void DynTracker::analyzeEvent(EventF p_event)
 		iter->age += 1.0;
 	}
 
-	if(distmin < 8.0){
+	if(distmin < 5.0){
 		if(trackermin == trackermin2){
-			//cout << "Point " << nodemin->point.x << " " << nodemin->point.y << endl;
-			double gamma = atan2(p_event.position.x - nodemin->point.x, p_event.position.y - nodemin->point.y)
-					- atan2(nodemin2->point.x - nodemin->point.x, nodemin2->point.y - nodemin->point.y);
-			double h = sin(gamma) * distmin;
-			PointF delta = PointF(nodemin2->point.y - nodemin->point.y, nodemin2->point.x - nodemin->point.x);
-			double dist = PointF().getDistance(delta);
-			delta *= h / dist;
-			if(dist < 0.01){
-				delta = PointF();
-				cout << "over" << endl;
-			}
 			double fact = m_attraction_fact / pow(distmin, m_attraction_pow);
 			fact = min(m_attraction_max, fact);
-			cout << delta << endl;
-			nodemin->point += delta * 0.2;
-			nodemin2->point += delta * 0.2;
 
-			nodemin->point += (p_event.position - nodemin->point) * fact * 0.1;
-		}
-		else{
 			PointF delta = p_event.position - nodemin->point;
 
-			double fact = m_attraction_fact / pow(PointF().getDistance(delta), m_attraction_pow);
-			fact = min(m_attraction_max, fact);
-
 			nodemin->point += delta * fact;
+			nodemin2->point += delta * fact * 0.2;
 		}
 
 		trackermin->age /= 2.0;
@@ -88,14 +90,51 @@ void DynTracker::analyzeEvent(EventF p_event)
 		}
 	}
 	else{
-		m_initial_tracker = p_event.position * m_initial_inf + m_initial_tracker * (1.0 - m_initial_inf);
+		int x = (2 + p_event.position.x) / 10;
+		int y = (2 + p_event.position.y) / 10;
+		m_test_init_n[13 * x + y] += 1.0;
+		double ref = m_test_init_n[13 * x + y];
 
-		m_initial_ratio *= 1.01;
+		int checkval = 0;
 
-		if(m_initial_ratio > 1.3){
-			m_trackers.push_back(TrackingUnit(m_initial_tracker));
-			m_initial_ratio = 1.0;
+		if(check_ini(x-1, y-1, ref))checkval++;
+		if(check_ini(x-1, y, ref))checkval++;
+		if(check_ini(x-1, y+1, ref))checkval++;
+
+		if(check_ini(x, y-1, ref))checkval++;
+		if(check_ini(x, y+1, ref))checkval++;
+
+		if(check_ini(x+1, y-1, ref))checkval++;
+		if(check_ini(x+1, y, ref))checkval++;
+		if(check_ini(x+1, y+1, ref))checkval++;
+
+		if(checkval == 8){
+			m_trackers.push_back(TrackingUnit(m_test_init_move[13 * x + y]));
+			m_trackers.back().initialize();
+			m_test_init_n[13 * x + y] = 0.0;
+			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
+			for(int a = x - 1; a <= x + 1; a++){
+				for(int b = y - 1; b <= y + 1; b++){
+					if((a == x && b == y) || a < 0 || b < 0 || a > 12 || b > 12) continue;
+					m_test_init_n[13 * a + b] /= 2.0;
+				}
+			}
 		}
+		else{
+			PointF delta = p_event.position - m_test_init_move[13 * x + y];
+			m_test_init_move[13 * x + y] += delta * 0.1;
+		}
+
+
+//		m_initial_tracker = p_event.position * m_initial_inf + m_initial_tracker * (1.0 - m_initial_inf);
+
+//		m_initial_ratio *= 1.01;
+
+//		if(m_initial_ratio > 1.3){
+//			m_trackers.push_back(TrackingUnit(m_initial_tracker));
+//			m_trackers.back().initialize();
+//			m_initial_ratio = 1.0;
+//		}
 	}
 
 	for(list<TrackingUnit>::iterator iter = m_trackers.begin(); iter != m_trackers.end(); ){

@@ -167,6 +167,9 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 	for(list<TrackingUnit>::const_iterator iter = m_dyntracker.getTrackers().begin(); iter != m_dyntracker.getTrackers().end(); iter++){
 		for(list<TrackingNode>::const_iterator jter = iter->nodes.begin(); jter != iter->nodes.end(); jter++){
 			m_painter->drawEllipse(PointF::toQPointF(jter->point), 1.0, 1.0);
+            for(list<TrackingNode*>::const_iterator kter = jter->edges.begin(); kter != jter->edges.end(); kter++){
+                m_painter->drawLine(PointF::toQPointF(jter->point), PointF::toQPointF((*kter)->point));
+            }
 		}
 	}
 
