@@ -88,6 +88,11 @@ struct PointF{
 		return tmp;
 	}
 
+	double operator * (PointF rhs)
+	{
+		return this->x * rhs.x + this->y * rhs.y;
+	}
+
 	PointF& operator /= (double rhs)
 	{
 		this->x /= rhs;
@@ -110,6 +115,16 @@ struct PointF{
 	static double getDistance(PointF p_p1, PointF p_p2)
 	{
 		return sqrt((p_p1.x-p_p2.x)*(p_p1.x-p_p2.x)+(p_p1.y-p_p2.y)*(p_p1.y-p_p2.y));
+	}
+
+	double getAbs()
+	{
+		return sqrt((this->x * this->x) + (this->y * this->y));
+	}
+
+	static double getAbs(PointF p_p)
+	{
+		return sqrt((p_p.x * p_p.x) + (p_p.y * p_p.y));
 	}
 };
 

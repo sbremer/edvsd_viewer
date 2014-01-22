@@ -173,7 +173,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 		}
 	}
 
-	m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getInitialTracker()), 0.5, 0.5);
+	//m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getInitialTracker()), 0.5, 0.5);
 
 	return;
 

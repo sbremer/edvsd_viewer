@@ -71,6 +71,34 @@ void DynTracker::analyzeEvent(EventF p_event)
 		iter->age += 1.0;
 	}
 
+	if(trackermin == trackermin2 && distmin < 20.0){
+		PointF para = nodemin->point - nodemin2->point;
+		PointF delta = p_event.position - nodemin->point;
+		PointF orth;
+		orth.x = para.y;
+		orth.y = para.x;
+		double orthdist = (delta * orth) / delta.getAbs();
+
+		double errorrate = 0.2;
+		trackermin->error = (1.0 - errorrate) * trackermin->error + errorrate * orthdist * orthdist;
+
+		if(trackermin->error > 25.0){
+			trackermin->nodes.push_back(TrackingNode((nodemin->point + nodemin2->point) * 0.5));
+			trackermin->error = 0.0;
+			nodemin->edges.remove(&*nodemin2);
+			nodemin2->edges.remove(&*nodemin);
+			nodemin->edges.push_back(&(trackermin->nodes.back()));
+			nodemin2->edges.push_back(&(trackermin->nodes.back()));
+			trackermin->nodes.back().edges.push_back(&*nodemin);
+			trackermin->nodes.back().edges.push_back(&*nodemin2);
+		}
+		else{
+
+		}
+
+		cout << trackermin->error << endl;
+	}
+
 	if(distmin < 5.0){
 		if(trackermin == trackermin2){
 			double fact = m_attraction_fact / pow(distmin, m_attraction_pow);
@@ -79,7 +107,10 @@ void DynTracker::analyzeEvent(EventF p_event)
 			PointF delta = p_event.position - nodemin->point;
 
 			nodemin->point += delta * fact;
-			nodemin2->point += delta * fact * 0.2;
+			for(list<TrackingNode*>::iterator iter = nodemin->edges.begin(); iter != nodemin->edges.end(); iter++){
+				(*iter)->point += delta * fact * 0.2;
+			}
+			//nodemin2->point += delta * fact * 0.2;
 		}
 
 		trackermin->age /= 2.0;
@@ -108,7 +139,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 		if(check_ini(x+1, y, ref))checkval++;
 		if(check_ini(x+1, y+1, ref))checkval++;
 
-		if(checkval == 8){
+		if(checkval >= 7){
 			m_trackers.push_back(TrackingUnit(m_test_init_move[13 * x + y]));
 			m_trackers.back().initialize();
 			m_test_init_n[13 * x + y] = 0.0;
@@ -116,7 +147,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 			for(int a = x - 1; a <= x + 1; a++){
 				for(int b = y - 1; b <= y + 1; b++){
 					if((a == x && b == y) || a < 0 || b < 0 || a > 12 || b > 12) continue;
-					m_test_init_n[13 * a + b] /= 2.0;
+					m_test_init_n[13 * a + b] /= 4.0;
 				}
 			}
 		}

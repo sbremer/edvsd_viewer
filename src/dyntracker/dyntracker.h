@@ -24,6 +24,7 @@ struct TrackingUnit{
 	{
 		point = PointF();
 		age = 0.0;
+		error = 0.0;
 	}
 
 	TrackingUnit(PointF p_point)
@@ -47,6 +48,7 @@ struct TrackingUnit{
 	PointF point;
 	list<TrackingNode> nodes;
 	double age;
+	double error;
 };
 
 class DynTracker
