@@ -24,7 +24,7 @@ struct TrackingUnit{
 	{
 		point = PointF();
 		age = 0.0;
-		error = 0.0;
+		error = 20.0;
 	}
 
 	TrackingUnit(PointF p_point)
