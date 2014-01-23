@@ -71,7 +71,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 		iter->age += 1.0;
 	}
 
-	if(trackermin == trackermin2 && distmin < 10.0){
+	if(trackermin == trackermin2 && distmin < 6.0){
 		PointF para = nodemin->point - nodemin2->point;
 		PointF delta = p_event.position - nodemin->point;
 		PointF orth;
