@@ -4,7 +4,7 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_initial_inf(0.05)
+	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_initial_inf(0.05), m_track_num(30)
 {
 	m_initial_tracker = PointF(64.0, 64.0);
 	m_initial_ratio = 1.0;
@@ -16,6 +16,29 @@ DynTracker::DynTracker()
 			m_test_init_n[a * 13 + b] = 0.0;
 		}
 	}
+
+	//Adj Track; m_track_adj[>][<]
+	m_track_trackingpoints = new TrackingPoint*[m_track_num];
+
+	for(int a = 0; a < m_track_num; a++){
+		m_track_trackingpoints[a] = NULL;
+	}
+
+	m_track_adj = new double*[m_track_num];
+
+	for(int a = 0; a < m_track_num; a++){
+		if(a == 0){
+			m_track_adj[a] = NULL;
+		}
+		else{
+			m_track_adj[a] = new double[a];
+
+			for(int b = 0; b < a; b++){
+				m_track_adj[a][b] = 0.0;
+			}
+		}
+	}
+
 }
 
 const list<TrackingUnit> &DynTracker::getTrackers()
@@ -28,23 +51,103 @@ PointF DynTracker::getInitialTracker()
 	return m_initial_tracker;
 }
 
-bool DynTracker::check_ini(int px, int py, double ref)
+int DynTracker::getTrackerNum()
 {
-   if(px >= 0 && px < 13 && py >= 0 && py < 13){
-	   if(m_test_init_n[13 * px + py] < ref - 5){
-		   return true;
-	   }
-   }
-   else{
-	   return true;
-   }
-   return false;
+	return m_track_num;
+}
+
+PointF DynTracker::getTracker(int p_a)
+{
+	if(m_track_trackingpoints[p_a] != NULL){
+		return m_track_trackingpoints[p_a]->point;
+	}
+
+	return PointF();
+}
+
+bool DynTracker::isTrackerActive(int p_a)
+{
+	if(m_track_trackingpoints[p_a] != NULL){
+		return true;
+	}
+	return false;
 }
 
 void DynTracker::analyzeEvent(EventF p_event)
 {
 	double distmin = INFINITY;
 	double distmin2 = INFINITY;
+	int pointmin = -1;
+	int pointmin2 = -1;
+
+	for(int a = 0; a < m_track_num; a++){
+		if(m_track_trackingpoints[a] != NULL){
+			double dist = p_event.position.getDistance(m_track_trackingpoints[a]->point);
+
+			if(dist < distmin){
+				distmin2 = distmin;
+				distmin = dist;
+				pointmin2 = pointmin;
+				pointmin = a;
+			}
+			else if(dist < distmin2){
+				distmin2 = dist;
+				pointmin2 = a;
+			}
+		}
+	}
+
+	if(pointmin != -1 && distmin < 8.0){ //Tracker found close to input
+		PointF delta = p_event.position - m_track_trackingpoints[pointmin]->point;
+		double fact = m_attraction_fact / pow(distmin, m_attraction_pow);
+		fact = min(m_attraction_max, fact);
+
+		m_track_trackingpoints[pointmin]->point += delta * fact;
+
+		if(pointmin2 =! -1){
+			m_track_trackingpoints[pointmin]->point += delta * fact * 0.3;
+		}
+	}
+	else{ //No input found close to a point
+		int x = (2 + p_event.position.x) / 10;
+		int y = (2 + p_event.position.y) / 10;
+
+		if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
+			int free = -1;
+			for(int a = 0; a < m_track_num; a++){
+				if(m_track_trackingpoints[a] == NULL){
+					free = a;
+					break;
+				}
+			}
+			if(free != -1){
+				m_track_trackingpoints[free] = new TrackingPoint();
+				m_track_trackingpoints[free]->point = m_test_init_move[13 * x + y];
+
+				for(int a = 0; a < m_track_num; a++){
+					if(free == a)continue;
+
+					m_track_adj[max(free, a)][min(free, a)] = 0.0;
+				}
+
+			}
+			else{
+				//tracker buffer full
+			}
+			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
+		}
+		else{
+			PointF delta = p_event.position - m_test_init_move[13 * x + y];
+			m_test_init_move[13 * x + y] += delta * 0.1;
+		}
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////
+	return;
+
+//	double distmin = INFINITY;
+//	double distmin2 = INFINITY;
 	list<TrackingUnit>::iterator trackermin;
 	list<TrackingNode>::iterator nodemin;
 	list<TrackingUnit>::iterator trackermin2;

@@ -164,6 +164,14 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
+	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
+		if(m_dyntracker.isTrackerActive(a)){
+			m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getTracker(a)), 1.0, 1.0);
+		}
+	}
+
+	return;
+
 	for(list<TrackingUnit>::const_iterator iter = m_dyntracker.getTrackers().begin(); iter != m_dyntracker.getTrackers().end(); iter++){
 		for(list<TrackingNode>::const_iterator jter = iter->nodes.begin(); jter != iter->nodes.end(); jter++){
 			m_painter->drawEllipse(PointF::toQPointF(jter->point), 1.0, 1.0);

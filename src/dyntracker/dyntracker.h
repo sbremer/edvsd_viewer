@@ -9,6 +9,10 @@
 
 using namespace std;
 
+struct TrackingPoint{
+	PointF point;
+};
+
 struct TrackingNode{
 	TrackingNode(PointF p_point)
 	{
@@ -59,8 +63,16 @@ public:
 	const list<TrackingUnit> &getTrackers();
 	PointF getInitialTracker();
 
+	int getTrackerNum();
+	PointF getTracker(int p_a);
+	bool isTrackerActive(int p_a);
+
 private:
 	list<TrackingUnit> m_trackers;
+
+	const int m_track_num;
+	TrackingPoint **m_track_trackingpoints;
+	double **m_track_adj;
 
 	PointF m_initial_tracker;
 	const double m_initial_inf;
