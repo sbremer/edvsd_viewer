@@ -79,6 +79,7 @@ private:
 	list<TrackingUnit> m_trackers;
 
 	const int m_track_num;
+	int m_track_active;
 	TrackingPoint **m_track_trackingpoints;
 	double **m_track_adj;
 	int createTrackerPoint(PointF p_point);

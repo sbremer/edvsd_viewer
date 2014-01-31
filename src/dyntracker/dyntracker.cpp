@@ -39,6 +39,8 @@ DynTracker::DynTracker()
 		}
 	}
 
+	m_track_active = 0;
+
 }
 
 const list<TrackingUnit> &DynTracker::getTrackers()
@@ -90,7 +92,7 @@ int DynTracker::createTrackerPoint(PointF p_point)
 
 			m_track_adj[max(free, a)][min(free, a)] = 0.0;
 		}
-
+		m_track_active++;
 		return free;
 	}
 	else{
@@ -109,9 +111,10 @@ void DynTracker::analyzeEvent(EventF p_event)
 	for(int a = 0; a < m_track_num; a++){
 		if(m_track_trackingpoints[a] != NULL){
 
-			if(m_track_trackingpoints[a]->age > 60){
+			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
 				delete m_track_trackingpoints[a];
 				m_track_trackingpoints[a] = NULL;
+				m_track_active--;
 				continue;
 			}
 
@@ -127,12 +130,12 @@ void DynTracker::analyzeEvent(EventF p_event)
 				pointmin2 = a;
 			}
 
-			m_track_trackingpoints[a]->age++;
+			m_track_trackingpoints[a]->age += 1.0;
 
 		}
 	}
 
-	if(pointmin != -1 && distmin < 8.0){ //Tracker found close to input
+	if(pointmin != -1 && distmin < 6.0){ //Tracker found close to input
 		PointF delta = p_event.position - m_track_trackingpoints[pointmin]->point;
 		double fact = m_attraction_fact / pow(distmin, m_attraction_pow);
 		fact = min(m_attraction_max, fact);
@@ -141,19 +144,21 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		m_track_trackingpoints[pointmin]->age /= 2.0;
 
-		double error_imp = 0.1;
-
-		if(pointmin2 != -1 && distmin2 < 8.0){
-
-			for(int a = 0; a < m_track_num; a++){
-				if(pointmin == a || m_track_trackingpoints[a] == NULL){
-					continue;
-				}
-
-				m_track_adj[max(pointmin, a)][min(pointmin, a)] = max(0.0, m_track_adj[max(pointmin, a)][min(pointmin, a)] - 0.05);
+		for(int a = 0; a < m_track_num; a++){
+			if(pointmin == a || m_track_trackingpoints[a] == NULL){
+				continue;
 			}
 
-			m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] = min(1.0, m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] + 0.1);
+			m_track_adj[max(pointmin, a)][min(pointmin, a)] = max(0.0, m_track_adj[max(pointmin, a)][min(pointmin, a)] - 0.01);
+		}
+
+		double error_imp = 0.18;
+
+		if(pointmin2 != -1 && distmin2 < 6.0){
+
+			m_track_trackingpoints[pointmin2]->age /= 1.5;
+
+			m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] = min(1.0, m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] + 0.15);
 
 			//calculate orthogonal error
 			PointF para = m_track_trackingpoints[pointmin]->point - m_track_trackingpoints[pointmin2]->point;
@@ -164,19 +169,25 @@ void DynTracker::analyzeEvent(EventF p_event)
 			if(delta.getAbs() == 0.0){
 				orthdist = 0.0;
 			}
-			orthdist = fabs(orthdist);
+//			orthdist = fabs(orthdist);
 
-			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * orthdist;
+			double error = max(orthdist, distmin * 1.5);
+
+			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * error * error;
 		}
 		else{
 			//apply abs error
-			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * distmin;
+			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * distmin * distmin * 1.5;
 		}
 
-		if(m_track_trackingpoints[pointmin]->error > 4.0){
+		if(m_track_trackingpoints[pointmin]->error > 23.0){
 			int new_track = createTrackerPoint(m_track_trackingpoints[pointmin]->point);
 			m_track_trackingpoints[pointmin]->error = 0.0;
 			m_track_adj[max(pointmin, new_track)][min(pointmin, new_track)] = 0.8;
+			if(pointmin2 != -1){
+				m_track_trackingpoints[pointmin2]->error = 0.0;
+				m_track_adj[max(pointmin2, new_track)][min(pointmin2, new_track)] = 0.6;
+			}
 		}
 
 		for(int a = 0; a < m_track_num; a++){
@@ -194,7 +205,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
 			createTrackerPoint(m_test_init_move[13 * x + y]);
-
+			//createTrackerPoint(m_test_init_move[13 * x + y]);
 			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
 		}
 		else{
