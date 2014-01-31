@@ -10,7 +10,15 @@
 using namespace std;
 
 struct TrackingPoint{
+	TrackingPoint(PointF p_point)
+		:point(p_point), age(0.0), error(0.0)
+	{
+
+	}
+
 	PointF point;
+	double age;
+	double error;
 };
 
 struct TrackingNode{
@@ -73,6 +81,7 @@ private:
 	const int m_track_num;
 	TrackingPoint **m_track_trackingpoints;
 	double **m_track_adj;
+	int createTrackerPoint(PointF p_point);
 
 	PointF m_initial_tracker;
 	const double m_initial_inf;

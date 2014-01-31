@@ -73,6 +73,32 @@ bool DynTracker::isTrackerActive(int p_a)
 	return false;
 }
 
+int DynTracker::createTrackerPoint(PointF p_point)
+{
+	int free = -1;
+	for(int a = 0; a < m_track_num; a++){
+		if(m_track_trackingpoints[a] == NULL){
+			free = a;
+			break;
+		}
+	}
+	if(free != -1){
+		m_track_trackingpoints[free] = new TrackingPoint(p_point);
+
+		for(int a = 0; a < m_track_num; a++){
+			if(free == a)continue;
+
+			m_track_adj[max(free, a)][min(free, a)] = 0.0;
+		}
+
+		return free;
+	}
+	else{
+		//TrackerPoint buffer full!
+		return -1;
+	}
+}
+
 void DynTracker::analyzeEvent(EventF p_event)
 {
 	double distmin = INFINITY;
@@ -82,8 +108,14 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 	for(int a = 0; a < m_track_num; a++){
 		if(m_track_trackingpoints[a] != NULL){
-			double dist = p_event.position.getDistance(m_track_trackingpoints[a]->point);
 
+			if(m_track_trackingpoints[a]->age > 60){
+				delete m_track_trackingpoints[a];
+				m_track_trackingpoints[a] = NULL;
+				continue;
+			}
+
+			double dist = p_event.position.getDistance(m_track_trackingpoints[a]->point);
 			if(dist < distmin){
 				distmin2 = distmin;
 				distmin = dist;
@@ -94,6 +126,9 @@ void DynTracker::analyzeEvent(EventF p_event)
 				distmin2 = dist;
 				pointmin2 = a;
 			}
+
+			m_track_trackingpoints[a]->age++;
+
 		}
 	}
 
@@ -104,36 +139,62 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		m_track_trackingpoints[pointmin]->point += delta * fact;
 
-		if(pointmin2 =! -1){
-			m_track_trackingpoints[pointmin]->point += delta * fact * 0.3;
+		m_track_trackingpoints[pointmin]->age /= 2.0;
+
+		double error_imp = 0.1;
+
+		if(pointmin2 != -1 && distmin2 < 8.0){
+
+			for(int a = 0; a < m_track_num; a++){
+				if(pointmin == a || m_track_trackingpoints[a] == NULL){
+					continue;
+				}
+
+				m_track_adj[max(pointmin, a)][min(pointmin, a)] = max(0.0, m_track_adj[max(pointmin, a)][min(pointmin, a)] - 0.05);
+			}
+
+			m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] = min(1.0, m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] + 0.1);
+
+			//calculate orthogonal error
+			PointF para = m_track_trackingpoints[pointmin]->point - m_track_trackingpoints[pointmin2]->point;
+			PointF orth;
+			orth.x = para.y;
+			orth.y = para.x;
+			double orthdist = (delta * orth) / delta.getAbs();
+			if(delta.getAbs() == 0.0){
+				orthdist = 0.0;
+			}
+			orthdist = fabs(orthdist);
+
+			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * orthdist;
 		}
+		else{
+			//apply abs error
+			m_track_trackingpoints[pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[pointmin]->error + error_imp * distmin;
+		}
+
+		if(m_track_trackingpoints[pointmin]->error > 4.0){
+			int new_track = createTrackerPoint(m_track_trackingpoints[pointmin]->point);
+			m_track_trackingpoints[pointmin]->error = 0.0;
+			m_track_adj[max(pointmin, new_track)][min(pointmin, new_track)] = 0.8;
+		}
+
+		for(int a = 0; a < m_track_num; a++){
+			if(pointmin == a || m_track_trackingpoints[a] == NULL){
+				continue;
+			}
+
+			m_track_trackingpoints[a]->point += delta * fact * m_track_adj[max(pointmin, a)][min(pointmin, a)] * 0.4;
+		}
+
 	}
 	else{ //No input found close to a point
 		int x = (2 + p_event.position.x) / 10;
 		int y = (2 + p_event.position.y) / 10;
 
 		if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
-			int free = -1;
-			for(int a = 0; a < m_track_num; a++){
-				if(m_track_trackingpoints[a] == NULL){
-					free = a;
-					break;
-				}
-			}
-			if(free != -1){
-				m_track_trackingpoints[free] = new TrackingPoint();
-				m_track_trackingpoints[free]->point = m_test_init_move[13 * x + y];
+			createTrackerPoint(m_test_init_move[13 * x + y]);
 
-				for(int a = 0; a < m_track_num; a++){
-					if(free == a)continue;
-
-					m_track_adj[max(free, a)][min(free, a)] = 0.0;
-				}
-
-			}
-			else{
-				//tracker buffer full
-			}
 			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
 		}
 		else{
