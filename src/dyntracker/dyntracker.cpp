@@ -4,7 +4,7 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_initial_inf(0.05), m_track_num(30)
+	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_initial_inf(0.05), m_track_num(60)
 {
 	m_initial_tracker = PointF(64.0, 64.0);
 	m_initial_ratio = 1.0;
@@ -182,11 +182,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		if(m_track_trackingpoints[pointmin]->error > 23.0){
 			int new_track = createTrackerPoint(m_track_trackingpoints[pointmin]->point);
-			m_track_trackingpoints[pointmin]->error = 0.0;
-			m_track_adj[max(pointmin, new_track)][min(pointmin, new_track)] = 0.8;
-			if(pointmin2 != -1){
-				m_track_trackingpoints[pointmin2]->error = 0.0;
-				m_track_adj[max(pointmin2, new_track)][min(pointmin2, new_track)] = 0.6;
+			if(new_track != -1){
+				m_track_trackingpoints[pointmin]->error = 0.0;
+				m_track_adj[max(pointmin, new_track)][min(pointmin, new_track)] = 0.8;
+				if(pointmin2 != -1){
+					m_track_trackingpoints[pointmin2]->error = 0.0;
+					m_track_adj[max(pointmin2, new_track)][min(pointmin2, new_track)] = 0.6;
+				}
 			}
 		}
 
@@ -205,7 +207,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
 			createTrackerPoint(m_test_init_move[13 * x + y]);
-			//createTrackerPoint(m_test_init_move[13 * x + y]);
+			createTrackerPoint(m_test_init_move[13 * x + y]);
 			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
 		}
 		else{

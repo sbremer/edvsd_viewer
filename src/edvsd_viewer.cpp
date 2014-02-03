@@ -54,7 +54,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 
 void EDVSD_Viewer::loadEventData()
 {
-	int c = m_fileprocessor->readEventsByTime(33*20);
+	int c = m_fileprocessor->readEventsByTime(33*500);
 }
 
 void EDVSD_Viewer::on_actionE_xit_triggered()
