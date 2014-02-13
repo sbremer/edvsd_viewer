@@ -13,7 +13,7 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 	m_visualizer = NULL;
 	m_detection = NULL;
 
-	on_action1_8x_triggered();
+	on_action1_64x_triggered();
 
 	m_tracking_param.resize(11);
 
@@ -194,7 +194,7 @@ void EDVSD_Viewer::on_action1_1x_triggered()
 {
 	uncheckAllReplaySpeed();
 	m_ui->action1_1x->setChecked(true);
-	m_replay_speed = 33000 / 1;
+	m_replay_speed = 33000 / 1; //33000 us per frame
 }
 
 void EDVSD_Viewer::on_action1_2x_triggered()

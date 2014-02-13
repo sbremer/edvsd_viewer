@@ -75,7 +75,7 @@ bool DynTracker::isTrackerActive(int p_a)
 	return false;
 }
 
-int DynTracker::createTrackerPoint(PointF p_point)
+int DynTracker::createTrackerPoint(PointF p_point, unsigned int p_ts)
 {
 	int free = -1;
 	for(int a = 0; a < m_track_num; a++){
@@ -85,7 +85,7 @@ int DynTracker::createTrackerPoint(PointF p_point)
 		}
 	}
 	if(free != -1){
-		m_track_trackingpoints[free] = new TrackingPoint(p_point);
+		m_track_trackingpoints[free] = new TrackingPoint(p_point, p_ts);
 
 		for(int a = 0; a < m_track_num; a++){
 			if(free == a)continue;
@@ -111,7 +111,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 	for(int a = 0; a < m_track_num; a++){
 		if(m_track_trackingpoints[a] != NULL){
 
-			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
+//			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
+			if(m_track_trackingpoints[a]->rate * 5 < p_event.ts - m_track_trackingpoints[a]->last){
+				m_track_trackingpoints[a]->rate *= 0.8;
+			}
+
+			if(m_track_trackingpoints[a]->rate * 8 < p_event.ts - m_track_trackingpoints[a]->last){
+				cout << "LIM: " << m_track_trackingpoints[a]->rate * 15 << endl << "Cur: " << p_event.ts - m_track_trackingpoints[a]->last << endl;
 				delete m_track_trackingpoints[a];
 				m_track_trackingpoints[a] = NULL;
 				m_track_active--;
@@ -143,6 +149,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 		m_track_trackingpoints[pointmin]->point += delta * fact;
 
 		m_track_trackingpoints[pointmin]->age /= 2.0;
+
+		double rate_imp = 0.04;
+		unsigned int diff = p_event.ts - m_track_trackingpoints[pointmin]->last;
+		if(diff != 0){
+			m_track_trackingpoints[pointmin]->rate = (1.0 - rate_imp) * m_track_trackingpoints[pointmin]->rate + rate_imp * diff;
+		}
+		m_track_trackingpoints[pointmin]->last = p_event.ts;
 
 		for(int a = 0; a < m_track_num; a++){
 			if(pointmin == a || m_track_trackingpoints[a] == NULL){
@@ -181,7 +194,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 		}
 
 		if(m_track_trackingpoints[pointmin]->error > 23.0){
-			int new_track = createTrackerPoint(m_track_trackingpoints[pointmin]->point);
+			int new_track = createTrackerPoint(m_track_trackingpoints[pointmin]->point, p_event.ts);
 			if(new_track != -1){
 				m_track_trackingpoints[pointmin]->error = 0.0;
 				m_track_adj[max(pointmin, new_track)][min(pointmin, new_track)] = 0.8;
@@ -206,8 +219,8 @@ void DynTracker::analyzeEvent(EventF p_event)
 		int y = (2 + p_event.position.y) / 10;
 
 		if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
-			createTrackerPoint(m_test_init_move[13 * x + y]);
-			createTrackerPoint(m_test_init_move[13 * x + y]);
+			createTrackerPoint(m_test_init_move[13 * x + y], p_event.ts);
+//			createTrackerPoint(m_test_init_move[13 * x + y], p_event.ts);
 			m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
 		}
 		else{

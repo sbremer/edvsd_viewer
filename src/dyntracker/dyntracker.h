@@ -10,8 +10,8 @@
 using namespace std;
 
 struct TrackingPoint{
-	TrackingPoint(PointF p_point)
-		:point(p_point), age(0.0), error(0.0)
+	TrackingPoint(PointF p_point, unsigned int p_ts)
+		:point(p_point), age(0.0), error(0.0), last(p_ts), rate(2000.0)
 	{
 
 	}
@@ -19,6 +19,8 @@ struct TrackingPoint{
 	PointF point;
 	double age;
 	double error;
+	unsigned int last;
+	double rate;
 };
 
 struct TrackingNode{
@@ -82,7 +84,7 @@ private:
 	int m_track_active;
 	TrackingPoint **m_track_trackingpoints;
 	double **m_track_adj;
-	int createTrackerPoint(PointF p_point);
+	int createTrackerPoint(PointF p_point, unsigned int p_ts);
 
 	PointF m_initial_tracker;
 	const double m_initial_inf;
