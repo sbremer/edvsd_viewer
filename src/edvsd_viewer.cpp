@@ -195,6 +195,7 @@ void EDVSD_Viewer::on_action1_1x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_1x->setChecked(true);
 	m_replay_speed = 33000 / 1; //33000 us per frame
+	m_replay_speed_state = 0;
 }
 
 void EDVSD_Viewer::on_action1_2x_triggered()
@@ -202,6 +203,7 @@ void EDVSD_Viewer::on_action1_2x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_2x->setChecked(true);
 	m_replay_speed = 33000 / 2;
+	m_replay_speed_state = 1;
 }
 
 void EDVSD_Viewer::on_action1_4x_triggered()
@@ -209,6 +211,7 @@ void EDVSD_Viewer::on_action1_4x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_4x->setChecked(true);
 	m_replay_speed = 33000 / 4;
+	m_replay_speed_state = 2;
 }
 
 void EDVSD_Viewer::on_action1_8x_triggered()
@@ -216,6 +219,7 @@ void EDVSD_Viewer::on_action1_8x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_8x->setChecked(true);
 	m_replay_speed = 33000 / 8;
+	m_replay_speed_state = 3;
 }
 
 void EDVSD_Viewer::on_action1_16x_triggered()
@@ -223,6 +227,7 @@ void EDVSD_Viewer::on_action1_16x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_16x->setChecked(true);
 	m_replay_speed = 33000 / 16;
+	m_replay_speed_state = 4;
 }
 
 void EDVSD_Viewer::on_action1_32x_triggered()
@@ -230,6 +235,7 @@ void EDVSD_Viewer::on_action1_32x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_32x->setChecked(true);
 	m_replay_speed = 33000 / 32;
+	m_replay_speed_state = 5;
 }
 
 void EDVSD_Viewer::on_action1_64x_triggered()
@@ -237,6 +243,7 @@ void EDVSD_Viewer::on_action1_64x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_64x->setChecked(true);
 	m_replay_speed = 33000 / 64;
+	m_replay_speed_state = 6;
 }
 
 void EDVSD_Viewer::on_action1_128x_triggered()
@@ -244,6 +251,7 @@ void EDVSD_Viewer::on_action1_128x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_128x->setChecked(true);
 	m_replay_speed = 33000 / 128;
+	m_replay_speed_state = 7;
 }
 
 void EDVSD_Viewer::on_action1_256x_triggered()
@@ -251,4 +259,50 @@ void EDVSD_Viewer::on_action1_256x_triggered()
 	uncheckAllReplaySpeed();
 	m_ui->action1_256x->setChecked(true);
 	m_replay_speed = 33000 / 256;
+	m_replay_speed_state = 8;
+}
+
+void EDVSD_Viewer::executeReplaySpeed()
+{
+	switch(m_replay_speed_state){
+	case 0:
+		on_action1_1x_triggered();
+		break;
+	case 1:
+		on_action1_2x_triggered();
+		break;
+	case 2:
+		on_action1_4x_triggered();
+		break;
+	case 3:
+		on_action1_8x_triggered();
+		break;
+	case 4:
+		on_action1_16x_triggered();
+		break;
+	case 5:
+		on_action1_32x_triggered();
+		break;
+	case 6:
+		on_action1_64x_triggered();
+		break;
+	case 7:
+		on_action1_128x_triggered();
+		break;
+	case 8:
+		on_action1_256x_triggered();
+		break;
+	}
+}
+
+void EDVSD_Viewer::on_actionSlower_triggered()
+{
+	m_replay_speed_state = max(0, m_replay_speed_state + 1);
+	executeReplaySpeed();
+}
+
+void EDVSD_Viewer::on_actionFaster_triggered()
+{
+	m_replay_speed_state = min(8, m_replay_speed_state - 1);
+	executeReplaySpeed();
 }

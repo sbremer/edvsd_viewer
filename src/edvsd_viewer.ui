@@ -57,6 +57,9 @@
      <property name="title">
       <string>Replay Speed</string>
      </property>
+     <addaction name="actionSlower"/>
+     <addaction name="actionFaster"/>
+     <addaction name="separator"/>
      <addaction name="action1_1x"/>
      <addaction name="action1_2x"/>
      <addaction name="action1_4x"/>
@@ -247,6 +250,22 @@
    </property>
    <property name="text">
     <string>1/ 256x</string>
+   </property>
+  </action>
+  <action name="actionSlower">
+   <property name="text">
+    <string>Slower</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionFaster">
+   <property name="text">
+    <string>Faster</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
    </property>
   </action>
  </widget>

@@ -111,13 +111,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 	for(int a = 0; a < m_track_num; a++){
 		if(m_track_trackingpoints[a] != NULL){
 
-//			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
-			if(m_track_trackingpoints[a]->rate * 5 < p_event.ts - m_track_trackingpoints[a]->last){
-				m_track_trackingpoints[a]->rate *= 0.8;
-			}
+			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
+//			if(m_track_trackingpoints[a]->rate * 5 < p_event.ts - m_track_trackingpoints[a]->last){
+//				m_track_trackingpoints[a]->rate *= 0.8;
+//			}
 
-			if(m_track_trackingpoints[a]->rate * 8 < p_event.ts - m_track_trackingpoints[a]->last){
-				cout << "LIM: " << m_track_trackingpoints[a]->rate * 15 << endl << "Cur: " << p_event.ts - m_track_trackingpoints[a]->last << endl;
+//			if(m_track_trackingpoints[a]->rate * 8 < p_event.ts - m_track_trackingpoints[a]->last){
+//				cout << "LIM: " << m_track_trackingpoints[a]->rate * 15 << endl << "Cur: " << p_event.ts - m_track_trackingpoints[a]->last << endl;
 				delete m_track_trackingpoints[a];
 				m_track_trackingpoints[a] = NULL;
 				m_track_active--;
@@ -148,7 +148,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		m_track_trackingpoints[pointmin]->point += delta * fact;
 
-		m_track_trackingpoints[pointmin]->age /= 2.0;
+		m_track_trackingpoints[pointmin]->age /= 3.0;
 
 		double rate_imp = 0.04;
 		unsigned int diff = p_event.ts - m_track_trackingpoints[pointmin]->last;
@@ -169,7 +169,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 		if(pointmin2 != -1 && distmin2 < 6.0){
 
-			m_track_trackingpoints[pointmin2]->age /= 1.5;
+//			m_track_trackingpoints[pointmin2]->age /= 1.5;
 
 			m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] = min(1.0, m_track_adj[max(pointmin, pointmin2)][min(pointmin, pointmin2)] + 0.15);
 

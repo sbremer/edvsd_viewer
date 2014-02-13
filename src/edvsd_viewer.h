@@ -64,6 +64,12 @@ private slots:
 
 	void on_action1_256x_triggered();
 
+	void executeReplaySpeed();
+
+	void on_actionSlower_triggered();
+
+	void on_actionFaster_triggered();
+
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;
@@ -73,6 +79,7 @@ private:
 	vector<double> m_tracking_param;
 
 	quint32 m_replay_speed;
+	int m_replay_speed_state;
 
 	vector<EventF> m_eventbuffer;
 
