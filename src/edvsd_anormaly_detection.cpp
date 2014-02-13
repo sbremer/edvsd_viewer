@@ -156,7 +156,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 {
 	for(int a = 0; a < p_n; a++){
 		if(p_buffer[a].polarity == false){
-			continue;
+			//continue;
 		}
 
 		m_dyntracker.analyzeEvent(p_buffer[a]);

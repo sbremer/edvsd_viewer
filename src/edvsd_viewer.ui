@@ -53,9 +53,24 @@
      <addaction name="action_Green_Red"/>
      <addaction name="action_White_Black"/>
     </widget>
+    <widget class="QMenu" name="menuReplay_Speed">
+     <property name="title">
+      <string>Replay Speed</string>
+     </property>
+     <addaction name="action1_1x"/>
+     <addaction name="action1_2x"/>
+     <addaction name="action1_4x"/>
+     <addaction name="action1_8x"/>
+     <addaction name="action1_16x"/>
+     <addaction name="action1_32x"/>
+     <addaction name="action1_64x"/>
+     <addaction name="action1_128x"/>
+     <addaction name="action1_256x"/>
+    </widget>
     <addaction name="menu_Mode"/>
     <addaction name="actionDump_NNData"/>
     <addaction name="action_Pause"/>
+    <addaction name="menuReplay_Speed"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -157,6 +172,81 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="action1_1x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 1x</string>
+   </property>
+  </action>
+  <action name="action1_2x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 2x</string>
+   </property>
+  </action>
+  <action name="action1_4x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 4x</string>
+   </property>
+  </action>
+  <action name="action1_8x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>1/ 8x</string>
+   </property>
+  </action>
+  <action name="action1_16x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 16x</string>
+   </property>
+  </action>
+  <action name="action1_32x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 32x</string>
+   </property>
+  </action>
+  <action name="action1_64x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 64x</string>
+   </property>
+  </action>
+  <action name="action1_128x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 128x</string>
+   </property>
+  </action>
+  <action name="action1_256x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 256x</string>
    </property>
   </action>
  </widget>

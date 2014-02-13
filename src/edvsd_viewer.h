@@ -44,6 +44,26 @@ private slots:
 
 	void on_action_Pause_triggered();
 
+	void uncheckAllReplaySpeed();
+
+	void on_action1_1x_triggered();
+
+	void on_action1_2x_triggered();
+
+	void on_action1_4x_triggered();
+
+	void on_action1_8x_triggered();
+
+	void on_action1_16x_triggered();
+
+	void on_action1_32x_triggered();
+
+	void on_action1_64x_triggered();
+
+	void on_action1_128x_triggered();
+
+	void on_action1_256x_triggered();
+
 private:
 	Ui::EDVSD_Viewer *m_ui;
 	EDVSD_Visualizer *m_visualizer;
@@ -51,6 +71,8 @@ private:
 	EDVSD_Anormaly_Detection *m_detection;
 
 	vector<double> m_tracking_param;
+
+	quint32 m_replay_speed;
 
 	vector<EventF> m_eventbuffer;
 

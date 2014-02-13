@@ -13,6 +13,8 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 	m_visualizer = NULL;
 	m_detection = NULL;
 
+	on_action1_8x_triggered();
+
 	m_tracking_param.resize(11);
 
 	m_tracking_param[0] = 1.36506;
@@ -54,7 +56,7 @@ EDVSD_Viewer::~EDVSD_Viewer()
 
 void EDVSD_Viewer::loadEventData()
 {
-	int c = m_fileprocessor->readEventsByTime(33*500);
+	int c = m_fileprocessor->readEventsByTime(m_replay_speed);
 }
 
 void EDVSD_Viewer::on_actionE_xit_triggered()
@@ -173,4 +175,80 @@ void EDVSD_Viewer::on_action_Testopen_File_triggered()
 void EDVSD_Viewer::on_action_Pause_triggered()
 {
 	m_visualizer->setPaused(m_ui->action_Pause->isChecked());
+}
+
+void EDVSD_Viewer::uncheckAllReplaySpeed()
+{
+	m_ui->action1_1x->setChecked(false);
+	m_ui->action1_2x->setChecked(false);
+	m_ui->action1_4x->setChecked(false);
+	m_ui->action1_8x->setChecked(false);
+	m_ui->action1_16x->setChecked(false);
+	m_ui->action1_32x->setChecked(false);
+	m_ui->action1_64x->setChecked(false);
+	m_ui->action1_128x->setChecked(false);
+	m_ui->action1_256x->setChecked(false);
+}
+
+void EDVSD_Viewer::on_action1_1x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_1x->setChecked(true);
+	m_replay_speed = 33000 / 1;
+}
+
+void EDVSD_Viewer::on_action1_2x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_2x->setChecked(true);
+	m_replay_speed = 33000 / 2;
+}
+
+void EDVSD_Viewer::on_action1_4x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_4x->setChecked(true);
+	m_replay_speed = 33000 / 4;
+}
+
+void EDVSD_Viewer::on_action1_8x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_8x->setChecked(true);
+	m_replay_speed = 33000 / 8;
+}
+
+void EDVSD_Viewer::on_action1_16x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_16x->setChecked(true);
+	m_replay_speed = 33000 / 16;
+}
+
+void EDVSD_Viewer::on_action1_32x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_32x->setChecked(true);
+	m_replay_speed = 33000 / 32;
+}
+
+void EDVSD_Viewer::on_action1_64x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_64x->setChecked(true);
+	m_replay_speed = 33000 / 64;
+}
+
+void EDVSD_Viewer::on_action1_128x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_128x->setChecked(true);
+	m_replay_speed = 33000 / 128;
+}
+
+void EDVSD_Viewer::on_action1_256x_triggered()
+{
+	uncheckAllReplaySpeed();
+	m_ui->action1_256x->setChecked(true);
+	m_replay_speed = 33000 / 256;
 }
