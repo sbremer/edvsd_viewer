@@ -172,57 +172,57 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 
 	return;
 
-	for(list<TrackingUnit>::const_iterator iter = m_dyntracker.getTrackers().begin(); iter != m_dyntracker.getTrackers().end(); iter++){
-		for(list<TrackingNode>::const_iterator jter = iter->nodes.begin(); jter != iter->nodes.end(); jter++){
-			m_painter->drawEllipse(PointF::toQPointF(jter->point), 1.0, 1.0);
-            for(list<TrackingNode*>::const_iterator kter = jter->edges.begin(); kter != jter->edges.end(); kter++){
-                m_painter->drawLine(PointF::toQPointF(jter->point), PointF::toQPointF((*kter)->point));
-            }
-		}
-	}
-
-	//m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getInitialTracker()), 0.5, 0.5);
-
-	return;
-
-	m_painter->fillRect(0,0,128,128,Qt::transparent);
-
-	//draw start and endpoint
-	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
-		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
-		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
-		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
-	}
-
-	for(int a = 0; a < p_n; a++){
-		const KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
-		//const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
-//		if(map == 0){
-//			continue;
+//	for(list<TrackingUnit>::const_iterator iter = m_dyntracker.getTrackers().begin(); iter != m_dyntracker.getTrackers().end(); iter++){
+//		for(list<TrackingNode>::const_iterator jter = iter->nodes.begin(); jter != iter->nodes.end(); jter++){
+//			m_painter->drawEllipse(PointF::toQPointF(jter->point), 1.0, 1.0);
+//            for(list<TrackingNode*>::const_iterator kter = jter->edges.begin(); kter != jter->edges.end(); kter++){
+//                m_painter->drawLine(PointF::toQPointF(jter->point), PointF::toQPointF((*kter)->point));
+//            }
 //		}
+//	}
 
-//		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
-//			m_time_comp = m_tracking.getDurationMin();
-//		}
+//	//m_painter->drawEllipse(PointF::toQPointF(m_dyntracker.getInitialTracker()), 0.5, 0.5);
 
-//		if(m_time_comp != -1 && map->ts != -1){
-//			double x = (map->points[0].x + map->points[1].x) / 2.0;
-//			double y = (map->points[0].y + map->points[1].y) / 2.0;
-//			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
-//			double t = (double)p_buffer[a].t - map->ts;
+//	return;
 
-//			x = (x - 64) / 32;
-//			y = (y - 64) / 32;
-//			atan = atan;
-//			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
-//		}
-	}
+//	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	for(int a = 0; a < m_tracking.getListLength(); a++){
-		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
-		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
-		m_painter->drawLine(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]));
-	}
+//	//draw start and endpoint
+//	for(QList<MotionF>::iterator i = m_motions.begin(); i!= m_motions.end(); i++){
+//		m_painter->drawEllipse(i->start.toQPointF(),1.0,1.0);
+//		m_painter->drawEllipse(i->end.toQPointF(),1.0,1.0);
+//		m_painter->drawLine(i->start.toQPointF(), i->end.toQPointF());
+//	}
+
+//	for(int a = 0; a < p_n; a++){
+//		const KohonenMap<2>* map = m_tracking.analyzeEvent(p_buffer[a]);
+//		//const KohonenMap<2>* map = m_tracking.analyzeEvent(PointF((double)(p_buffer[a].x), (double)(p_buffer[a].y)), (bool)(p_buffer[a].p), (unsigned int)(p_buffer[a].t));
+////		if(map == 0){
+////			continue;
+////		}
+
+////		if(m_tracking.getDurationMin() < 1000000 && m_time_comp == -1){
+////			m_time_comp = m_tracking.getDurationMin();
+////		}
+
+////		if(m_time_comp != -1 && map->ts != -1){
+////			double x = (map->points[0].x + map->points[1].x) / 2.0;
+////			double y = (map->points[0].y + map->points[1].y) / 2.0;
+////			double atan = qAtan((map->points[0].x - map->points[1].x) / (map->points[0].y - map->points[1].y));
+////			double t = (double)p_buffer[a].t - map->ts;
+
+////			x = (x - 64) / 32;
+////			y = (y - 64) / 32;
+////			atan = atan;
+////			t = (t - m_time_comp / 2.0) / (m_time_comp / 4);
+////		}
+//	}
+
+//	for(int a = 0; a < m_tracking.getListLength(); a++){
+//		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), 1.0, 1.0);
+//		m_painter->drawEllipse(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]), 1.0, 1.0);
+//		m_painter->drawLine(PointF::toQPointF(m_tracking.getKohonenMap(a)->points[0]), PointF::toQPointF(m_tracking.getKohonenMap(a)->points[1]));
+//	}
 }
 
 void EDVSD_Anormaly_Detection::testEvents(EventF *p_buffer, int p_n)
