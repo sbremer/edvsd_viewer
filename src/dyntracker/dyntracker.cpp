@@ -173,7 +173,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	if(p_pointmin2 != -1 && p_distmin2 < 6.0){
 
 		//Lower age
-		m_track_trackingpoints[pointmin2]->age /= 1.5;
+		m_track_trackingpoints[p_pointmin2]->age /= 1.5;
 
 		//Strengthen the connection between closest and 2nd closest point
 		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.15);
