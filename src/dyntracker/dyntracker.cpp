@@ -145,6 +145,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
 	fact = min(m_attraction_max, fact);
 
+	//Override "old" fact calculation (not really useful I think)
 	fact = 0.25;
 
 	//Execute attraction for closest trackingpoint
