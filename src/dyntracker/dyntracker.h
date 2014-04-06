@@ -11,7 +11,7 @@ using namespace std;
 
 struct TrackingPoint{
 	TrackingPoint(PointF p_point, unsigned int p_ts)
-		:point(p_point), age(0.0), error(0.0), last(p_ts), rate(2000.0)
+		:point(p_point), age(0.0), error(0.0), last(p_ts), rate(2000.0), velocity()
 	{
 
 	}
@@ -21,6 +21,7 @@ struct TrackingPoint{
 	double error;
 	unsigned int last;
 	double rate;
+	PointF velocity;
 };
 
 class DynTracker

@@ -145,18 +145,28 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
 	fact = min(m_attraction_max, fact);
 
+	cout << fact << endl;
+
 	//Execute attraction for closest trackingpoint
 	m_track_trackingpoints[p_pointmin]->point += delta * fact;
 
 	//Lower age of closest trackingpoint
 	m_track_trackingpoints[p_pointmin]->age /= 3.0;
 
-//	double rate_imp = 0.04;
-//	unsigned int diff = p_event.ts - m_track_trackingpoints[p_pointmin]->last;
-//	if(diff != 0){
-//		m_track_trackingpoints[p_pointmin]->rate = (1.0 - rate_imp) * m_track_trackingpoints[p_pointmin]->rate + rate_imp * diff;
-//	}
-//	m_track_trackingpoints[p_pointmin]->last = p_event.ts;
+	//Update event rate
+	double rate_imp = 0.04;
+	unsigned int diff = p_event.ts - m_track_trackingpoints[p_pointmin]->last;
+	if(diff != 0){
+		m_track_trackingpoints[p_pointmin]->rate = (1.0 - rate_imp) * m_track_trackingpoints[p_pointmin]->rate + rate_imp * diff;
+	}
+	else{
+		diff = 1;
+	}
+	m_track_trackingpoints[p_pointmin]->last = p_event.ts;
+
+	//Update tracker velocity
+	double velocity_imp = 0.1;
+	m_track_trackingpoints[p_pointmin]->velocity = (1.0 - velocity_imp) * m_track_trackingpoints[p_pointmin]->velocity + velocity_imp * delta * 1000000.0 / (double)diff;
 
 	//Lower connection strength between closest trackingpoint to all other trackingpoints
 	for(int a = 0; a < m_track_num; a++){
