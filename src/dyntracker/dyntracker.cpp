@@ -103,7 +103,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 		if(m_track_trackingpoints[a] != NULL){
 
 			//Remove "old" Tracking Points
-			if(m_track_trackingpoints[a]->age > 8 * m_track_active + 10){
+			if(m_track_trackingpoints[a]->age > 5 * m_track_active + 10){
 				delete m_track_trackingpoints[a];
 				m_track_trackingpoints[a] = NULL;
 				m_track_active--;
@@ -145,7 +145,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
 	fact = min(m_attraction_max, fact);
 
-	cout << fact << endl;
+	fact = 0.25;
 
 	//Execute attraction for closest trackingpoint
 	m_track_trackingpoints[p_pointmin]->point += delta * fact;
@@ -166,7 +166,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 	//Update tracker velocity
 	double velocity_imp = 0.1;
-	m_track_trackingpoints[p_pointmin]->velocity = (1.0 - velocity_imp) * m_track_trackingpoints[p_pointmin]->velocity + velocity_imp * delta * 1000000.0 / (double)diff;
+	m_track_trackingpoints[p_pointmin]->velocity = m_track_trackingpoints[p_pointmin]->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 
 	//Lower connection strength between closest trackingpoint to all other trackingpoints
 	for(int a = 0; a < m_track_num; a++){
@@ -210,7 +210,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Check for a high error
-	if(m_track_trackingpoints[p_pointmin]->error > 23.0){
+	if(m_track_trackingpoints[p_pointmin]->error > 22.0){
 		//Try to create a new point
 		int new_track = createTrackerPoint(m_track_trackingpoints[p_pointmin]->point, p_event.ts);
 		if(new_track != -1){

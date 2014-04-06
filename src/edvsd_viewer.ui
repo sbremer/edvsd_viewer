@@ -69,6 +69,9 @@
      <addaction name="action1_64x"/>
      <addaction name="action1_128x"/>
      <addaction name="action1_256x"/>
+     <addaction name="action1_512x"/>
+     <addaction name="action1_1024x"/>
+     <addaction name="action1_2048x"/>
     </widget>
     <addaction name="menu_Mode"/>
     <addaction name="actionDump_NNData"/>
@@ -266,6 +269,30 @@
    </property>
    <property name="shortcut">
     <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="action1_512x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 512x</string>
+   </property>
+  </action>
+  <action name="action1_1024x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 1024x</string>
+   </property>
+  </action>
+  <action name="action1_2048x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1/ 2048x</string>
    </property>
   </action>
  </widget>

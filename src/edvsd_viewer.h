@@ -64,6 +64,12 @@ private slots:
 
 	void on_action1_256x_triggered();
 
+	void on_action1_512x_triggered();
+
+	void on_action1_1024x_triggered();
+
+	void on_action1_2048x_triggered();
+
 	void executeReplaySpeed();
 
 	void on_actionSlower_triggered();
