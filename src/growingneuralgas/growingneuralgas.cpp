@@ -30,7 +30,7 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 	m_edges.push_back(edge);
 }
 
-void GrowingNeuralGas::learn(vector<double> p_input)
+void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int p_time)
 {
 //	if(m_iterations == 200){
 //		m_attraction_fact_first = 0.2;
@@ -247,7 +247,7 @@ void GrowingNeuralGas::learn(vector<double> p_input)
 	m_iterations++;
 }
 
-double GrowingNeuralGas::test(vector<double> p_input)
+double GrowingNeuralGas::testNode(vector<double> p_input, int p_id, unsigned int p_time)
 {
 	//Find first (s1) and second (s1) closest vertex
 	Vertex *s1 = 0;

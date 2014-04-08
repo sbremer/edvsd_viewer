@@ -8,12 +8,12 @@ GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
 
 void GrowingNeuralGas_Driver::learn(vector<double> p_input)
 {
-	m_gng.learn(p_input);
+	m_gng.learnNode(p_input, 0, 0);
 }
 
 double GrowingNeuralGas_Driver::test(vector<double> p_input)
 {
-	return m_gng.test(p_input);
+	return m_gng.testNode(p_input, 0, 0);
 }
 
 void GrowingNeuralGas_Driver::dumpData()

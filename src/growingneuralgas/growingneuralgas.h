@@ -24,6 +24,14 @@ struct Edge{
 	int age;
 };
 
+struct VertexLink{
+	Vertex *link;
+	double probability; //Or rather use rate? Prob can still be calculated
+	double time;
+	double timedeviation;
+	int age;
+};
+
 struct Vertex{
 	Vertex(int p_dim)
 		:position(p_dim), error(0.0), utility(0.0), error_dim(p_dim)
@@ -60,6 +68,19 @@ struct Vertex{
 	double error;
 	vector<double> error_dim;
 	double utility;
+
+	double rate_newnode;
+	unsigned int last_new;
+	double rate_killnode;
+	unsigned int last_kill;
+
+	list<VertexLink> links;
+};
+
+struct InputNode{
+	int id;
+	Vertex *current;
+	unsigned int since;
 };
 
 class GrowingNeuralGas
@@ -67,8 +88,11 @@ class GrowingNeuralGas
 public:
 	GrowingNeuralGas(int p_dim);
 
-	void learn(vector<double> p_input);
-	double test(vector<double> p_input);
+	void newNode(vector<double> p_input, int p_id, unsigned int p_time);
+	void learnNode(vector<double> p_input, int p_id, unsigned int p_time);
+	void killNode(int p_id, unsigned int p_time);
+
+	double testNode(vector<double> p_input, int p_id, unsigned int p_time);
 
 	int getDimension();
 	const list<Vertex*> &getVertices();
@@ -92,6 +116,7 @@ private:
 
 	list<Vertex*> m_vertices;
 	list<Edge*> m_edges;
+	list<InputNode> m_inputnodes;
 };
 
 #endif // GROWINGNEURALGAS_H
