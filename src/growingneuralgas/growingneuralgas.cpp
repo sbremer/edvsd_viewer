@@ -30,7 +30,47 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 	m_edges.push_back(edge);
 }
 
+void GrowingNeuralGas::newNode(vector<double> p_input, int p_id, unsigned int p_time)
+{
+	InputNode *node = new InputNode(p_id, p_time);
+	m_inputnodes.push_back(node);
+
+	Vertex *closest = adjustGNG(p_input);
+	m_inputnodes.back().current = closest;
+
+	//Adjust closest new probability/rate
+}
+
 void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int p_time)
+{
+	InputNode *node = 0;
+
+	for(list<InputNode*>::iterator iter = m_inputnodes.begin(); iter != m_inputnodes.end(); iter++){
+		if(iter->id == p_id){
+			node = &(*iter);
+			break;
+		}
+	}
+
+	if(node == 0){
+		//id unknown!
+		return;
+	}
+
+	Vertex *closest = adjustGNG(p_input);
+
+	//Closest Vertex changed!
+	if(node->current != closest){
+		//Magic happens here
+	}
+}
+
+void GrowingNeuralGas::killNode(int p_id, unsigned int p_time)
+{
+	//ToDo
+}
+
+Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 {
 //	if(m_iterations == 200){
 //		m_attraction_fact_first = 0.2;
@@ -245,6 +285,8 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 		f->edges.push_back(nf);
 	}
 	m_iterations++;
+
+	return s1;
 }
 
 double GrowingNeuralGas::testNode(vector<double> p_input, int p_id, unsigned int p_time)

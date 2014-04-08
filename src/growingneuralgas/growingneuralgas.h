@@ -27,8 +27,8 @@ struct Edge{
 struct VertexLink{
 	Vertex *link;
 	double probability; //Or rather use rate? Prob can still be calculated
-	double time;
-	double timedeviation;
+	double atime_stay;
+	double atime_stay_deviation;
 	int age;
 };
 
@@ -69,15 +69,24 @@ struct Vertex{
 	vector<double> error_dim;
 	double utility;
 
-	double rate_newnode;
+	double atime_newnode;
+	double atime_newnode_deviation;
 	unsigned int last_new;
-	double rate_killnode;
+
+	double atime_killnode;
+	double atime_killnode_deviation;
 	unsigned int last_kill;
 
 	list<VertexLink> links;
 };
 
 struct InputNode{
+	InputNode(int p_id, unsigned int p_time)
+		:id(p_id), since(p_time)
+	{
+
+	}
+
 	int id;
 	Vertex *current;
 	unsigned int since;
@@ -99,6 +108,8 @@ public:
 	const list<Edge*> &getEdges();
 
 private:
+	Vertex* adjustGNG(vector<double> p_input);
+
 	const int m_dim;
 	Random m_rand;
 
@@ -116,7 +127,7 @@ private:
 
 	list<Vertex*> m_vertices;
 	list<Edge*> m_edges;
-	list<InputNode> m_inputnodes;
+	list<InputNode*> m_inputnodes;
 };
 
 #endif // GROWINGNEURALGAS_H
