@@ -25,16 +25,27 @@ struct Edge{
 };
 
 struct VertexLink{
-	Vertex *link;
-	double probability; //Or rather use rate? Prob can still be calculated
+	VertexLink(Vertex *p_link)
+		:link(p_link), atime_transfer(0.0), atime_transfer_deviation(0.0), last_transfer(0), atime_stay(0.0), atime_stay_deviation(0.0)
+	{
+
+	}
+
+	const Vertex *link;
+
+	double atime_transfer;
+	double atime_transfer_deviation;
+	unsigned int last_transfer;
+
 	double atime_stay;
 	double atime_stay_deviation;
+
 	int age;
 };
 
 struct Vertex{
 	Vertex(int p_dim)
-		:position(p_dim), error(0.0), utility(0.0), error_dim(p_dim)
+		:position(p_dim), error(0.0), utility(0.0), error_dim(p_dim), atime_newnode(0.0), atime_newnode_deviation(0.0), last_new(0), atime_stay_kill(0.0), atime_stay_kill_deviation(0.0), atime_killnode(0.0), atime_killnode_deviation(0.0), last_kill(0)
 	{
 		for(int a = 0; a < p_dim; a++){
 			position[a] = 0.0;
@@ -73,6 +84,9 @@ struct Vertex{
 	double atime_newnode_deviation;
 	unsigned int last_new;
 
+	double atime_stay_kill;
+	double atime_stay_kill_deviation;
+
 	double atime_killnode;
 	double atime_killnode_deviation;
 	unsigned int last_kill;
@@ -87,7 +101,7 @@ struct InputNode{
 
 	}
 
-	int id;
+	const int id;
 	Vertex *current;
 	unsigned int since;
 };

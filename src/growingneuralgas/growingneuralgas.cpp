@@ -36,9 +36,21 @@ void GrowingNeuralGas::newNode(vector<double> p_input, int p_id, unsigned int p_
 	m_inputnodes.push_back(node);
 
 	Vertex *closest = adjustGNG(p_input);
-	m_inputnodes.back().current = closest;
+	node->current = closest;
 
-	//Adjust closest new probability/rate
+	if(closest->last_new == 0){
+		closest->last_new = p_time;
+	}
+	else{
+		//Adjust closest new rate
+		double dt = p_time - closest->last_new;
+		closest->last_new = p_time;
+
+		double atime_imp = 0.1;
+
+		closest->atime_newnode_deviation = (1.0 - atime_imp) * closest->atime_newnode_deviation + atime_imp * (closest->atime_newnode - dt) * (closest->atime_newnode - dt);
+		closest->atime_newnode = (1.0 - atime_imp) * closest->atime_newnode + atime_imp * dt;
+	}
 }
 
 void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int p_time)
@@ -46,8 +58,8 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 	InputNode *node = 0;
 
 	for(list<InputNode*>::iterator iter = m_inputnodes.begin(); iter != m_inputnodes.end(); iter++){
-		if(iter->id == p_id){
-			node = &(*iter);
+		if((*iter)->id == p_id){
+			node = (*iter);
 			break;
 		}
 	}
@@ -59,15 +71,108 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 
 	Vertex *closest = adjustGNG(p_input);
 
-	//Closest Vertex changed!
+	//Check if closest Vertex changed
 	if(node->current != closest){
-		//Magic happens here
+
+		//Check if connection exists
+		VertexLink *link = 0;
+
+		for(list<VertexLink>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); /* iter++ */){
+			//Age links
+			iter->age++;
+
+			if(iter->link == closest){
+				link = &(*iter);
+				//break;
+			}
+
+			//Delete old connections
+			if(iter->age > 50){
+				iter = node->current->links.erase(iter);
+			}
+			else{
+				iter++;
+			}
+		}
+
+		//Create link if nonexistant
+		if(link == 0){
+			node->current->links.push_back(VertexLink(closest));
+			link = &(*(node->current->links.end()--));
+
+			link->atime_stay = node->since - p_time;
+
+			link->last_transfer = p_time;
+			node->since = p_time;
+			node->current = closest;
+		}
+
+		//Update times if existant
+		else{
+			double atime_imp = 0.1;
+
+			link->age = 0;
+
+			double dt = node->since - p_time;
+
+			link->atime_stay_deviation = (1.0 - atime_imp) * link->atime_stay_deviation + atime_imp * (link->atime_stay - dt) * (link->atime_stay - dt);
+			link->atime_stay = (1.0 - atime_imp) * link->atime_stay + atime_imp * dt;
+
+			node->since = p_time;
+
+			dt = link->last_transfer - p_time;
+
+			link->atime_transfer_deviation = (1.0 - atime_imp) * link->atime_transfer_deviation + atime_imp * (link->atime_transfer - dt) * (link->atime_transfer - dt);
+			link->atime_transfer = (1.0 - atime_imp) * link->atime_transfer + atime_imp * dt;
+
+			link->last_transfer = p_time;
+
+			node->current = closest;
+		}
 	}
 }
 
 void GrowingNeuralGas::killNode(int p_id, unsigned int p_time)
 {
-	//ToDo
+	InputNode *node = 0;
+	list<InputNode*>::iterator node_iter;
+
+	for(list<InputNode*>::iterator iter = m_inputnodes.begin(); iter != m_inputnodes.end(); iter++){
+		if((*iter)->id == p_id){
+			node_iter = iter;
+			node = (*iter);
+			break;
+		}
+	}
+
+	if(node == 0){
+		//id unknown!
+		return;
+	}
+
+	if(node->current->last_kill == 0){
+		node->current->last_kill = p_time;
+	}
+	else{
+		//Adjust closest kill rate
+		double atime_imp = 0.1;
+
+		double dt = node->since - p_time;
+
+		node->current->atime_stay_kill_deviation = (1.0 - atime_imp) * node->current->atime_killnode_deviation + atime_imp * (node->current->atime_stay_kill - dt) * (node->current->atime_stay_kill - dt);
+		node->current->atime_stay_kill = (1.0 - atime_imp) * node->current->atime_stay_kill + atime_imp * dt;
+
+		dt = p_time - node->current->last_kill;
+
+		node->current->atime_killnode_deviation = (1.0 - atime_imp) * node->current->atime_killnode_deviation + atime_imp * (node->current->atime_killnode - dt) * (node->current->atime_killnode - dt);
+		node->current->atime_killnode = (1.0 - atime_imp) * node->current->atime_killnode + atime_imp * dt;
+
+		node->current->last_kill = p_time;
+	}
+
+	//Erase node
+	m_inputnodes.erase(node_iter);
+	delete node;
 }
 
 Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
