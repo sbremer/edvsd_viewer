@@ -13,7 +13,7 @@ void GrowingNeuralGas_Driver::learn(vector<double> p_input)
 
 double GrowingNeuralGas_Driver::test(vector<double> p_input)
 {
-	return m_gng.testNode(p_input, 0, 0);
+	return m_gng.test_learnNode(p_input, 0, 0);
 }
 
 void GrowingNeuralGas_Driver::dumpData()

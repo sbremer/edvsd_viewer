@@ -115,7 +115,9 @@ public:
 	void learnNode(vector<double> p_input, int p_id, unsigned int p_time);
 	void killNode(int p_id, unsigned int p_time);
 
-	double testNode(vector<double> p_input, int p_id, unsigned int p_time);
+	double test_newNode(vector<double> p_input, int p_id, unsigned int p_time);
+	double test_learnNode(vector<double> p_input, int p_id, unsigned int p_time);
+	double test_killNode(int p_id, unsigned int p_time);
 
 	int getDimension();
 	const list<Vertex*> &getVertices();
@@ -123,6 +125,7 @@ public:
 
 private:
 	Vertex* adjustGNG(vector<double> p_input);
+	double accumulateError(double p_total, double p_component);
 
 	const int m_dim;
 	Random m_rand;

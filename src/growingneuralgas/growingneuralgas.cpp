@@ -78,6 +78,12 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 		VertexLink *link = 0;
 
 		for(list<VertexLink>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); /* iter++ */){
+			//Delete old connections
+			if(iter->age > 50){
+				iter = node->current->links.erase(iter);
+				continue;
+			}
+
 			//Age links
 			iter->age++;
 
@@ -86,13 +92,7 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 				//break;
 			}
 
-			//Delete old connections
-			if(iter->age > 50){
-				iter = node->current->links.erase(iter);
-			}
-			else{
-				iter++;
-			}
+			iter++;
 		}
 
 		//Create link if nonexistant
@@ -113,6 +113,7 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 
 			link->age = 0;
 
+			//Stay of a node at closest vertex
 			double dt = node->since - p_time;
 
 			link->atime_stay_deviation = (1.0 - atime_imp) * link->atime_stay_deviation + atime_imp * (link->atime_stay - dt) * (link->atime_stay - dt);
@@ -120,6 +121,7 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 
 			node->since = p_time;
 
+			//Transfer rate of all nodes via this vertexlink
 			dt = link->last_transfer - p_time;
 
 			link->atime_transfer_deviation = (1.0 - atime_imp) * link->atime_transfer_deviation + atime_imp * (link->atime_transfer - dt) * (link->atime_transfer - dt);
@@ -394,7 +396,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 	return s1;
 }
 
-double GrowingNeuralGas::testNode(vector<double> p_input, int p_id, unsigned int p_time)
+double GrowingNeuralGas::test_newNode(vector<double> p_input, int p_id, unsigned int p_time)
 {
 	//Find first (s1) and second (s1) closest vertex
 	Vertex *s1 = 0;
@@ -416,20 +418,132 @@ double GrowingNeuralGas::testNode(vector<double> p_input, int p_id, unsigned int
 		}
 	}
 
-	double error = 0.0;
+	double error_total = 0.0;
+	double error;
 
-//	for(int a = 0; a < m_dim; a++){
-//		if(s1->error_dim[a] != 0.0){
-//			error += fabs(s1->position[a] - p_input[a]);// / s1->error_dim[a];
-//			//error += fabs(s2->position[a] - p_input[a]) / 2.0;
-//		}
-//	}
+	//Relative distance to input
+	error = distmin / s1->getDistance(s2->position);
+	error_total = accumulateError(error_total, error);
 
-//	error /= m_dim;
+	//Time (rate) of node creation at the closest vertex
+	error = ((p_time - s1->last_new) - s1->atime_newnode) * ((p_time - s1->last_new) - s1->atime_newnode) / s1->atime_newnode_deviation / 2.0;
+	error_total = accumulateError(error_total, error);
 
-	error = distmin;
+	return error_total;
+}
 
-	return error;
+double GrowingNeuralGas::test_learnNode(vector<double> p_input, int p_id, unsigned int p_time)
+{
+	//Find corresponding inputnode
+	InputNode *node = 0;
+
+	for(list<InputNode*>::iterator iter = m_inputnodes.begin(); iter != m_inputnodes.end(); iter++){
+		if((*iter)->id == p_id){
+			node = (*iter);
+			break;
+		}
+	}
+
+	if(node == 0){
+		//id unknown!
+		return -1.0;
+	}
+
+	//Find first (s1) and second (s1) closest vertex
+	Vertex *s1 = 0;
+	Vertex *s2 = 0;
+	double distmin = INFINITY;
+	double distmin2 = INFINITY;
+
+	for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
+		double dist = (*iter)->getDistance(p_input);
+		if(dist < distmin){
+			s2 = s1;
+			s1 = *iter;
+			distmin2 = distmin;
+			distmin = dist;
+		}
+		else if(dist < distmin2){
+			s2 = *iter;
+			distmin2 = dist;
+		}
+	}
+
+	double error_total = 0.0;
+	double error;
+
+	//Relative distance to input
+	error = distmin / s1->getDistance(s2->position);
+	error_total = accumulateError(error_total, error);
+
+	//Check if closest vertex changed
+	if(node->current != s1){
+
+		//Check for link from "current" to new vertex
+		VertexLink *link = 0;
+
+		for(list<VertexLink>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); iter++){
+			if(iter->link == s1){
+				link = &(*iter);
+				break;
+			}
+		}
+
+		//Create link if nonexistant
+		if(link == 0){
+			//Add a lot of error
+			error = 20.0;
+			error_total = accumulateError(error_total, error);
+		}
+		else{
+			//Duration of the stay of this node at the old vertex
+			error = ((p_time - node->since) - link->atime_stay) * ((p_time - node->since) - link->atime_stay) / link->atime_stay_deviation / 2.0;
+			error_total = accumulateError(error_total, error);
+
+			//General transfer time of this link
+			error = ((p_time - link->last_transfer) - link->atime_transfer) * ((p_time - link->last_transfer) - link->atime_transfer) / link->atime_transfer_deviation / 2.0;
+			error_total = accumulateError(error_total, error);
+		}
+	}
+
+	return error_total;
+}
+
+double GrowingNeuralGas::test_killNode(int p_id, unsigned int p_time)
+{
+	//Find corresponding inputnode
+	InputNode *node = 0;
+
+	for(list<InputNode*>::iterator iter = m_inputnodes.begin(); iter != m_inputnodes.end(); iter++){
+		if((*iter)->id == p_id){
+			node = (*iter);
+			break;
+		}
+	}
+
+	if(node == 0){
+		//id unknown!
+		return -1.0;
+	}
+
+	double error_total = 0.0;
+	double error;
+
+	//Stay of this node at the current vertex until death
+	error = ((p_time - node->since) - node->current->atime_stay_kill) * ((p_time - node->since) - node->current->atime_stay_kill) / node->current->atime_stay_kill_deviation / 2.0;
+	error_total = accumulateError(error_total, error);
+
+	//General death time at this vertex
+	error = ((p_time - node->current->last_kill) - node->current->atime_killnode) * ((p_time - node->current->last_kill) - node->current->atime_killnode) / node->current->atime_killnode_deviation / 2.0;
+	error_total = accumulateError(error_total, error);
+
+	return error_total;
+}
+
+double GrowingNeuralGas::accumulateError(double p_total, double p_component)
+{
+	//How the final error is computed
+	return max(p_total, p_component); //Maybe not the smartest.. ToDo
 }
 
 int GrowingNeuralGas::getDimension()
