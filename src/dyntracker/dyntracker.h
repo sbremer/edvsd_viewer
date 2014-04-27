@@ -9,18 +9,25 @@
 
 using namespace std;
 
-struct TrackingPoint{
-	TrackingPoint(PointF p_point, unsigned int p_ts)
-		:point(p_point), age(0.0), error(0.0), last(p_ts), rate(2000.0), velocity()
+struct TrackingNode{
+	TrackingNode(PointF p_point, unsigned int p_ts)
+		:position(p_point), age(0.0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity()
 	{
 
 	}
 
-	PointF point;
+	TrackingNode()
+		:position(), age(0.0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity()
+	{
+
+	}
+
+	PointF position;
 	double age;
 	double error;
 	unsigned int last;
 	double rate;
+	double angle;
 	PointF velocity;
 };
 
@@ -31,18 +38,19 @@ public:
 	void analyzeEvent(EventF p_event);
 
 	int getTrackerNum();
-	PointF getTracker(int p_a);
-	bool isTrackerActive(int p_a);
+	TrackingNode getTrackingNode(int p_a);
+	bool isTrackingNodeActive(int p_a);
+	double getTrackingNodeConnection(int p_a, int p_b);
 
 private:
 	const int m_track_num;
 	int m_track_active;
-	TrackingPoint **m_track_trackingpoints;
+	TrackingNode **m_track_trackingnodes;
 	double **m_track_adj;
 
 	void adjustTrackers(EventF p_event, int p_pointmin, double p_distmin, int p_pointmin2, double p_distmin2);
 	void adjustInitial(EventF p_event);
-	int createTrackerPoint(PointF p_point, unsigned int p_ts);
+	int createTrackingNode(PointF p_point, unsigned int p_ts);
 
 	PointF m_test_init[13*13];
 	PointF m_test_init_move[13*13];

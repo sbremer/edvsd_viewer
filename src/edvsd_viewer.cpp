@@ -74,7 +74,7 @@ void EDVSD_Viewer::on_action_Close_File_triggered()
 		m_visualizer = NULL;
 	}
 	if(m_detection!=NULL){
-		disconnect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_detection, SLOT(analyzeLiveEvents(EDVS_Event*,int)));
+		disconnect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(analyzeLiveEvents(EventF*,int)));
 		delete m_detection;
 		m_detection = NULL;
 	}
@@ -188,6 +188,9 @@ void EDVSD_Viewer::uncheckAllReplaySpeed()
 	m_ui->action1_64x->setChecked(false);
 	m_ui->action1_128x->setChecked(false);
 	m_ui->action1_256x->setChecked(false);
+	m_ui->action1_512x->setChecked(false);
+	m_ui->action1_1024x->setChecked(false);
+	m_ui->action1_2048x->setChecked(false);
 }
 
 void EDVSD_Viewer::on_action1_1x_triggered()
@@ -330,12 +333,12 @@ void EDVSD_Viewer::executeReplaySpeed()
 
 void EDVSD_Viewer::on_actionSlower_triggered()
 {
-	m_replay_speed_state = max(0, m_replay_speed_state + 1);
+	m_replay_speed_state = min(11, m_replay_speed_state + 1);
 	executeReplaySpeed();
 }
 
 void EDVSD_Viewer::on_actionFaster_triggered()
 {
-	m_replay_speed_state = min(11, m_replay_speed_state - 1);
+	m_replay_speed_state = max(0, m_replay_speed_state - 1);
 	executeReplaySpeed();
 }

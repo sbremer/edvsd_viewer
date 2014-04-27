@@ -16,10 +16,10 @@ DynTracker::DynTracker()
 	}
 
 	//Initiate Tracking Points
-	m_track_trackingpoints = new TrackingPoint*[m_track_num];
+	m_track_trackingnodes = new TrackingNode*[m_track_num];
 
 	for(int a = 0; a < m_track_num; a++){
-		m_track_trackingpoints[a] = NULL;
+		m_track_trackingnodes[a] = NULL;
 	}
 
 	//Initiate adjacency matrix, access with m_track_adj[>index][<index]
@@ -47,35 +47,44 @@ int DynTracker::getTrackerNum()
 	return m_track_num;
 }
 
-PointF DynTracker::getTracker(int p_a)
+TrackingNode DynTracker::getTrackingNode(int p_a)
 {
-	if(m_track_trackingpoints[p_a] != NULL){
-		return m_track_trackingpoints[p_a]->point;
+	if(m_track_trackingnodes[p_a] != NULL){
+		return *(m_track_trackingnodes[p_a]);
 	}
 
-	return PointF();
+	return TrackingNode();
 }
 
-bool DynTracker::isTrackerActive(int p_a)
+bool DynTracker::isTrackingNodeActive(int p_a)
 {
-	if(m_track_trackingpoints[p_a] != NULL){
+	if(m_track_trackingnodes[p_a] != NULL){
 		return true;
 	}
 	return false;
 }
 
-int DynTracker::createTrackerPoint(PointF p_point, unsigned int p_ts)
+double DynTracker::getTrackingNodeConnection(int p_a, int p_b)
+{
+	if(m_track_trackingnodes[p_a] == NULL || m_track_trackingnodes[p_b] == NULL){
+		return 0.0;
+	}
+
+	return m_track_adj[max(p_a, p_b)][min(p_a, p_b)];
+}
+
+int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 {
 	//Search for free slot
 	int free = -1;
 	for(int a = 0; a < m_track_num; a++){
-		if(m_track_trackingpoints[a] == NULL){
+		if(m_track_trackingnodes[a] == NULL){
 			free = a;
 			break;
 		}
 	}
 	if(free != -1){ //Free slot found, initiate Tracker
-		m_track_trackingpoints[free] = new TrackingPoint(p_point, p_ts);
+		m_track_trackingnodes[free] = new TrackingNode(p_point, p_ts);
 
 		for(int a = 0; a < m_track_num; a++){
 			if(free == a)continue;
@@ -100,17 +109,17 @@ void DynTracker::analyzeEvent(EventF p_event)
 	int pointmin2 = -1;
 
 	for(int a = 0; a < m_track_num; a++){
-		if(m_track_trackingpoints[a] != NULL){
+		if(m_track_trackingnodes[a] != NULL){
 
 			//Remove "old" Tracking Points
-			if(m_track_trackingpoints[a]->age > 5 * m_track_active + 10){
-				delete m_track_trackingpoints[a];
-				m_track_trackingpoints[a] = NULL;
+			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
+				delete m_track_trackingnodes[a];
+				m_track_trackingnodes[a] = NULL;
 				m_track_active--;
 				continue;
 			}
 
-			double dist = p_event.position.getDistance(m_track_trackingpoints[a]->point);
+			double dist = p_event.position.getDistance(m_track_trackingnodes[a]->position);
 			if(dist < distmin){
 				distmin2 = distmin;
 				distmin = dist;
@@ -123,7 +132,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 			}
 
 			//Age Tracking Points
-			m_track_trackingpoints[a]->age += 1.0;
+			m_track_trackingnodes[a]->age += 1.0;
 
 		}
 	}
@@ -139,39 +148,64 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin, int p_pointmin2, double p_distmin2)
 {
-	PointF delta = p_event.position - m_track_trackingpoints[p_pointmin]->point;
+	PointF delta = p_event.position - m_track_trackingnodes[p_pointmin]->position;
 
 	//Calculate attraction strength
 	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
 	fact = min(m_attraction_max, fact);
 
 	//Override "old" fact calculation (not really useful I think)
-	fact = 0.25;
+	fact = 0.15;
 
 	//Execute attraction for closest trackingpoint
-	m_track_trackingpoints[p_pointmin]->point += delta * fact;
+	m_track_trackingnodes[p_pointmin]->position += delta * fact;
 
 	//Lower age of closest trackingpoint
-	m_track_trackingpoints[p_pointmin]->age /= 3.0;
+	m_track_trackingnodes[p_pointmin]->age /= 3.0;
 
 	//Update event rate
 	double rate_imp = 0.04;
-	unsigned int diff = p_event.ts - m_track_trackingpoints[p_pointmin]->last;
+	unsigned int diff = p_event.ts - m_track_trackingnodes[p_pointmin]->last;
 	if(diff != 0){
-		m_track_trackingpoints[p_pointmin]->rate = (1.0 - rate_imp) * m_track_trackingpoints[p_pointmin]->rate + rate_imp * diff;
+		m_track_trackingnodes[p_pointmin]->rate = (1.0 - rate_imp) * m_track_trackingnodes[p_pointmin]->rate + rate_imp * diff;
 	}
 	else{
 		diff = 1;
 	}
-	m_track_trackingpoints[p_pointmin]->last = p_event.ts;
+	m_track_trackingnodes[p_pointmin]->last = p_event.ts;
+
+	//Update event angle
+	double angle_imp = 0.05;
+	double angle = atan(delta.y / delta.x);
+	if(fabs(angle - m_track_trackingnodes[p_pointmin]->angle) > M_PI_2){
+		if(angle > m_track_trackingnodes[p_pointmin]->angle){
+			angle -= M_PI;
+		}
+		else{
+			angle += M_PI;
+		}
+	}
+
+	m_track_trackingnodes[p_pointmin]->angle = (1.0 - angle_imp) * m_track_trackingnodes[p_pointmin]->angle + angle_imp * angle;
+
+	m_track_trackingnodes[p_pointmin]->angle = fmod(m_track_trackingnodes[p_pointmin]->angle + M_PI_2, M_PI) - M_PI_2;
 
 	//Update tracker velocity
 	double velocity_imp = 0.1;
-	m_track_trackingpoints[p_pointmin]->velocity = m_track_trackingpoints[p_pointmin]->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
+	m_track_trackingnodes[p_pointmin]->velocity = m_track_trackingnodes[p_pointmin]->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
+
+	//Attract all tracking points to the event depending on their connection strength to the closest event
+	for(int a = 0; a < m_track_num; a++){
+		if(p_pointmin == a || m_track_trackingnodes[a] == NULL){
+			continue;
+		}
+
+		m_track_trackingnodes[a]->position += delta * fact * m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] * 0.4;
+	}
 
 	//Lower connection strength between closest trackingpoint to all other trackingpoints
 	for(int a = 0; a < m_track_num; a++){
-		if(p_pointmin == a || m_track_trackingpoints[a] == NULL){
+		if(p_pointmin == a || m_track_trackingnodes[a] == NULL){
 			continue;
 		}
 
@@ -184,13 +218,17 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	if(p_pointmin2 != -1 && p_distmin2 < 6.0){
 
 		//Lower age
-		m_track_trackingpoints[p_pointmin2]->age /= 1.5;
+		m_track_trackingnodes[p_pointmin2]->age /= 1.5;
 
 		//Strengthen the connection between closest and 2nd closest point
 		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.15);
 
+		//Update angle
+//		m_track_trackingnodes[p_pointmin2]->angle = (1.0 - angle_imp * 0.4) * m_track_trackingnodes[p_pointmin2]->angle + angle_imp * 0.4 * angle;
+//		m_track_trackingnodes[p_pointmin2]->angle = fmod(m_track_trackingnodes[p_pointmin2]->angle + M_PI_2, M_PI) - M_PI_2;
+
 		//calculate orthogonal error between the 2 points and the event
-		PointF para = m_track_trackingpoints[p_pointmin]->point - m_track_trackingpoints[p_pointmin2]->point;
+		PointF para = m_track_trackingnodes[p_pointmin]->position - m_track_trackingnodes[p_pointmin2]->position;
 		PointF orth;
 		orth.x = para.y;
 		orth.y = para.x;
@@ -200,38 +238,32 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		}
 //			orthdist = fabs(orthdist);
 
-		double error = max(orthdist, p_distmin * 1.5);
+		double error = min(orthdist, p_distmin);
+
+		//Override orth. error
+		error = p_distmin;
 
 		//Apply othogonal error
-		m_track_trackingpoints[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[p_pointmin]->error + error_imp * error * error;
+		m_track_trackingnodes[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingnodes[p_pointmin]->error + error_imp * error * error;
 	}
 	else{
 		//Apply simple distance error
-		m_track_trackingpoints[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingpoints[p_pointmin]->error + error_imp * p_distmin * p_distmin * 1.5;
+		m_track_trackingnodes[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingnodes[p_pointmin]->error + error_imp * p_distmin * p_distmin;
 	}
 
 	//Check for a high error
-	if(m_track_trackingpoints[p_pointmin]->error > 22.0){
+	if(m_track_trackingnodes[p_pointmin]->error > 14.0){
 		//Try to create a new point
-		int new_track = createTrackerPoint(m_track_trackingpoints[p_pointmin]->point, p_event.ts);
+		int new_track = createTrackingNode(m_track_trackingnodes[p_pointmin]->position, p_event.ts);
 		if(new_track != -1){
 			//Lower error of closest point if successful
-			m_track_trackingpoints[p_pointmin]->error = 0.0;
+			m_track_trackingnodes[p_pointmin]->error = 0.0;
 			m_track_adj[max(p_pointmin, new_track)][min(p_pointmin, new_track)] = 0.8;
 			if(p_pointmin2 != -1){
-				m_track_trackingpoints[p_pointmin2]->error = 0.0;
+				m_track_trackingnodes[p_pointmin2]->error = 0.0;
 				m_track_adj[max(p_pointmin2, new_track)][min(p_pointmin2, new_track)] = 0.6;
 			}
 		}
-	}
-
-	//Attract all tracking points to the event depending on their connection strength to the closest event
-	for(int a = 0; a < m_track_num; a++){
-		if(p_pointmin == a || m_track_trackingpoints[a] == NULL){
-			continue;
-		}
-
-		m_track_trackingpoints[a]->point += delta * fact * m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] * 0.4;
 	}
 }
 
@@ -244,10 +276,21 @@ void DynTracker::adjustInitial(EventF p_event)
 	//Check if initializerpoint is far away from origin
 	if(m_test_init_move[13 * x + y].getDistance(m_test_init[13 * x + y]) > 3.0){
 		//Spawn new Tracker
-		createTrackerPoint(m_test_init_move[13 * x + y], p_event.ts);
+		createTrackingNode(m_test_init_move[13 * x + y], p_event.ts);
 
 		//Reset initializerpoint's position
 		m_test_init_move[13 * x + y] = m_test_init[13 * x + y];
+
+		//(Half-) Reset surrounding initialtracker's position
+		for(int a = x - 1; a <= x + 1; a++){
+			for(int b = y - 1; b <= y + 1; b++){
+				if( (a == x && b == y) || a < 0 || a > 12 || b < 0 || b > 12){
+					continue;
+				}
+
+				m_test_init_move[13 * a + b] = m_test_init_move[13 * a + b] * 0.5 + m_test_init[13 * a + b] * 0.5;
+			}
+		}
 	}
 	else{
 		//Pull closest initializerpoint towards event
