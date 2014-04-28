@@ -11,17 +11,18 @@ using namespace std;
 
 struct TrackingNode{
 	TrackingNode(PointF p_point, unsigned int p_ts)
-		:position(p_point), age(0.0), events(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity()
+		:id(0), position(p_point), age(0.0), events(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity()
 	{
 
 	}
 
 	TrackingNode()
-		:position(), age(0.0), events(0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity()
+		:id(-1), position(), age(0.0), events(0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity()
 	{
 
 	}
 
+	int id; //Todo!
 	PointF position;
 	double age;
 	int events;

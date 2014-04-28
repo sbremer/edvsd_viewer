@@ -137,11 +137,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 		}
 	}
 
-	if(pointmin != -1 && distmin < 6.0){ //Tracker found close to input
+	//Check for node close to input
+	if(pointmin != -1 && distmin < 6.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
-	else{ //No input found close to a point, run initializer algorithm
+	//Else run initializer algorithm
+	else{
 		adjustInitial(p_event);
 	}
 }
@@ -178,19 +180,8 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 	//Check if node has passed initial adjustment process
 	if(closest->events == 5){
-		//ToDo: Fire NowItem to GNG
+		//ToDo: Fire NewItem to GNG (later?)
 	}
-
-	//Update event rate
-	double rate_imp = 0.04;
-	unsigned int diff = p_event.ts - closest->last;
-	if(diff != 0){
-		closest->rate = (1.0 - rate_imp) * closest->rate + rate_imp * diff;
-	}
-	else{
-		diff = 1;
-	}
-	closest->last = p_event.ts;
 
 	//Update event angle
 	double angle_imp = 0.05;
@@ -207,6 +198,17 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	closest->angle = (1.0 - angle_imp) * closest->angle + angle_imp * angle;
 
 	closest->angle = fmod(closest->angle + M_PI_2, M_PI) - M_PI_2;
+
+	//Update event rate
+	double rate_imp = 0.04;
+	unsigned int diff = p_event.ts - closest->last;
+	if(diff != 0){
+		closest->rate = (1.0 - rate_imp) * closest->rate + rate_imp * diff;
+	}
+	else{
+		diff = 1;
+	}
+	closest->last = p_event.ts;
 
 	//Update tracker velocity
 	double velocity_imp = 0.1;
@@ -283,6 +285,28 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 			}
 		}
 	}
+
+	if(closest->events > 5){
+		//Outsorce this:
+
+		//Todo: Find tracker group, calculate group center (depending on error?)
+		//Todo: Build feature vector: (roughly normalized to -1 .. +1)
+
+		//Group center x
+		//Group center y
+		//Group center to node x
+		//Group center to node y
+		//Node error
+		//Node rate
+		//Node velocity x
+		//Node velocity y
+		//Node angle
+
+		//Send vector to normalizer
+
+		//Send vector to GNG
+	}
+
 }
 
 void DynTracker::adjustInitial(EventF p_event)
