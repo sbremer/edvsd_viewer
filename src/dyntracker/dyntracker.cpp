@@ -148,7 +148,17 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin, int p_pointmin2, double p_distmin2)
 {
-	PointF delta = p_event.position - m_track_trackingnodes[p_pointmin]->position;
+	TrackingNode *closest = m_track_trackingnodes[p_pointmin];
+
+	TrackingNode *closest2;
+	if(p_pointmin2 == -1){
+		closest2 = NULL;
+	}
+	else{
+		closest2 = m_track_trackingnodes[p_pointmin2];
+	}
+
+	PointF delta = p_event.position - closest->position;
 
 	//Calculate attraction strength
 	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
@@ -158,27 +168,35 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	fact = 0.15;
 
 	//Execute attraction for closest trackingpoint
-	m_track_trackingnodes[p_pointmin]->position += delta * fact;
+	closest->position += delta * fact;
 
 	//Lower age of closest trackingpoint
-	m_track_trackingnodes[p_pointmin]->age /= 3.0;
+	closest->age /= 3.0;
+
+	//Increase event number for this node
+	closest->events++;
+
+	//Check if node has passed initial adjustment process
+	if(closest->events == 5){
+		//ToDo: Fire NowItem to GNG
+	}
 
 	//Update event rate
 	double rate_imp = 0.04;
-	unsigned int diff = p_event.ts - m_track_trackingnodes[p_pointmin]->last;
+	unsigned int diff = p_event.ts - closest->last;
 	if(diff != 0){
-		m_track_trackingnodes[p_pointmin]->rate = (1.0 - rate_imp) * m_track_trackingnodes[p_pointmin]->rate + rate_imp * diff;
+		closest->rate = (1.0 - rate_imp) * closest->rate + rate_imp * diff;
 	}
 	else{
 		diff = 1;
 	}
-	m_track_trackingnodes[p_pointmin]->last = p_event.ts;
+	closest->last = p_event.ts;
 
 	//Update event angle
 	double angle_imp = 0.05;
 	double angle = atan(delta.y / delta.x);
-	if(fabs(angle - m_track_trackingnodes[p_pointmin]->angle) > M_PI_2){
-		if(angle > m_track_trackingnodes[p_pointmin]->angle){
+	if(fabs(angle - closest->angle) > M_PI_2){
+		if(angle > closest->angle){
 			angle -= M_PI;
 		}
 		else{
@@ -186,13 +204,13 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		}
 	}
 
-	m_track_trackingnodes[p_pointmin]->angle = (1.0 - angle_imp) * m_track_trackingnodes[p_pointmin]->angle + angle_imp * angle;
+	closest->angle = (1.0 - angle_imp) * closest->angle + angle_imp * angle;
 
-	m_track_trackingnodes[p_pointmin]->angle = fmod(m_track_trackingnodes[p_pointmin]->angle + M_PI_2, M_PI) - M_PI_2;
+	closest->angle = fmod(closest->angle + M_PI_2, M_PI) - M_PI_2;
 
 	//Update tracker velocity
 	double velocity_imp = 0.1;
-	m_track_trackingnodes[p_pointmin]->velocity = m_track_trackingnodes[p_pointmin]->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
+	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 
 	//Attract all tracking points to the event depending on their connection strength to the closest event
 	for(int a = 0; a < m_track_num; a++){
@@ -215,20 +233,20 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double error_imp = 0.18;
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(p_pointmin2 != -1 && p_distmin2 < 6.0){
+	if(closest2 != NULL && p_distmin2 < 6.0){
 
 		//Lower age
-		m_track_trackingnodes[p_pointmin2]->age /= 1.5;
+		closest2->age /= 1.5;
 
 		//Strengthen the connection between closest and 2nd closest point
 		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.15);
 
 		//Update angle
-//		m_track_trackingnodes[p_pointmin2]->angle = (1.0 - angle_imp * 0.4) * m_track_trackingnodes[p_pointmin2]->angle + angle_imp * 0.4 * angle;
-//		m_track_trackingnodes[p_pointmin2]->angle = fmod(m_track_trackingnodes[p_pointmin2]->angle + M_PI_2, M_PI) - M_PI_2;
+//		closest2->angle = (1.0 - angle_imp * 0.4) * closest2->angle + angle_imp * 0.4 * angle;
+//		closest2->angle = fmod(closest2->angle + M_PI_2, M_PI) - M_PI_2;
 
 		//calculate orthogonal error between the 2 points and the event
-		PointF para = m_track_trackingnodes[p_pointmin]->position - m_track_trackingnodes[p_pointmin2]->position;
+		PointF para = closest->position - closest2->position;
 		PointF orth;
 		orth.x = para.y;
 		orth.y = para.x;
@@ -244,23 +262,23 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		error = p_distmin;
 
 		//Apply othogonal error
-		m_track_trackingnodes[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingnodes[p_pointmin]->error + error_imp * error * error;
+		closest->error = (1.0 - error_imp) * closest->error + error_imp * error * error;
 	}
 	else{
 		//Apply simple distance error
-		m_track_trackingnodes[p_pointmin]->error = (1.0 - error_imp) * m_track_trackingnodes[p_pointmin]->error + error_imp * p_distmin * p_distmin;
+		closest->error = (1.0 - error_imp) * closest->error + error_imp * p_distmin * p_distmin;
 	}
 
 	//Check for a high error
-	if(m_track_trackingnodes[p_pointmin]->error > 14.0){
+	if(closest->error > 14.0){
 		//Try to create a new point
-		int new_track = createTrackingNode(m_track_trackingnodes[p_pointmin]->position, p_event.ts);
+		int new_track = createTrackingNode(closest->position, p_event.ts);
 		if(new_track != -1){
 			//Lower error of closest point if successful
-			m_track_trackingnodes[p_pointmin]->error = 0.0;
+			closest->error = 0.0;
 			m_track_adj[max(p_pointmin, new_track)][min(p_pointmin, new_track)] = 0.8;
 			if(p_pointmin2 != -1){
-				m_track_trackingnodes[p_pointmin2]->error = 0.0;
+				closest2->error = 0.0;
 				m_track_adj[max(p_pointmin2, new_track)][min(p_pointmin2, new_track)] = 0.6;
 			}
 		}
