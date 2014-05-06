@@ -4,7 +4,7 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_track_num(60)
+	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_track_num(60), m_features(9)
 {
 	//Initiate point pattern for spawning Trackers (2D every 10px)
 	for(int a = 0; a < 13; a++){
@@ -113,6 +113,8 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 			//Remove "old" Tracking Points
 			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
+				//Fire kill event to GNG
+
 				delete m_track_trackingnodes[a];
 				m_track_trackingnodes[a] = NULL;
 				m_track_active--;
@@ -200,7 +202,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	closest->angle = fmod(closest->angle + M_PI_2, M_PI) - M_PI_2;
 
 	//Update event rate
-	double rate_imp = 0.04;
+	double rate_imp = 0.02;
 	unsigned int diff = p_event.ts - closest->last;
 	if(diff != 0){
 		closest->rate = (1.0 - rate_imp) * closest->rate + rate_imp * diff;
@@ -211,7 +213,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	closest->last = p_event.ts;
 
 	//Update tracker velocity
-	double velocity_imp = 0.1;
+	double velocity_imp = 0.04;
 	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 
 	//Attract all tracking points to the event depending on their connection strength to the closest event
@@ -287,24 +289,18 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	if(closest->events > 5){
-		//Outsorce this:
 
-		//Todo: Find tracker group, calculate group center (depending on error?)
-		//Todo: Build feature vector: (roughly normalized to -1 .. +1)
-
-		//Group center x
-		//Group center y
-		//Group center to node x
-		//Group center to node y
-		//Node error
-		//Node rate
-		//Node velocity x
-		//Node velocity y
-		//Node angle
+		vector<double> features = buildFeatureVector(p_pointmin);
 
 		//Send vector to normalizer
 
-		//Send vector to GNG
+		//Send vector to GNG //Test this data also? Return anomaly score?
+		if(closest->events == 6){
+			//Send as new event to GNG
+		}
+		else{
+			//Send as normal data to GNG
+		}
 	}
 
 }
@@ -339,4 +335,62 @@ void DynTracker::adjustInitial(EventF p_event)
 		PointF delta = p_event.position - m_test_init_move[13 * x + y];
 		m_test_init_move[13 * x + y] += delta * 0.1;
 	}
+}
+
+vector<double> DynTracker::buildFeatureVector(int p_node)
+{
+	TrackingNode* node = m_track_trackingnodes[p_node];
+
+	//Find all nodes connected to the closest node
+	for(int a = 0; a < m_track_num; a++){
+		if(m_track_trackingnodes[a] != NULL){
+			m_track_trackingnodes[a]->looked_at = false;
+		}
+	}
+
+	list<int> group;
+	list<int>::iterator iter;
+
+	group.push_back(p_node);
+	m_track_trackingnodes[p_node]->looked_at = true;
+
+	iter = group.begin();
+	while(iter != group.end()){
+		for(int a = 0; a < m_track_num; a++){
+			if(m_track_trackingnodes[a] != NULL && a != *iter && !m_track_trackingnodes[a]->looked_at && m_track_adj[max(a, *iter)][min(a, *iter)] > 0.8){
+				group.push_back(a);
+				m_track_trackingnodes[a]->looked_at = true;
+			}
+		}
+
+		iter++;
+	}
+
+	//Find group center
+	int n = 0;
+	PointF center = PointF();
+	for(list<int>::iterator iter = group.begin(); iter != group.end(); iter++){
+		center += m_track_trackingnodes[*iter]->position;
+		n++;
+	}
+	center /= n;
+
+	//Build Feature Vector
+	vector<double> features(m_features);
+
+	PointF center_node = node->position - center;
+
+	int at = 0;
+	features[at++] = (center.x - 64.0) / 64.0;
+	features[at++] = (center.y - 64.0) / 64.0;
+	features[at++] = center_node.x / 5.0;
+	features[at++] = center_node.y / 5.0;
+	features[at++] = node->error / 14.0;
+	features[at++] = node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
+	features[at++] = node->velocity.x / 1500.0;
+	features[at++] = node->velocity.y / 1500.0;
+	features[at++] = node->angle / M_PI_2;
+	//ToDo: More?
+
+	return features;
 }
