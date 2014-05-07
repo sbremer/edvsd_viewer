@@ -83,7 +83,8 @@ int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 			break;
 		}
 	}
-	if(free != -1){ //Free slot found, initiate Tracker
+	if(free != -1){
+		//Free slot found, initiate Tracker
 		m_track_trackingnodes[free] = new TrackingNode(p_point, p_ts);
 
 		for(int a = 0; a < m_track_num; a++){
@@ -100,7 +101,7 @@ int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 	}
 }
 
-void DynTracker::analyzeEvent(EventF p_event)
+vector<double> DynTracker::analyzeEvent(EventF p_event)
 {
 	//Search for the 2 Trackers closest to the input event
 	double distmin = INFINITY;
@@ -114,6 +115,8 @@ void DynTracker::analyzeEvent(EventF p_event)
 			//Remove "old" Tracking Points
 			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
 				//Fire kill event to GNG
+				vector<double> features = buildFeatureVector(a);
+				m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_KILL_NODE));
 
 				delete m_track_trackingnodes[a];
 				m_track_trackingnodes[a] = NULL;
@@ -296,13 +299,12 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 		//Send vector to GNG //Test this data also? Return anomaly score?
 		if(closest->events == 6){
-			//Send as new event to GNG
+			m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_NEW_NODE));
 		}
 		else{
-			//Send as normal data to GNG
+			m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_LEARN_NODE));
 		}
 	}
-
 }
 
 void DynTracker::adjustInitial(EventF p_event)
@@ -381,6 +383,9 @@ vector<double> DynTracker::buildFeatureVector(int p_node)
 	PointF center_node = node->position - center;
 
 	int at = 0;
+
+	//An incrementing int allows easy exchange and changes in order of data
+	//Values should be roughly in the area of [-1.0, 1.0] //Todo: more advanced normalization
 	features[at++] = (center.x - 64.0) / 64.0;
 	features[at++] = (center.y - 64.0) / 64.0;
 	features[at++] = center_node.x / 5.0;
@@ -393,4 +398,16 @@ vector<double> DynTracker::buildFeatureVector(int p_node)
 	//ToDo: More?
 
 	return features;
+}
+
+void DynTracker::resetTracker()
+{
+	for(int a = 0; a < m_track_num; a++){
+		if(m_track_trackingnodes[a] != NULL){
+			delete m_track_trackingnodes[a];
+			m_track_trackingnodes[a] = NULL;
+		}
+	}
+
+	m_track_active = 0;
 }

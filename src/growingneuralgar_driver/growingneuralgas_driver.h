@@ -12,11 +12,16 @@ class GrowingNeuralGas_Driver
 {
 public:
 	GrowingNeuralGas_Driver(int p_dim);
-	void learn(vector<double> p_input);
-	double test(vector<double> p_input);
+	double learn_node(vector<double> p_input, int p_id, unsigned int p_time);
+	double new_node(vector<double> p_input, int p_id, unsigned int p_time);
+	double kill_node(int p_id, unsigned int p_time);
+
+	void setLearning(bool p_learning);
+
 	void dumpData();
 
 private:
+	bool m_learning;
 	GrowingNeuralGas m_gng;
 };
 

@@ -56,6 +56,7 @@ HEADERS  += edvsd_viewer.h \
 	growingneuralgas/growingneuralgas.h \
     growingneuralgar_driver/growingneuralgas_driver.h \
 	helper/random.h \
-    dyntracker/dyntracker.h
+    dyntracker/dyntracker.h \
+    helper/feature_event.h
 
 FORMS    += edvsd_viewer.ui

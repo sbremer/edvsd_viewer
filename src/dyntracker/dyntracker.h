@@ -7,6 +7,7 @@
 
 #include "helper/eventf.h"
 #include "helper/pointf.h"
+#include "helper/feature_event.h"
 
 using namespace std;
 
@@ -41,12 +42,14 @@ class DynTracker
 {
 public:
     DynTracker();
-	void analyzeEvent(EventF p_event);
+	vector<double> analyzeEvent(EventF p_event);
 
 	int getTrackerNum();
 	TrackingNode getTrackingNode(int p_a);
 	bool isTrackingNodeActive(int p_a);
 	double getTrackingNodeConnection(int p_a, int p_b);
+
+	void resetTracker();
 
 private:
 	const int m_track_num;
@@ -68,6 +71,8 @@ private:
 	const double m_attraction_pow;
 	const double m_attraction_max;
 	const int m_features;
+
+	list<FeatureEvent> m_feature_events; //Todo: make accessible from outside
 };
 
 #endif // DYNTRACKER_H

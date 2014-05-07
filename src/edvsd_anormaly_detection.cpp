@@ -126,7 +126,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 //            data[3] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 //            data[4] = atan;
 
-			m_gngd.learn(data);
+			//m_gngd.learn(data);
 
 			m_output_xy.writeData(data);
 
@@ -304,7 +304,7 @@ void EDVSD_Anormaly_Detection::testEvents(EventF *p_buffer, int p_n)
 			data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
 			data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
-			double error = m_gngd.test(data);
+			double error = 0.0;//m_gngd.test(data);
 			//error = error * error;
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
@@ -369,7 +369,7 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EventF *p_buffer, int p_n)
             data[i++] = m_tracking.getTrackerDistance(map) / 128.0;
             data[i++] = PointF::getDistance(map->points[0], map->points[1]) / 128.0;
 
-			double error = m_gngd.test(data);
+			double error = 0.0;//m_gngd.test(data);
 			map->error = m_error_reduction * error + (1.0 - m_error_reduction) * map->error;
 			//map->error = error;
 
