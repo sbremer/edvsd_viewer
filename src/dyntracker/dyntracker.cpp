@@ -4,8 +4,9 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_attraction_fact(3.0), m_attraction_pow(2.0), m_attraction_max(0.3), m_track_num(60), m_features(9)
+	:m_track_num(60), m_featurenum(9)
 {
+	//Todo: smaller grid
 	//Initiate point pattern for spawning Trackers (2D every 10px)
 	for(int a = 0; a < 13; a++){
 		for(int b = 0; b < 13; b++){
@@ -73,6 +74,11 @@ double DynTracker::getTrackingNodeConnection(int p_a, int p_b)
 	return m_track_adj[max(p_a, p_b)][min(p_a, p_b)];
 }
 
+int DynTracker::getFeatureNum()
+{
+	return m_featurenum;
+}
+
 int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 {
 	//Search for free slot
@@ -101,7 +107,7 @@ int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 	}
 }
 
-vector<double> DynTracker::analyzeEvent(EventF p_event)
+void DynTracker::analyzeEvent(EventF p_event)
 {
 	//Search for the 2 Trackers closest to the input event
 	double distmin = INFINITY;
@@ -115,8 +121,7 @@ vector<double> DynTracker::analyzeEvent(EventF p_event)
 			//Remove "old" Tracking Points
 			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
 				//Fire kill event to GNG
-				vector<double> features = buildFeatureVector(a);
-				m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_KILL_NODE));
+				m_feature_events.push_back(FeatureEvent(a, p_event.ts));
 
 				delete m_track_trackingnodes[a];
 				m_track_trackingnodes[a] = NULL;
@@ -167,12 +172,8 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 	PointF delta = p_event.position - closest->position;
 
-	//Calculate attraction strength
-	double fact = m_attraction_fact / pow(p_distmin, m_attraction_pow);
-	fact = min(m_attraction_max, fact);
-
 	//Override "old" fact calculation (not really useful I think)
-	fact = 0.15;
+	double fact = 0.15;
 
 	//Execute attraction for closest trackingpoint
 	closest->position += delta * fact;
@@ -299,10 +300,10 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 		//Send vector to GNG //Test this data also? Return anomaly score?
 		if(closest->events == 6){
-			m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_NEW_NODE));
+			m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_NEW_NODE));
 		}
 		else{
-			m_feature_events.push_back(FeatureEvent(features, FEATURE_EVENT_TYPE_LEARN_NODE));
+			m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_LEARN_NODE));
 		}
 	}
 }
@@ -378,7 +379,7 @@ vector<double> DynTracker::buildFeatureVector(int p_node)
 	center /= n;
 
 	//Build Feature Vector
-	vector<double> features(m_features);
+	vector<double> features(m_featurenum);
 
 	PointF center_node = node->position - center;
 

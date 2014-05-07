@@ -6,6 +6,21 @@ GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
 
 }
 
+double GrowingNeuralGas_Driver::processFeatureEvent(FeatureEvent p_featureevent)
+{
+	switch(p_featureevent.type){
+	case FEATURE_EVENT_TYPE_NEW_NODE:
+		return new_node(p_featureevent.features, p_featureevent.id, p_featureevent.time);
+	case FEATURE_EVENT_TYPE_LEARN_NODE:
+		return learn_node(p_featureevent.features, p_featureevent.id, p_featureevent.time);
+	case FEATURE_EVENT_TYPE_KILL_NODE:
+		return kill_node(p_featureevent.id, p_featureevent.time);
+	default:
+		//Error
+		return 0.0;
+	}
+}
+
 double GrowingNeuralGas_Driver::learn_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
 	//Doing both in one step, minimizing overlaping code would be more efficient!

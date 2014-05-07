@@ -7,13 +7,24 @@ using namespace std;
 enum FeatureEventType {FEATURE_EVENT_TYPE_NEW_NODE, FEATURE_EVENT_TYPE_LEARN_NODE, FEATURE_EVENT_TYPE_KILL_NODE};
 
 struct FeatureEvent{
-	FeatureEvent(vector<double> p_features, FeatureEventType p_type)
+	FeatureEvent(vector<double> p_features, int p_id, unsigned int p_time, FeatureEventType p_type)
 	{
 		features = p_features;
+		id = p_id;
+		time = p_time;
 		type = p_type;
 	}
 
+	FeatureEvent(int p_id, unsigned int p_time)
+	{
+		id = p_id;
+		time = p_time;
+		type = FEATURE_EVENT_TYPE_KILL_NODE;
+	}
+
 	vector<double> features;
+	int id;
+	unsigned int time;
 	FeatureEventType type;
 };
 

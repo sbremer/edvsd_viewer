@@ -5,6 +5,7 @@
 
 #include "growingneuralgas/growingneuralgas.h"
 #include "output/gnuplot_output.h"
+#include "helper/feature_event.h"
 
 using namespace std;
 
@@ -12,6 +13,8 @@ class GrowingNeuralGas_Driver
 {
 public:
 	GrowingNeuralGas_Driver(int p_dim);
+	double processFeatureEvent(FeatureEvent p_featureevent);
+
 	double learn_node(vector<double> p_input, int p_id, unsigned int p_time);
 	double new_node(vector<double> p_input, int p_id, unsigned int p_time);
 	double kill_node(int p_id, unsigned int p_time);
