@@ -8,8 +8,6 @@
 #include "edvsd_fileprocessor.h"
 #include "edvsd_anormaly_detection.h"
 
-#include "genetricalgorithm_driver/geneticalgorithm_driver.h"
-
 namespace Ui {
 class EDVSD_Viewer;
 }

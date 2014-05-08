@@ -14,34 +14,6 @@ EDVSD_Viewer::EDVSD_Viewer(QWidget *parent) :
 	m_detection = NULL;
 
 	on_action1_64x_triggered();
-
-	m_tracking_param.resize(11);
-
-	m_tracking_param[0] = 1.36506;
-	m_tracking_param[1] = 3.24748;
-	m_tracking_param[2] = 0.974199;
-	m_tracking_param[3] = 1.50172;
-	m_tracking_param[4] = 4.37303;
-	m_tracking_param[5] = 2.44994;
-	m_tracking_param[6] = 2.43144;
-	m_tracking_param[7] = 1.82968;
-	m_tracking_param[8] = 4.27747;
-	m_tracking_param[9] = 0.159401;
-	m_tracking_param[10] = 0.00850496;
-
-	//		tracking_param[0] = 2.5; //StartEndTracker::m_attraction_fact_start
-	//		tracking_param[1] = 3.2; //StartEndTracker::m_attraction_pow_start
-	//		tracking_param[2] = 1.0; //StartEndTracker::m_dist
-	//		tracking_param[3] = 2.0; //StartEndTracker::m_attraction_fact_end
-	//		tracking_param[4] = 3.3; //StartEndTracker::m_attraction_pow_end
-
-	//		tracking_param[5] = 4.0; //KohonenTracking::m_start_dist
-	//		tracking_param[6] = 4.0; //KohonenTracking::m_end_dist
-	//		tracking_param[7] = 3.0; //KohonenTracking::m_attraction_fact
-	//		tracking_param[8] = 3.0; //KohonenTracking::m_attraction_pow
-	//		tracking_param[9] = 0.3; //KohonenTracking::m_attraction_max
-	//		tracking_param[10] = 0.01; //KohonenTracking::m_neighbor_attraction
-
 }
 
 EDVSD_Viewer::~EDVSD_Viewer()
@@ -107,16 +79,6 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 
 		m_detection->analyzeEvents(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents());
 
-
-//		QFile output(filename+".txt");
-//		output.open(QIODevice::WriteOnly);
-//		EDVS_Event* eventptr = m_fileprocessor->getEventPtr();
-//		for(int a=0;a<m_fileprocessor->getTotalEvents();a++){
-//			QString data = QString::number(eventptr[a].t) + "\t" + QString::number(eventptr[a].x) + "\t" + QString::number(eventptr[a].y) + "\t" + QString::number(eventptr[a].p) + "\n";
-//			output.write(data.toLocal8Bit().data());
-//		}
-//		output.close();
-
 		m_visualizer->start();
 	}
 	else{
@@ -144,14 +106,13 @@ void EDVSD_Viewer::on_action_White_Black_triggered()
 
 void EDVSD_Viewer::on_actionDump_NNData_triggered()
 {
-	if(m_detection != NULL)
-		m_detection->dumpNNData();
+	//if(m_detection != NULL)m_detection->dumpNNData();
 }
 
 void EDVSD_Viewer::on_action_GA_triggered()
 {
-	GeneticAlgorithm_Driver driver(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents(), 0.5);
-	m_tracking_param = driver.runGeneticAlgorithm();
+	//GeneticAlgorithm_Driver driver(m_fileprocessor->getEventPtrF(), m_fileprocessor->getTotalEvents(), 0.5);
+	//m_tracking_param = driver.runGeneticAlgorithm();
 }
 
 void EDVSD_Viewer::on_action_Testopen_File_triggered()
