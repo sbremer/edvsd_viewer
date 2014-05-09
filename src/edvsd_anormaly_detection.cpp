@@ -36,6 +36,11 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 		m_dyntracker.analyzeEvent(p_buffer[a]);
 	}
 
+	FeatureEvent event = m_dyntracker.popFeatureEvent();
+	while(event.type != FEATURE_EVENT_TYPE_INVALID){
+		m_gngd.processFeatureEvent(event);
+		event = m_dyntracker.popFeatureEvent();
+	}
 
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);

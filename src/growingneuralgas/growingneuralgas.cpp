@@ -284,7 +284,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 				delete (*iter)->vertex2;
 			}
 
-			delete *iter;
+			delete (*iter);
 			iter = m_edges.erase(iter);
 		}
 		else{

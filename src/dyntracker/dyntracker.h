@@ -52,6 +52,8 @@ public:
 
 	void resetTracker();
 
+	FeatureEvent popFeatureEvent();
+
 private:
 	const int m_track_num;
 	const int m_featurenum;

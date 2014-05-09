@@ -3,3 +3,4 @@ build/release
 *.user
 *.user.*
 *~
+*.autosave

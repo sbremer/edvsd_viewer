@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-enum FeatureEventType {FEATURE_EVENT_TYPE_NEW_NODE, FEATURE_EVENT_TYPE_LEARN_NODE, FEATURE_EVENT_TYPE_KILL_NODE};
+enum FeatureEventType {FEATURE_EVENT_TYPE_INVALID, FEATURE_EVENT_TYPE_NEW_NODE, FEATURE_EVENT_TYPE_LEARN_NODE, FEATURE_EVENT_TYPE_KILL_NODE};
 
 struct FeatureEvent{
 	FeatureEvent(vector<double> p_features, int p_id, unsigned int p_time, FeatureEventType p_type)
@@ -13,6 +13,11 @@ struct FeatureEvent{
 		id = p_id;
 		time = p_time;
 		type = p_type;
+	}
+
+	FeatureEvent()
+	{
+		type = FEATURE_EVENT_TYPE_INVALID;
 	}
 
 	FeatureEvent(int p_id, unsigned int p_time)

@@ -79,6 +79,19 @@ int DynTracker::getFeatureNum()
 	return m_featurenum;
 }
 
+FeatureEvent DynTracker::popFeatureEvent()
+{
+	FeatureEvent event;
+	if(m_feature_events.empty()){
+		event = FeatureEvent();
+	}
+	else{
+		event = m_feature_events.back();
+		m_feature_events.pop_back();
+	}
+	return event;
+}
+
 int DynTracker::createTrackingNode(PointF p_point, unsigned int p_ts)
 {
 	//Search for free slot
@@ -409,6 +422,8 @@ void DynTracker::resetTracker()
 			m_track_trackingnodes[a] = NULL;
 		}
 	}
+
+	m_feature_events.clear();
 
 	m_track_active = 0;
 }
