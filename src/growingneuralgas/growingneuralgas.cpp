@@ -77,18 +77,20 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 		//Check if connection exists
 		VertexLink *link = 0;
 
-		for(list<VertexLink>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); /* iter++ */){
+		for(list<VertexLink*>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); /* iter++ */){
+
 			//Delete old connections
-			if(iter->age > 50){
+			if((*iter)->age > 50){
+				delete (*iter);
 				iter = node->current->links.erase(iter);
 				continue;
 			}
 
 			//Age links
-			iter->age++;
+			(*iter)->age++;
 
-			if(iter->link == closest){
-				link = &(*iter);
+			if((*iter)->link == closest){
+				link = (*iter);
 				//break;
 			}
 
@@ -97,8 +99,8 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 
 		//Create link if nonexistant
 		if(link == 0){
-			node->current->links.push_back(VertexLink(closest));
-			link = &(*(node->current->links.end()--));
+			link = new VertexLink(closest);
+			node->current->links.push_back(link);
 
 			link->atime_stay = node->since - p_time;
 
@@ -186,7 +188,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 //	m_attraction_fact_first *= 0.999;
 //	m_attraction_fact_neighbors *= 0.999;
 
-	//Find first (s1) and second (s1) closest vertex
+	//Find first (s1) and second (s2) closest vertex
 	Vertex *s1 = 0;
 	Vertex *s2 = 0;
 	double distmin = INFINITY;
@@ -219,7 +221,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 	for(int a = 0; a < m_dim; a++){
 		s1->position[a] += m_attraction_fact_first * (p_input[a] - s1->position[a]);
 
-		s1->error_dim[a] = fabs(s1->position[a] - p_input[a]) * m_error_reduction_dim + (1.0 - m_error_reduction_dim) * s1->error_dim[a];
+		//s1->error_dim[a] = fabs(s1->position[a] - p_input[a]) * m_error_reduction_dim + (1.0 - m_error_reduction_dim) * s1->error_dim[a];
 	}
 
 	//Increase age of edges of s1 + Adjust position of neighbor vertices
@@ -332,6 +334,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 		Vertex *q = 0;
 		double errormax = 0;
 
+		//Find vertex with highest error
 		for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
 			if((*iter)->error > errormax){
 				q = *iter;
@@ -345,6 +348,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 		Edge *c = 0;
 		errormax = 0;
 
+		//Find neighbor with higest error and corresponding edge
 		for(list<Edge*>::iterator iter = q->edges.begin(); iter != q->edges.end(); iter++){
 			if((*iter)->vertex1 != q){
 				if((*iter)->vertex1->error >= errormax){
@@ -362,11 +366,13 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 			}
 		}
 
+		//Remove edge
 		q->edges.remove(c);
 		f->edges.remove(c);
 		m_edges.remove(c);
 		delete c;
 
+		//Create vertex inbetween the found vertices
 		vector<double> new_pos(m_dim);
 
 		for(int a = 0; a < m_dim; a++){
@@ -381,6 +387,7 @@ Vertex* GrowingNeuralGas::adjustGNG(vector<double> p_input)
 		f->error *= m_error_reduction_new;
 		n->error = q->error;
 
+		//Create edges between found and new vertex
 		Edge *qn = new Edge(q, n);
 		m_edges.push_back(qn);
 		q->edges.push_back(qn);
@@ -482,9 +489,9 @@ double GrowingNeuralGas::test_learnNode(vector<double> p_input, int p_id, unsign
 		//Check for link from "current" to new vertex
 		VertexLink *link = 0;
 
-		for(list<VertexLink>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); iter++){
-			if(iter->link == s1){
-				link = &(*iter);
+		for(list<VertexLink*>::iterator iter = node->current->links.begin(); iter != node->current->links.end(); iter++){
+			if((*iter)->link == s1){
+				link = (*iter);
 				break;
 			}
 		}

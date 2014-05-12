@@ -91,7 +91,7 @@ struct Vertex{
 	double atime_killnode_deviation;
 	unsigned int last_kill;
 
-	list<VertexLink> links;
+	list<VertexLink*> links;
 };
 
 struct InputNode{
