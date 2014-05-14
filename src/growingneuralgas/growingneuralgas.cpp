@@ -4,7 +4,7 @@
 using namespace std;
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(30), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(100), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
@@ -31,6 +31,85 @@ GrowingNeuralGas::GrowingNeuralGas(int p_dim)
 	vert1->edges.push_back(edge);
 	vert2->edges.push_back(edge);
 	m_edges.push_back(edge);
+}
+
+void GrowingNeuralGas::learn(vector<double> p_input)
+{
+	adjustGNG(p_input);
+}
+
+double GrowingNeuralGas::test(vector<double> p_input)
+{
+	//Find first (s1) and second (s1) closest vertex
+	Vertex *s1 = 0;
+	Vertex *s2 = 0;
+	Vertex *s3 = 0;
+	double distmin = INFINITY;
+	double distmin2 = INFINITY;
+	double distmin3 = INFINITY;
+
+	for(list<Vertex*>::iterator iter = m_vertices.begin(); iter != m_vertices.end(); iter++){
+		double dist = (*iter)->getDistance(p_input);
+		if(dist < distmin){
+			s3 = s2;
+			s2 = s1;
+			s1 = *iter;
+			distmin3 = distmin2;
+			distmin2 = distmin;
+			distmin = dist;
+		}
+		else if(dist < distmin2){
+			s3 = s2;
+			s2 = *iter;
+			distmin3 = distmin2;
+			distmin2 = dist;
+		}
+		else if(dist < distmin3){
+			s3 = *iter;
+			distmin3 = dist;
+		}
+	}
+
+	if(s3 == NULL){
+		return 0.0;
+	}
+
+	//Calculate average deviations of all dimensions
+	vector<double> deviation = vector<double>(m_dim);
+	for(int a = 0; a < m_dim; a++){
+		deviation[a] = (s1->position[a] - s2->position[a]) * (s1->position[a] - s2->position[a]);
+		deviation[a] = max(deviation[a], (s1->position[a] - s3->position[a]) * (s1->position[a] - s3->position[a]));
+		deviation[a] = max(deviation[a], (s2->position[a] - s3->position[a]) * (s2->position[a] - s3->position[a]));
+	}
+
+	//Calculate relative error
+	double error = 0.0;
+	double partial = 0.0;
+
+	double maxpartial = 0.0;
+	int maxdim = -1;
+
+	for(int a = 0; a < m_dim; a++){
+		partial = (p_input[a] - s1->position[a]) * (p_input[a] - s1->position[a]) / deviation[a];
+		partial = min(partial, (p_input[a] - s2->position[a]) * (p_input[a] - s2->position[a]) / deviation[a]);
+		partial = min(partial, (p_input[a] - s3->position[a]) * (p_input[a] - s3->position[a]) / deviation[a]);
+
+		if(partial > maxpartial){
+			maxpartial = partial;
+			maxdim = a;
+		}
+
+		error += partial;
+	}
+
+	error = sqrt(error / m_dim);
+
+	if(error > 20.0){
+		cout << "Error(" << maxdim << ") " << error << endl;
+		cout << distmin / s1->getDistance(s2->position) << endl;
+	}
+
+	return error;
 }
 
 void GrowingNeuralGas::newNode(vector<double> p_input, int p_id, unsigned int p_time)
@@ -433,14 +512,11 @@ double GrowingNeuralGas::test_newNode(vector<double> p_input, int p_id, unsigned
 
 	//Relative distance to input
 	error = distmin / s1->getDistance(s2->position);
-	cout << "Dist: " << error << endl;
 	error_total = accumulateError(error_total, error);
 
 	if(s1->atime_newnode != 0.0){
 		//Time (rate) of node creation at the closest vertex
 		error = ((p_time - s1->last_new) - s1->atime_newnode) * ((p_time - s1->last_new) - s1->atime_newnode) / s1->atime_newnode_deviation / 2.0;
-		cout << "Time: " << error << endl;
-		cout << "TimeA: " << s1->atime_newnode << endl;
 		error_total = accumulateError(error_total, error);
 	}
 

@@ -21,7 +21,25 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
+	//Process all events of this frame, pass them to the tracker
+	for(int a = 0; a < p_n; a++){
+		//Skip "off" events //Todo
+		if(p_buffer[a].polarity == false){
+			continue;
+		}
 
+		m_dyntracker.analyzeEvent(p_buffer[a]);
+	}
+
+	FeatureEvent event = m_dyntracker.popFeatureEvent();
+	while(event.type != FEATURE_EVENT_TYPE_INVALID){
+		m_gngd.processFeatureEvent(event);
+		event = m_dyntracker.popFeatureEvent();
+	}
+
+	m_gngd.dumpData();
+
+	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
 }
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
@@ -84,10 +102,64 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 
 void EDVSD_Anormaly_Detection::testEvents(EventF *p_buffer, int p_n)
 {
-
+	m_dyntracker.resetTracker();
+	m_gngd.setLearning(false);
 }
 
 void EDVSD_Anormaly_Detection::testLiveEvents(EventF *p_buffer, int p_n)
 {
+	//Process all events of this frame, pass them to the tracker
+	for(int a = 0; a < p_n; a++){
+		//Skip "off" events //Todo
+		if(p_buffer[a].polarity == false){
+			continue;
+		}
+
+		m_dyntracker.analyzeEvent(p_buffer[a]);
+	}
+
+	double error = 0.0;
+
+	FeatureEvent event = m_dyntracker.popFeatureEvent();
+	while(event.type != FEATURE_EVENT_TYPE_INVALID){
+		error = max(error, m_gngd.processFeatureEvent(event));
+		event = m_dyntracker.popFeatureEvent();
+	}
+
+	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
+
+	m_painter->drawText(0,10, QString::number(error));
+
+	//cout << error << endl;
+
+	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
+		if(m_dyntracker.isTrackingNodeActive(a)){
+			TrackingNode tpoint = m_dyntracker.getTrackingNode(a);
+
+			//Draw nodes
+			m_painter->drawEllipse(tpoint.position.toQPointF(), 1.0, 1.0);
+
+			//Draw node connections
+			for(int b = 0; b < a; b++){
+				double connection = m_dyntracker.getTrackingNodeConnection(a, b);
+				if(connection > 0.8){
+					m_painter->drawLine(tpoint.position.toQPointF(), m_dyntracker.getTrackingNode(b).position.toQPointF());
+				}
+			}
+
+			//Draw node angle
+			double len = 2.25;
+
+			PointF p1 = tpoint.position;
+			p1.x += len * cos(tpoint.angle);
+			p1.y += len * sin(tpoint.angle);
+
+			PointF p2 = tpoint.position;
+			p2.x -= len * cos(tpoint.angle);
+			p2.y -= len * sin(tpoint.angle);
+
+			m_painter->drawLine(p1.toQPointF(), p2.toQPointF());
+		}
+	}
 }

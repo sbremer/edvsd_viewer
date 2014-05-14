@@ -26,14 +26,19 @@ double GrowingNeuralGas_Driver::processFeatureEvent(FeatureEvent p_featureevent)
 
 double GrowingNeuralGas_Driver::learn_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
+	double error = m_gng.test(p_input);
+	if(m_learning)m_gng.learn(p_input);
+	return error;
+
 	//Doing both in one step, minimizing overlaping code would be more efficient!
-	double error = m_gng.test_learnNode(p_input, p_id, p_time);
+	//double error = m_gng.test_learnNode(p_input, p_id, p_time);
 	if(m_learning)m_gng.learnNode(p_input, p_id, p_time);
 	return error;
 }
 
 double GrowingNeuralGas_Driver::new_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
+	return 0.0;
 	//Doing both in one step, minimizing overlaping code would be more efficient!
 	double error = m_gng.test_newNode(p_input, p_id, p_time);
 	if(m_learning)m_gng.newNode(p_input, p_id, p_time);
@@ -42,6 +47,7 @@ double GrowingNeuralGas_Driver::new_node(vector<double> p_input, int p_id, unsig
 
 double GrowingNeuralGas_Driver::kill_node(int p_id, unsigned int p_time)
 {
+	return 0.0;
 	//Doing both in one step, minimizing overlaping code would be more efficient!
 	double error = m_gng.test_killNode(p_id, p_time);
 	if(m_learning)m_gng.killNode(p_id, p_time);

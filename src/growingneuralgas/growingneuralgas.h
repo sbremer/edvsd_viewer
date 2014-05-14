@@ -112,6 +112,10 @@ public:
 	double test_learnNode(vector<double> p_input, int p_id, unsigned int p_time);
 	double test_killNode(int p_id, unsigned int p_time);
 
+	//replacement
+	void learn(vector<double> p_input);
+	double test(vector<double> p_input);
+
 	int getDimension();
 	const list<Vertex*> &getVertices();
 	const list<Edge*> &getEdges();

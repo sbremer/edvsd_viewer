@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     growingneuralgas/growingneuralgas.cpp \
     growingneuralgar_driver/growingneuralgas_driver.cpp \
     helper/random.cpp \
-    dyntracker/dyntracker.cpp
+    dyntracker/dyntracker.cpp \
+    normalizer/normalizer.cpp
 
 HEADERS  += edvsd_viewer.h \
     edvsd.h \
@@ -57,6 +58,7 @@ HEADERS  += edvsd_viewer.h \
     growingneuralgar_driver/growingneuralgas_driver.h \
     helper/random.h \
     dyntracker/dyntracker.h \
-    helper/feature_event.h
+    helper/feature_event.h \
+    normalizer/normalizer.h
 
 FORMS    += edvsd_viewer.ui
