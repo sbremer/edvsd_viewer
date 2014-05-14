@@ -59,6 +59,8 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 	on_action_Close_File_triggered();
 	if(m_fileprocessor->loadFile(filename)){
 		m_visualizer = new EDVSD_Visualizer(this, m_fileprocessor->getSizeX(), m_fileprocessor->getSizeY());
+		m_visualizer->setPaused(m_ui->action_Pause->isChecked());
+
 		connect(m_fileprocessor, SIGNAL(eventsRead(EDVS_Event*,int)), m_visualizer, SLOT(drawEvents(EDVS_Event*,int)));
 		connect(m_visualizer, SIGNAL(loadEventData()), this, SLOT(loadEventData()));
 
@@ -135,7 +137,9 @@ void EDVSD_Viewer::on_action_Testopen_File_triggered()
 
 void EDVSD_Viewer::on_action_Pause_triggered()
 {
-	m_visualizer->setPaused(m_ui->action_Pause->isChecked());
+	if(m_visualizer != NULL){
+		m_visualizer->setPaused(m_ui->action_Pause->isChecked());
+	}
 }
 
 void EDVSD_Viewer::uncheckAllReplaySpeed()

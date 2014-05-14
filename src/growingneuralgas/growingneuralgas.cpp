@@ -1,7 +1,10 @@
 #include "growingneuralgas.h"
 
+#include <iostream>
+using namespace std;
+
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(30), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;
@@ -161,7 +164,7 @@ void GrowingNeuralGas::killNode(int p_id, unsigned int p_time)
 		//Adjust closest kill rate
 		double atime_imp = 0.1;
 
-		double dt = node->since - p_time;
+		double dt = p_time - node->since;
 
 		node->current->atime_stay_kill_deviation = (1.0 - atime_imp) * node->current->atime_killnode_deviation + atime_imp * (node->current->atime_stay_kill - dt) * (node->current->atime_stay_kill - dt);
 		node->current->atime_stay_kill = (1.0 - atime_imp) * node->current->atime_stay_kill + atime_imp * dt;
@@ -430,11 +433,16 @@ double GrowingNeuralGas::test_newNode(vector<double> p_input, int p_id, unsigned
 
 	//Relative distance to input
 	error = distmin / s1->getDistance(s2->position);
+	cout << "Dist: " << error << endl;
 	error_total = accumulateError(error_total, error);
 
-	//Time (rate) of node creation at the closest vertex
-	error = ((p_time - s1->last_new) - s1->atime_newnode) * ((p_time - s1->last_new) - s1->atime_newnode) / s1->atime_newnode_deviation / 2.0;
-	error_total = accumulateError(error_total, error);
+	if(s1->atime_newnode != 0.0){
+		//Time (rate) of node creation at the closest vertex
+		error = ((p_time - s1->last_new) - s1->atime_newnode) * ((p_time - s1->last_new) - s1->atime_newnode) / s1->atime_newnode_deviation / 2.0;
+		cout << "Time: " << error << endl;
+		cout << "TimeA: " << s1->atime_newnode << endl;
+		error_total = accumulateError(error_total, error);
+	}
 
 	return error_total;
 }
@@ -485,6 +493,11 @@ double GrowingNeuralGas::test_learnNode(vector<double> p_input, int p_id, unsign
 
 	//Check if closest vertex changed
 	if(node->current != s1){
+
+		if(find(m_vertices.begin(), m_vertices.end(), node->current) == m_vertices.end()){
+			node->current = s1;
+			return error_total;
+		}
 
 		//Check for link from "current" to new vertex
 		VertexLink *link = 0;

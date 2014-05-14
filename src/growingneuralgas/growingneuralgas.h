@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <list>
+#include <algorithm>
 #include <math.h>
 
 #include "helper/random.h"
@@ -26,7 +27,7 @@ struct Edge{
 
 struct VertexLink{
 	VertexLink(Vertex *p_link)
-		:link(p_link), atime_transfer(0.0), atime_transfer_deviation(0.0), last_transfer(0), atime_stay(0.0), atime_stay_deviation(0.0)
+		:link(p_link), atime_transfer(0.0), atime_transfer_deviation(1000.0), last_transfer(0), atime_stay(0.0), atime_stay_deviation(1000.0)
 	{
 
 	}
@@ -44,21 +45,13 @@ struct VertexLink{
 };
 
 struct Vertex{
-	Vertex(int p_dim)
-		:position(p_dim), error(0.0), utility(0.0), error_dim(p_dim), atime_newnode(0.0), atime_newnode_deviation(0.0), last_new(0), atime_stay_kill(0.0), atime_stay_kill_deviation(0.0), atime_killnode(0.0), atime_killnode_deviation(0.0), last_kill(0)
-	{
-		for(int a = 0; a < p_dim; a++){
-			position[a] = 0.0;
-			error_dim[a] = 1.0;
-		}
-	}
-
 	Vertex(vector<double> p_position)
-		:position(p_position), error(0.0), utility(0.0), error_dim(p_position.size())
+		:position(p_position), error(0.0), utility(0.0), error_dim(p_position.size()), atime_newnode(0.0), atime_newnode_deviation(1000.0), last_new(0), atime_stay_kill(0.0), atime_stay_kill_deviation(1000.0), atime_killnode(0.0), atime_killnode_deviation(1000.0), last_kill(0)
 	{
 		for(int a = 0; a < position.size(); a++){
 			error_dim[a] = 1.0;
 		}
+		links = list<VertexLink*>();
 	}
 
 	double getDistance(vector<double> p_input)

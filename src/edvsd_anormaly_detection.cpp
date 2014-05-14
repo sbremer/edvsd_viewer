@@ -36,14 +36,20 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 		m_dyntracker.analyzeEvent(p_buffer[a]);
 	}
 
+	double error = 0.0;
+
 	FeatureEvent event = m_dyntracker.popFeatureEvent();
 	while(event.type != FEATURE_EVENT_TYPE_INVALID){
-		m_gngd.processFeatureEvent(event);
+		error = max(error, m_gngd.processFeatureEvent(event));
 		event = m_dyntracker.popFeatureEvent();
 	}
 
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
+
+	m_painter->drawText(0,10, QString::number(error));
+
+	//cout << error << endl;
 
 	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
 		if(m_dyntracker.isTrackingNodeActive(a)){

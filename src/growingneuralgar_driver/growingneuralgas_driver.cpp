@@ -1,5 +1,8 @@
 #include "growingneuralgas_driver.h"
 
+#include <iostream>
+using namespace std;
+
 GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
 	:m_gng(p_dim), m_learning(true)
 {
