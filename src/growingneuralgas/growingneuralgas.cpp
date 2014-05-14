@@ -4,7 +4,7 @@
 using namespace std;
 
 GrowingNeuralGas::GrowingNeuralGas(int p_dim)
-	:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.01), m_max_age(20), m_generate_neuron(100), m_max_vertices(100), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
+	:m_dim(p_dim), m_attraction_fact_first(0.15), m_attraction_fact_neighbors(0.02), m_max_age(20), m_generate_neuron(50), m_max_vertices(200), m_error_reduction(0.99), m_error_reduction_new(0.5), m_error_reduction_dim(0.01), m_rand()
 	//:m_dim(p_dim), m_attraction_fact_first(0.2), m_attraction_fact_neighbors(0.006), m_max_age(50), m_generate_neuron(100), m_error_reduction(0.995), m_error_reduction_new(0.5), m_rand()
 {
 	m_iterations = 1;

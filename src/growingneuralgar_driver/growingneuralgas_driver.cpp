@@ -4,7 +4,7 @@
 using namespace std;
 
 GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
-	:m_gng(p_dim), m_learning(true)
+	:m_gng(p_dim), m_normalizer(p_dim), m_learning(true)
 {
 
 }
@@ -26,6 +26,7 @@ double GrowingNeuralGas_Driver::processFeatureEvent(FeatureEvent p_featureevent)
 
 double GrowingNeuralGas_Driver::learn_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
+	p_input = m_normalizer.normalize(p_input);
 	double error = m_gng.test(p_input);
 	if(m_learning)m_gng.learn(p_input);
 	return error;
@@ -57,6 +58,7 @@ double GrowingNeuralGas_Driver::kill_node(int p_id, unsigned int p_time)
 void GrowingNeuralGas_Driver::setLearning(bool p_learning)
 {
 	m_learning = p_learning;
+	m_normalizer.setLearning(p_learning);
 }
 
 void GrowingNeuralGas_Driver::dumpData()

@@ -230,7 +230,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	closest->last = p_event.ts;
 
 	//Update tracker velocity
-	double velocity_imp = 0.04;
+	double velocity_imp = 0.02;
 	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 
 	//Attract all tracking points to the event depending on their connection strength to the closest event

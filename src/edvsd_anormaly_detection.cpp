@@ -21,6 +21,8 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
+	//return;
+
 	//Process all events of this frame, pass them to the tracker
 	for(int a = 0; a < p_n; a++){
 		//Skip "off" events //Todo

@@ -6,6 +6,7 @@
 #include "growingneuralgas/growingneuralgas.h"
 #include "output/gnuplot_output.h"
 #include "helper/feature_event.h"
+#include "normalizer/normalizer.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
 private:
 	bool m_learning;
 	GrowingNeuralGas m_gng;
+	Normalizer m_normalizer;
 };
 
 #endif // GROWINGNEURALGAS_DRIVER_H
