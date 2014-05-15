@@ -4,7 +4,7 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_track_num(60), m_featurenum(9)
+	:m_track_num(20), m_featurenum(9)
 {
 	//Todo: smaller grid
 	//Initiate point pattern for spawning Trackers (2D every 10px)
@@ -86,8 +86,8 @@ FeatureEvent DynTracker::popFeatureEvent()
 		event = FeatureEvent();
 	}
 	else{
-		event = m_feature_events.back();
-		m_feature_events.pop_back();
+		event = m_feature_events.front();
+		m_feature_events.pop_front();
 	}
 	return event;
 }
@@ -133,13 +133,15 @@ void DynTracker::analyzeEvent(EventF p_event)
 
 			//Remove "old" Tracking Points
 			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
-				//Fire kill event to GNG
-				vector<double> features(2);
-				int at = 0;
+				if(m_track_trackingnodes[a]->events > 6){
+					//Fire kill event to GNG
+					vector<double> features(2);
+					int at = 0;
 
-				features[at++] = m_track_trackingnodes[a]->position.x;
-				features[at++] = m_track_trackingnodes[a]->position.y;
-				m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
+					features[at++] = m_track_trackingnodes[a]->position.x;
+					features[at++] = m_track_trackingnodes[a]->position.y;
+					m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
+				}
 
 				delete m_track_trackingnodes[a];
 				m_track_trackingnodes[a] = NULL;
@@ -166,7 +168,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 	}
 
 	//Check for node close to input
-	if(pointmin != -1 && distmin < 6.0){
+	if(pointmin != -1 && distmin < 5.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
@@ -259,7 +261,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double error_imp = 0.18;
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 6.0){
+	if(closest2 != NULL && p_distmin2 < 5.0){
 
 		//Lower age
 		closest2->age /= 1.5;
@@ -296,7 +298,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Check for a high error
-	if(closest->error > 14.0){
+	if(closest->error > 12.0){
 		//Try to create a new point
 		int new_track = createTrackingNode(closest->position, p_event.ts);
 		if(new_track != -1){
@@ -319,7 +321,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 		m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_NEW_NODE));
 	}
-	else if(closest->events > 10){
+	else if(closest->events > 6){
 
 		vector<double> features = buildFeatureVector(p_pointmin);
 
@@ -410,10 +412,10 @@ vector<double> DynTracker::buildFeatureVector(int p_node)
 	features[at++] = (center.y - 64.0) / 64.0;
 	features[at++] = center_node.x / 5.0;
 	features[at++] = center_node.y / 5.0;
-	features[at++] = node->error / 14.0;
-	features[at++] = node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
-	features[at++] = node->velocity.x / 1500.0;
-	features[at++] = node->velocity.y / 1500.0;
+	features[at++] = 0;//node->error / 14.0;
+	features[at++] = 0;//node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
+	features[at++] = 0;//node->velocity.x / 1500.0;
+	features[at++] = 0;//node->velocity.y / 1500.0;
 	features[at++] = node->angle / M_PI_2;
 	//ToDo: More?
 

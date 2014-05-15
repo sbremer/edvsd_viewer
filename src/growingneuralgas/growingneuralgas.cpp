@@ -104,6 +104,12 @@ double GrowingNeuralGas::test(vector<double> p_input)
 		return 0.0;
 	}
 
+	double rel_distance = 0.0;
+
+	rel_distance = (s1->getDistance(s2->position) + s1->getDistance(s3->position) + s3->getDistance(s2->position)) / 3.0;
+
+	return distmin / rel_distance;
+
 	//Calculate average deviations of all dimensions
 	vector<double> deviation = vector<double>(m_dim);
 	for(int a = 0; a < m_dim; a++){

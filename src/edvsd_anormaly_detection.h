@@ -12,6 +12,17 @@
 
 #include "dyntracker/dyntracker.h"
 
+struct ErrorCollector{
+	ErrorCollector()
+		:error(0.0), n(0)
+	{
+
+	}
+
+	double error;
+	int n;
+};
+
 class EDVSD_Anormaly_Detection : public QObject
 {
 	Q_OBJECT
@@ -35,6 +46,8 @@ private:
     DynTracker m_dyntracker;
 
 	GrowingNeuralGas_Driver m_gngd;
+
+	ErrorCollector **m_collectors;
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H

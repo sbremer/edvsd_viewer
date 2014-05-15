@@ -21,7 +21,11 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
-	//return;
+	m_collectors = new ErrorCollector*[40];
+
+	for(int a = 0; a < 40; a++){
+		m_collectors[a] = NULL;
+	}
 
 	//Process all events of this frame, pass them to the tracker
 	for(int a = 0; a < p_n; a++){
@@ -31,15 +35,42 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 		}
 
 		m_dyntracker.analyzeEvent(p_buffer[a]);
-	}
 
-	FeatureEvent event = m_dyntracker.popFeatureEvent();
-	while(event.type != FEATURE_EVENT_TYPE_INVALID){
-		m_gngd.processFeatureEvent(event);
-		event = m_dyntracker.popFeatureEvent();
+		FeatureEvent event = m_dyntracker.popFeatureEvent();
+		while(event.type != FEATURE_EVENT_TYPE_INVALID){
+			double error = m_gngd.processFeatureEvent(event);
+
+			switch(event.type){
+			case FEATURE_EVENT_TYPE_NEW_NODE:
+				m_collectors[event.id] = new ErrorCollector();
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+				cout << "New: " << error << endl;
+				break;
+			case FEATURE_EVENT_TYPE_LEARN_NODE:
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+				break;
+			case FEATURE_EVENT_TYPE_KILL_NODE:
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+
+				cout << "Dead: " << error << endl;
+
+				//cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
+
+				delete m_collectors[event.id];
+				m_collectors[event.id] = NULL;
+				break;
+			}
+
+			event = m_dyntracker.popFeatureEvent();
+		}
 	}
 
 	m_gngd.dumpData();
+
+	m_dyntracker.resetTracker();
 
 	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
 }
@@ -56,20 +87,18 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 		m_dyntracker.analyzeEvent(p_buffer[a]);
 	}
 
-	double error = 0.0;
+	//double error = 0.0;
 
 	FeatureEvent event = m_dyntracker.popFeatureEvent();
 	while(event.type != FEATURE_EVENT_TYPE_INVALID){
-		error = max(error, m_gngd.processFeatureEvent(event));
+		//error = max(error, m_gngd.processFeatureEvent(event));
 		event = m_dyntracker.popFeatureEvent();
 	}
 
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	m_painter->drawText(0,10, QString::number(error));
-
-	//cout << error << endl;
+	//m_painter->drawText(0,10, QString::number(error));
 
 	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
 		if(m_dyntracker.isTrackingNodeActive(a)){
@@ -106,6 +135,53 @@ void EDVSD_Anormaly_Detection::testEvents(EventF *p_buffer, int p_n)
 {
 	m_dyntracker.resetTracker();
 	m_gngd.setLearning(false);
+	cout << "Testing:" << endl;
+
+	for(int a = 0; a < 40; a++){
+		if(m_collectors[a] != NULL){
+			delete m_collectors[a];
+			m_collectors[a] = NULL;
+		}
+	}
+
+	//Process all events of this frame, pass them to the tracker
+	for(int a = 0; a < p_n; a++){
+		//Skip "off" events //Todo
+		if(p_buffer[a].polarity == false){
+			continue;
+		}
+
+		m_dyntracker.analyzeEvent(p_buffer[a]);
+
+		FeatureEvent event = m_dyntracker.popFeatureEvent();
+		while(event.type != FEATURE_EVENT_TYPE_INVALID){
+			double error = m_gngd.processFeatureEvent(event);
+
+			switch(event.type){
+			case FEATURE_EVENT_TYPE_NEW_NODE:
+				m_collectors[event.id] = new ErrorCollector();
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+				break;
+			case FEATURE_EVENT_TYPE_LEARN_NODE:
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+				break;
+			case FEATURE_EVENT_TYPE_KILL_NODE:
+				m_collectors[event.id]->error += error;
+				m_collectors[event.id]->n++;
+
+				cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
+
+				delete m_collectors[event.id];
+				m_collectors[event.id] = NULL;
+				break;
+			}
+
+			event = m_dyntracker.popFeatureEvent();
+		}
+	}
+
 }
 
 void EDVSD_Anormaly_Detection::testLiveEvents(EventF *p_buffer, int p_n)
@@ -120,20 +196,18 @@ void EDVSD_Anormaly_Detection::testLiveEvents(EventF *p_buffer, int p_n)
 		m_dyntracker.analyzeEvent(p_buffer[a]);
 	}
 
-	double error = 0.0;
+	//double error = 0.0;
 
 	FeatureEvent event = m_dyntracker.popFeatureEvent();
 	while(event.type != FEATURE_EVENT_TYPE_INVALID){
-		error = max(error, m_gngd.processFeatureEvent(event));
+		//double error = m_gngd.processFeatureEvent(event);
 		event = m_dyntracker.popFeatureEvent();
 	}
 
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	m_painter->drawText(0,10, QString::number(error));
-
-	//cout << error << endl;
+	//m_painter->drawText(0,10, QString::number(error));
 
 	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
 		if(m_dyntracker.isTrackingNodeActive(a)){
