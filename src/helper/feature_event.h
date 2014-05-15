@@ -20,13 +20,6 @@ struct FeatureEvent{
 		type = FEATURE_EVENT_TYPE_INVALID;
 	}
 
-	FeatureEvent(int p_id, unsigned int p_time)
-	{
-		id = p_id;
-		time = p_time;
-		type = FEATURE_EVENT_TYPE_KILL_NODE;
-	}
-
 	vector<double> features;
 	int id;
 	unsigned int time;

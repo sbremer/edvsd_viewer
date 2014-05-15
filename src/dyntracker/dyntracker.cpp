@@ -134,7 +134,12 @@ void DynTracker::analyzeEvent(EventF p_event)
 			//Remove "old" Tracking Points
 			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
 				//Fire kill event to GNG
-				m_feature_events.push_back(FeatureEvent(a, p_event.ts));
+				vector<double> features(2);
+				int at = 0;
+
+				features[at++] = m_track_trackingnodes[a]->position.x;
+				features[at++] = m_track_trackingnodes[a]->position.y;
+				m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
 
 				delete m_track_trackingnodes[a];
 				m_track_trackingnodes[a] = NULL;
@@ -305,19 +310,20 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		}
 	}
 
-	if(closest->events > 5){
+	if(closest->events == 6){
+		vector<double> features(2);
+		int at = 0;
+
+		features[at++] = closest->position.x;
+		features[at++] = closest->position.y;
+
+		m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_NEW_NODE));
+	}
+	else if(closest->events > 10){
 
 		vector<double> features = buildFeatureVector(p_pointmin);
 
-		//Send vector to normalizer
-
-		//Send vector to GNG //Test this data also? Return anomaly score?
-		if(closest->events == 6){
-			m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_NEW_NODE));
-		}
-		else{
-			m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_LEARN_NODE));
-		}
+		m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_LEARN_NODE));
 	}
 }
 

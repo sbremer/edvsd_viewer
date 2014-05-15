@@ -3,8 +3,11 @@
 #include <iostream>
 using namespace std;
 
+//	p_max_age, p_generate_neuron, p_max_vertices, p_age_edges);
+
+
 GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
-	:m_gng(p_dim), m_normalizer(p_dim), m_learning(true)
+	:m_gng(p_dim, 0.15, 0.02, 20, 20, 200, 100), m_normalizer(p_dim), m_gng_newkill(3, 0.5, 0.05, 5, 3, 30, 4), m_normalizer_newkill(2), m_learning(true)
 {
 
 }
@@ -17,7 +20,7 @@ double GrowingNeuralGas_Driver::processFeatureEvent(FeatureEvent p_featureevent)
 	case FEATURE_EVENT_TYPE_LEARN_NODE:
 		return learn_node(p_featureevent.features, p_featureevent.id, p_featureevent.time);
 	case FEATURE_EVENT_TYPE_KILL_NODE:
-		return kill_node(p_featureevent.id, p_featureevent.time);
+		return kill_node(p_featureevent.features, p_featureevent.id, p_featureevent.time);
 	default:
 		//Error
 		return 0.0;
@@ -26,32 +29,40 @@ double GrowingNeuralGas_Driver::processFeatureEvent(FeatureEvent p_featureevent)
 
 double GrowingNeuralGas_Driver::learn_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
+	//Normalize inputs
 	p_input = m_normalizer.normalize(p_input);
+
+	//Test and learn input with GNG
 	double error = m_gng.test(p_input);
 	if(m_learning)m_gng.learn(p_input);
-	return error;
-
-	//Doing both in one step, minimizing overlaping code would be more efficient!
-	//double error = m_gng.test_learnNode(p_input, p_id, p_time);
-	if(m_learning)m_gng.learnNode(p_input, p_id, p_time);
 	return error;
 }
 
 double GrowingNeuralGas_Driver::new_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
-	return 0.0;
-	//Doing both in one step, minimizing overlaping code would be more efficient!
-	double error = m_gng.test_newNode(p_input, p_id, p_time);
-	if(m_learning)m_gng.newNode(p_input, p_id, p_time);
+	//Normalize inputs
+	p_input = m_normalizer_newkill.normalize(p_input);
+
+	//Data for "New" Tracker
+	p_input.push_back(3.0);
+
+	//Test and learn input with GNG
+	double error = m_gng_newkill.test(p_input);
+	if(m_learning)m_gng_newkill.learn(p_input);
 	return error;
 }
 
-double GrowingNeuralGas_Driver::kill_node(int p_id, unsigned int p_time)
+double GrowingNeuralGas_Driver::kill_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
-	return 0.0;
-	//Doing both in one step, minimizing overlaping code would be more efficient!
-	double error = m_gng.test_killNode(p_id, p_time);
-	if(m_learning)m_gng.killNode(p_id, p_time);
+	//Normalize inputs
+	p_input = m_normalizer_newkill.normalize(p_input);
+
+	//Data for "Dead" Tracker
+	p_input.push_back(-3.0);
+
+	//Test and learn input with GNG
+	double error = m_gng_newkill.test(p_input);
+	if(m_learning)m_gng_newkill.learn(p_input);
 	return error;
 }
 
@@ -59,6 +70,7 @@ void GrowingNeuralGas_Driver::setLearning(bool p_learning)
 {
 	m_learning = p_learning;
 	m_normalizer.setLearning(p_learning);
+	m_normalizer_newkill.setLearning(p_learning);
 }
 
 void GrowingNeuralGas_Driver::dumpData()

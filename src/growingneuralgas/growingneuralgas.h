@@ -103,6 +103,7 @@ class GrowingNeuralGas
 {
 public:
 	GrowingNeuralGas(int p_dim);
+	GrowingNeuralGas(int p_dim, double p_attraction_fact_first, double p_attraction_fact_neighbors, int p_max_age, int p_generate_neuron, int p_max_vertices, int p_age_edges);
 
 	void newNode(vector<double> p_input, int p_id, unsigned int p_time);
 	void learnNode(vector<double> p_input, int p_id, unsigned int p_time);
@@ -129,13 +130,14 @@ private:
 
 	int m_iterations;
 
-	double m_attraction_fact_first;
-	double m_attraction_fact_neighbors;
-	int m_max_age;
-	int m_generate_neuron;
-	int m_max_vertices;
-	double m_error_reduction;
-	double m_error_reduction_new;
+	const double m_attraction_fact_first;
+	const double m_attraction_fact_neighbors;
+	const int m_max_age;
+	const int m_generate_neuron;
+	const int m_max_vertices;
+	const int m_age_edges;
+	const double m_error_reduction;
+	const double m_error_reduction_new;
 
 	double m_error_reduction_dim;
 
