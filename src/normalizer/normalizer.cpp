@@ -27,9 +27,11 @@ vector<double> Normalizer::normalize(vector<double> p_input){
 	if(m_learning){
 
 		for(int a = 0; a < m_dim; a++){
-			//Learn values
-			m_deviation[a] = (1.0 - m_learnrate) * m_deviation[a] + m_learnrate * fabs(m_mean[a] - p_input[a]);
-			m_mean[a] = (1.0 - m_learnrate) * m_mean[a] + m_learnrate * p_input[a];
+			if(p_input[a] != m_mean[a]){
+				//Learn values
+				m_deviation[a] = (1.0 - m_learnrate / 2.0) * m_deviation[a] + m_learnrate * fabs(m_mean[a] - p_input[a]);
+				m_mean[a] = (1.0 - m_learnrate) * m_mean[a] + m_learnrate * p_input[a];
+			}
 		}
 
 		m_learnrate *= m_learnratereduction;

@@ -131,8 +131,8 @@ void DynTracker::analyzeEvent(EventF p_event)
 	for(int a = 0; a < m_track_num; a++){
 		if(m_track_trackingnodes[a] != NULL){
 
-			//Remove "old" Tracking Points
-			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
+			//Remove "old" Tracking Points //Todo: Different deletion?
+			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 20){
 				if(m_track_trackingnodes[a]->events > 6){
 					//Fire kill event to GNG
 					vector<double> features(2);
@@ -258,7 +258,9 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] = max(0.0, m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] - 0.01);
 	}
 
-	double error_imp = 0.18;
+	double error_imp = 0.05;
+
+	//Todo: different distance calculation elipsoid with angle and error
 
 	//Check if 2nd closest trackingpoint is also nearby
 	if(closest2 != NULL && p_distmin2 < 5.0){
@@ -267,7 +269,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		closest2->age /= 1.5;
 
 		//Strengthen the connection between closest and 2nd closest point
-		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.15);
+		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.1);
 
 		//Update angle
 //		closest2->angle = (1.0 - angle_imp * 0.4) * closest2->angle + angle_imp * 0.4 * angle;
@@ -298,7 +300,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Check for a high error
-	if(closest->error > 12.0){
+	if(closest->error > 13.0){
 		//Try to create a new point
 		int new_track = createTrackingNode(closest->position, p_event.ts);
 		if(new_track != -1){
@@ -407,13 +409,13 @@ vector<double> DynTracker::buildFeatureVector(int p_node)
 	int at = 0;
 
 	//An incrementing int allows easy exchange and changes in order of data
-	//Values should be roughly in the area of [-1.0, 1.0] //Todo: more advanced normalization
+	//Values should be roughly in the area of [-1.0, 1.0]
 	features[at++] = (center.x - 64.0) / 64.0;
 	features[at++] = (center.y - 64.0) / 64.0;
 	features[at++] = center_node.x / 5.0;
 	features[at++] = center_node.y / 5.0;
-	features[at++] = 0;//node->error / 14.0;
-	features[at++] = 0;//node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
+	features[at++] = node->error / 14.0;
+	features[at++] = node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
 	features[at++] = 0;//node->velocity.x / 1500.0;
 	features[at++] = 0;//node->velocity.y / 1500.0;
 	features[at++] = node->angle / M_PI_2;

@@ -45,7 +45,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 				m_collectors[event.id] = new ErrorCollector();
 				m_collectors[event.id]->error += error;
 				m_collectors[event.id]->n++;
-				cout << "New: " << error << endl;
+				//cout << "New: " << error << endl;
 				break;
 			case FEATURE_EVENT_TYPE_LEARN_NODE:
 				m_collectors[event.id]->error += error;
@@ -55,9 +55,9 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 				m_collectors[event.id]->error += error;
 				m_collectors[event.id]->n++;
 
-				cout << "Dead: " << error << endl;
+				//cout << "Dead: " << error << endl;
 
-				//cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
+				cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
 
 				delete m_collectors[event.id];
 				m_collectors[event.id] = NULL;
@@ -105,7 +105,12 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 			TrackingNode tpoint = m_dyntracker.getTrackingNode(a);
 
 			//Draw nodes
-			m_painter->drawEllipse(tpoint.position.toQPointF(), 1.0, 1.0);
+			double radius = 1.8 * sqrt(tpoint.error);
+			m_painter->save();
+			m_painter->translate(tpoint.position.toQPointF());
+			m_painter->rotate(tpoint.angle / M_PI * 180.0);
+			m_painter->drawEllipse(QPoint(), radius, 1.0);
+			m_painter->restore();
 
 			//Draw node connections
 			for(int b = 0; b < a; b++){
@@ -116,7 +121,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 			}
 
 			//Draw node angle
-			double len = 2.25;
+			double len = radius / 1.8;
 
 			PointF p1 = tpoint.position;
 			p1.x += len * cos(tpoint.angle);
