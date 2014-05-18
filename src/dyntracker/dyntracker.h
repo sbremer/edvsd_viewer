@@ -3,6 +3,7 @@
 
 #include <list>
 #include <vector>
+#include <algorithm>
 #include <math.h>
 
 #include "helper/eventf.h"
@@ -13,13 +14,13 @@ using namespace std;
 
 struct TrackingNode{
 	TrackingNode(PointF p_point, unsigned int p_ts)
-		:position(p_point), age(0.0), events(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity(), looked_at(false)
+		:position(p_point), age(0.0), events(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity(), looked_at(false), group(-1)
 	{
 
 	}
 
 	TrackingNode()
-		:position(), age(0.0), events(0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity(), looked_at(false)
+		:position(), age(0.0), events(0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity(), looked_at(false), group(-1)
 	{
 
 	}
@@ -35,6 +36,7 @@ struct TrackingNode{
 
 	//For group searching/ ToDo: Replace with more intelligent algorithm
 	bool looked_at;
+	int group;
 };
 
 class DynTracker
@@ -57,15 +59,25 @@ public:
 private:
 	const int m_track_num;
 	const int m_featurenum;
+	const double m_connection_threshold;
+
 	int m_track_active;
 	TrackingNode **m_track_trackingnodes;
 	double **m_track_adj;
 
+	list<int> **m_groups;
+	void group(int p_a, int p_b);
+	void ungroup(int p_a, int p_b);
+	list<int> findgroup(int p_a);
+
+	int newTrackingNode(PointF p_point, unsigned int p_ts);
+	void killTrackingNode(int p_a);
+
 	void adjustTrackers(EventF p_event, int p_pointmin, double p_distmin, int p_pointmin2, double p_distmin2);
 	void adjustInitial(EventF p_event);
-	int createTrackingNode(PointF p_point, unsigned int p_ts);
 
-	vector<double> buildFeatureVector(int p_node);
+
+	vector<double> buildFeatureVector(int p_a);
 
 	PointF m_test_init[13*13];
 	PointF m_test_init_move[13*13];
