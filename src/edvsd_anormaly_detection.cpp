@@ -21,6 +21,7 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
+	return;
 	m_collectors = new ErrorCollector*[40];
 
 	for(int a = 0; a < 40; a++){
@@ -42,25 +43,25 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 
 			switch(event.type){
 			case FEATURE_EVENT_TYPE_NEW_NODE:
-				m_collectors[event.id] = new ErrorCollector();
-				m_collectors[event.id]->error += error;
-				m_collectors[event.id]->n++;
+				//m_collectors[event.id] = new ErrorCollector();
+				//m_collectors[event.id]->error += error;
+				//m_collectors[event.id]->n++;
 				//cout << "New: " << error << endl;
 				break;
 			case FEATURE_EVENT_TYPE_LEARN_NODE:
-				m_collectors[event.id]->error += error;
-				m_collectors[event.id]->n++;
+				//m_collectors[event.id]->error += error;
+				//m_collectors[event.id]->n++;
 				break;
 			case FEATURE_EVENT_TYPE_KILL_NODE:
-				m_collectors[event.id]->error += error;
-				m_collectors[event.id]->n++;
+				//m_collectors[event.id]->error += error;
+				//m_collectors[event.id]->n++;
 
 				//cout << "Dead: " << error << endl;
 
-				cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
+				//cout << m_collectors[event.id]->error / m_collectors[event.id]->n << endl;
 
-				delete m_collectors[event.id];
-				m_collectors[event.id] = NULL;
+				//delete m_collectors[event.id];
+				//m_collectors[event.id] = NULL;
 				break;
 			}
 
@@ -85,14 +86,12 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 		}
 
 		m_dyntracker.analyzeEvent(p_buffer[a]);
-	}
 
-	//double error = 0.0;
-
-	FeatureEvent event = m_dyntracker.popFeatureEvent();
-	while(event.type != FEATURE_EVENT_TYPE_INVALID){
-		//error = max(error, m_gngd.processFeatureEvent(event));
-		event = m_dyntracker.popFeatureEvent();
+		FeatureEvent event = m_dyntracker.popFeatureEvent();
+		while(event.type != FEATURE_EVENT_TYPE_INVALID){
+			//error = max(error, m_gngd.processFeatureEvent(event));
+			event = m_dyntracker.popFeatureEvent();
+		}
 	}
 
 	//Visual output

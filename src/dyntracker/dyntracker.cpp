@@ -111,20 +111,20 @@ void DynTracker::analyzeEvent(EventF p_event)
 		if(m_track_trackingnodes[a] != NULL){
 
 			//Remove "old" Tracking Points //Todo: Different deletion?
-			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 20){
-				if(m_track_trackingnodes[a]->events > 6){
-					//Fire kill event to GNG
-					vector<double> features(2);
-					int at = 0;
+//			if(m_track_trackingnodes[a]->age > 5 * m_track_active + 20){
+//				if(m_track_trackingnodes[a]->events > 6){
+//					//Fire kill event to GNG
+//					vector<double> features(2);
+//					int at = 0;
 
-					features[at++] = m_track_trackingnodes[a]->position.x;
-					features[at++] = m_track_trackingnodes[a]->position.y;
-					m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
-				}
+//					features[at++] = m_track_trackingnodes[a]->position.x;
+//					features[at++] = m_track_trackingnodes[a]->position.y;
+//					m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
+//				}
 
-				killTrackingNode(a);
-				continue;
-			}
+//				killTrackingNode(a);
+//				continue;
+//			}
 
 			double dist = p_event.position.getDistance(m_track_trackingnodes[a]->position);
 			if(dist < distmin){
@@ -139,13 +139,13 @@ void DynTracker::analyzeEvent(EventF p_event)
 			}
 
 			//Age Tracking Points
-			m_track_trackingnodes[a]->age += 1.0;
+			//m_track_trackingnodes[a]->age += 1.0;
 
 		}
 	}
 
 	//Check for node close to input
-	if(pointmin != -1 && distmin < 5.0){
+	if(pointmin != -1 && distmin < 6.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
@@ -181,13 +181,8 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	//Increase event number for this node
 	closest->events++;
 
-	//Check if node has passed initial adjustment process
-	if(closest->events == 5){
-		//ToDo: Fire NewItem to GNG (later?)
-	}
-
 	//Update event angle
-	double angle_imp = 0.05;
+	double angle_imp = 0.06;
 	double angle = atan(delta.y / delta.x);
 	if(fabs(angle - closest->angle) > M_PI_2){
 		if(angle > closest->angle){
@@ -243,12 +238,30 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		}
 
 		m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] = new_adj;
+
+		//Age Trackers here
+		m_track_trackingnodes[a]->age += 1.0;
+
+		if(a != p_pointmin && a != p_pointmin2 && m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
+			if(m_track_trackingnodes[a]->events > 6){
+				//Fire kill event to GNG
+				vector<double> features(2);
+				int at = 0;
+
+				features[at++] = m_track_trackingnodes[a]->position.x;
+				features[at++] = m_track_trackingnodes[a]->position.y;
+				m_feature_events.push_back(FeatureEvent(features, a, p_event.ts, FEATURE_EVENT_TYPE_KILL_NODE));
+			}
+
+			killTrackingNode(a);
+			continue;
+		}
 	}
 
 	//Todo: different distance calculation elipsoid with angle and error
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 5.0){
+	if(closest2 != NULL && p_distmin2 < 6.0){
 
 		//Lower age
 		closest2->age /= 1.5;
@@ -264,7 +277,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Check for a high error
-	if(closest->error > 13.0){
+	if(closest->error > 15.0){
 		//Try to create a new point
 		int new_track = newTrackingNode(closest->position, p_event.ts);
 		if(new_track != -1){
@@ -337,12 +350,17 @@ void DynTracker::adjustInitial(EventF p_event)
 	else{
 		//Pull closest initializerpoint towards event
 		PointF delta = p_event.position - m_test_init_move[13 * x + y];
-		m_test_init_move[13 * x + y] += delta * 0.1;
+		m_test_init_move[13 * x + y] += delta * 0.15;
 	}
 }
 
 void DynTracker::group(int p_a, int p_b)
 {
+	//Verify that nodes are not connected already
+	if(m_track_trackingnodes[p_a]->group == m_track_trackingnodes[p_b]->group){
+		return;
+	}
+
 	if(m_track_trackingnodes[p_a]->group == -1 && m_track_trackingnodes[p_b]->group == -1){
 		//New group number is min of both elements
 		int group = min(p_a, p_b);
@@ -419,6 +437,10 @@ void DynTracker::group(int p_a, int p_b)
 
 void DynTracker::ungroup(int p_a, int p_b)
 {
+	if(m_track_trackingnodes[p_a]->group == -1 || m_track_trackingnodes[p_b]->group == -1 || m_track_trackingnodes[p_a]->group != m_track_trackingnodes[p_b]->group){
+		return;
+	}
+
 	int group = m_track_trackingnodes[p_a]->group;
 
 	//Verify connection
