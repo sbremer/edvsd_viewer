@@ -21,7 +21,6 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
-	return;
 	m_collectors = new ErrorCollector*[40];
 
 	for(int a = 0; a < 40; a++){

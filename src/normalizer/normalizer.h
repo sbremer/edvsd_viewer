@@ -18,6 +18,7 @@ private:
 	bool m_learning;
 
 	double m_learnrate;
+	double m_baselearnrate;
 	double m_learnratereduction;
 
 	vector<double> m_mean;
