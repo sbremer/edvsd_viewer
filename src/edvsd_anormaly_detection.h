@@ -48,6 +48,8 @@ private:
 	GrowingNeuralGas_Driver m_gngd;
 
 	ErrorCollector **m_collectors;
+
+	double m_error;
 };
 
 #endif // EDVSD_ANORMALY_DETECTION_H

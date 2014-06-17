@@ -125,7 +125,7 @@ list<MotionF> StartEndTracker::analyzeMotionStartpoints(EventF *p_buffer, int p_
 				PointF tmp;
 				PointF point = point_cloud_revers[y*13+x];
 				double fact = m_attraction_fact_start/pow(sqrt((event.x-point.x)*(event.x-point.x)+(event.y-point.y)*(event.y-point.y)), m_attraction_pow_start);
-				fact = qMin(1.0, fact);
+				fact = min(1.0, fact);
 				tmp.x = (point.x*(1.0-fact)+event.x*fact);
 				tmp.y =(point.y*(1.0-fact)+event.y*fact);
 				point_cloud_revers[y*13+x] = tmp;

@@ -3,15 +3,17 @@
 GnuPlot_Output::GnuPlot_Output(QString p_filename)
 {
 	//system("rm "+p_filename);
-	m_file.setFileName(p_filename);
-	m_file.remove();
-	m_file.open(QIODevice::WriteOnly);
+	m_file = new QFile();
+	m_file->setFileName(p_filename);
+	m_file->remove();
+	m_file->open(QIODevice::WriteOnly);
 }
 
 GnuPlot_Output::~GnuPlot_Output()
 {
-	m_file.flush();
-	m_file.close();
+	m_file->flush();
+	m_file->close();
+	delete m_file;
 }
 
 void GnuPlot_Output::writeData(int p_args, ...)
@@ -25,7 +27,7 @@ void GnuPlot_Output::writeData(int p_args, ...)
 	va_end(ap);
 	data += "\n";
 
-	m_file.write(data.toLocal8Bit().data());
+	m_file->write(data.toLocal8Bit().data());
 	//m_file.flush();
 }
 
@@ -36,17 +38,17 @@ void GnuPlot_Output::writeData(const vector<double> &p_data)
 		data += QString::number(p_data[a]) + "\t";
 	}
 	data += "\n";
-	m_file.write(data.toLocal8Bit().data());
+	m_file->write(data.toLocal8Bit().data());
 }
 
 void GnuPlot_Output::clear()
 {
-	m_file.close();
-	m_file.remove();
-	m_file.open(QIODevice::WriteOnly);
+	m_file->close();
+	m_file->remove();
+	m_file->open(QIODevice::WriteOnly);
 }
 
 void GnuPlot_Output::flush()
 {
-	m_file.flush();
+	m_file->flush();
 }

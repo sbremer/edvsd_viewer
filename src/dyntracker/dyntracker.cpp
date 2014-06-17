@@ -6,6 +6,8 @@ using namespace std;
 DynTracker::DynTracker()
 	:m_track_num(20), m_featurenum(9), m_connection_threshold(0.8)
 {
+	m_trackerage_initial = 50;
+
 	//Todo: smaller grid?
 	//Initiate point pattern for spawning Trackers (2D every 10px)
 	for(int a = 0; a < 13; a++){
@@ -145,7 +147,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 	}
 
 	//Check for node close to input
-	if(pointmin != -1 && distmin < 6.0){
+	if(pointmin != -1 && distmin < 7.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
@@ -201,7 +203,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double error_imp = 0.05;
 	closest->error = (1.0 - error_imp) * closest->error + error_imp * p_distmin * p_distmin;
 
-	//Update event rate
+	//Update event rate TODO! exp decay and addition
 	double rate_imp = 0.02;
 	unsigned int diff = p_event.ts - closest->last;
 	if(diff != 0){
@@ -212,7 +214,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 	closest->last = p_event.ts;
 
-	//Update tracker velocity
+	//Update tracker velocity avg exp decay delta times rate
 	double velocity_imp = 0.02;
 	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 
@@ -242,8 +244,8 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		//Age Trackers here
 		m_track_trackingnodes[a]->age += 1.0;
 
-		if(a != p_pointmin && a != p_pointmin2 && m_track_trackingnodes[a]->age > 5 * m_track_active + 10){
-			if(m_track_trackingnodes[a]->events > 6){
+		if(a != p_pointmin && a != p_pointmin2 && m_track_trackingnodes[a]->age > 7 * m_track_active + 20){
+			if(m_track_trackingnodes[a]->events > m_trackerage_initial){
 				//Fire kill event to GNG
 				vector<double> features(2);
 				int at = 0;
@@ -261,7 +263,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	//Todo: different distance calculation elipsoid with angle and error
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 6.0){
+	if(closest2 != NULL && p_distmin2 < 7.0){
 
 		//Lower age
 		closest2->age /= 1.5;
@@ -296,7 +298,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Build Feature Events for user class to call for
-	if(closest->events == 6){
+	if(closest->events == m_trackerage_initial){
 		vector<double> features(2);
 		int at = 0;
 
@@ -310,7 +312,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 			m_feature_events.push_back(FeatureEvent(features, p_pointmin, p_event.ts, FEATURE_EVENT_TYPE_NEW_NODE));
 		}
 	}
-	else if(closest->events > 6){
+	else if(closest->events > m_trackerage_initial){
 
 		vector<double> features = buildFeatureVector(p_pointmin);
 		if(closest->group != -1){
@@ -729,6 +731,8 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		center = node->position;
 	}
 
+	center = node->position;
+
 	//Build Feature Vector
 	vector<double> features(m_featurenum);
 
@@ -743,7 +747,7 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 	features[at++] = center_node.x / 5.0;
 	features[at++] = center_node.y / 5.0;
 	features[at++] = node->error / 14.0;
-	features[at++] = node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
+	features[at++] = 0;//node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
 	features[at++] = 0;//node->velocity.x / 1500.0;
 	features[at++] = 0;//node->velocity.y / 1500.0;
 	features[at++] = node->angle / M_PI_2;

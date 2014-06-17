@@ -104,6 +104,8 @@ double GrowingNeuralGas::test(vector<double> p_input)
 		return 0.0;
 	}
 
+	return distmin;
+
 	double rel_distance = 0.0;
 
 	rel_distance = (s1->getDistance(s2->position) + s1->getDistance(s3->position) + s3->getDistance(s2->position)) / 3.0;
@@ -188,6 +190,8 @@ void GrowingNeuralGas::learnNode(vector<double> p_input, int p_id, unsigned int 
 	}
 
 	Vertex *closest = adjustGNG(p_input);
+
+	return;
 
 	//Check if closest Vertex changed
 	if(node->current != closest){

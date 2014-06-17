@@ -1,12 +1,27 @@
 #ifndef EDVSD_H
 #define EDVSD_H
 
-#include <QtGlobal>
+//#include <QtGlobal>
+#include <stdint.h>
 
 struct EDVS_Event{
-	quint8 x, y, p;
-	quint8 fill;
-	quint32 t;
+	uint8_t x;		// (0, EDVS_Header.x_resolution - 1)
+	uint8_t y;		// (0, EDVS_Header.y_resolution - 1)
+	uint8_t p;		// {0,1}, 0/false = "off", 1../true = "on"
+	uint8_t fill;	// no function, only to ensure 8 byte total size and alignment
+	uint32_t t;		// Timestamp
+
+	inline bool operator< (const EDVS_Event& other) const
+	{
+		return t < other.t;
+	}
+};
+
+struct EDVS_Header{
+	uint8_t version;
+	uint8_t x_resolution;
+	uint8_t y_resolution;
+	uint8_t timestamp_resolution;
 };
 
 enum EDVS_Timestamp_Resolution{

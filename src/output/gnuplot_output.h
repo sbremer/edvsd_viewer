@@ -18,7 +18,7 @@ public:
 	void flush();
 
 private:
-	QFile m_file;
+	QFile* m_file;
 };
 
 #endif // GNUPLOT_OUTPUT_H

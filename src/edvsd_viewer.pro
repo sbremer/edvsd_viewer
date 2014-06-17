@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = edvsd_viewer
 TEMPLATE = app
 
+INCLUDEPATH += archive/
 
 SOURCES += main.cpp\
     edvsd_viewer.cpp \

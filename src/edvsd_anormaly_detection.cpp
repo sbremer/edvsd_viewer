@@ -6,7 +6,7 @@ using namespace std;
 EDVSD_Anormaly_Detection::EDVSD_Anormaly_Detection(QObject *parent)
 	:QObject(parent), m_dyntracker(), m_gngd(m_dyntracker.getFeatureNum())
 {
-
+	m_error = 1.0;
 }
 
 EDVSD_Anormaly_Detection::~EDVSD_Anormaly_Detection()
@@ -22,6 +22,10 @@ void EDVSD_Anormaly_Detection::setDebugPainter(QPainter *p_painter)
 void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
 	m_collectors = new ErrorCollector*[40];
+
+	double error_imp = 0.02;
+
+	GnuPlot_Output out = GnuPlot_Output(QString("err.dat"));
 
 	for(int a = 0; a < 40; a++){
 		m_collectors[a] = NULL;
@@ -39,6 +43,12 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 		FeatureEvent event = m_dyntracker.popFeatureEvent();
 		while(event.type != FEATURE_EVENT_TYPE_INVALID){
 			double error = m_gngd.processFeatureEvent(event);
+
+			if(error != 0.0){
+				m_error = (1.0 - error_imp) * m_error + error_imp * error;
+
+				out.writeData(3, (double)(p_buffer[a].ts) / 1000000, error, m_error);
+			}
 
 			switch(event.type){
 			case FEATURE_EVENT_TYPE_NEW_NODE:
@@ -72,11 +82,16 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 
 	m_dyntracker.resetTracker();
 
-	system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
+	out.flush();
+
+	//system("gnuplot -p -e \"load 'plot_gng3.plt';\"");
+	system("gnuplot -p -e \"load 'plot_error_new.plt';\"");
 }
 
 void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 {
+	double error = 0.0;
+
 	//Process all events of this frame, pass them to the tracker
 	for(int a = 0; a < p_n; a++){
 		//Skip "off" events //Todo
@@ -96,7 +111,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	//m_painter->drawText(0,10, QString::number(error));
+	m_painter->drawText(0,10, QString::number(error));
 
 	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
 		if(m_dyntracker.isTrackingNodeActive(a)){

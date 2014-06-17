@@ -61,6 +61,8 @@ private:
 	const int m_featurenum;
 	const double m_connection_threshold;
 
+	int m_trackerage_initial;
+
 	int m_track_active;
 	TrackingNode **m_track_trackingnodes;
 	double **m_track_adj;
