@@ -6,7 +6,7 @@ using namespace std;
 DynTracker::DynTracker()
 	:m_track_num(20), m_featurenum(9), m_connection_threshold(0.8)
 {
-	m_trackerage_initial = 50;
+	m_trackerage_initial = 40;
 
 	//Todo: smaller grid?
 	//Initiate point pattern for spawning Trackers (2D every 10px)
@@ -146,8 +146,8 @@ void DynTracker::analyzeEvent(EventF p_event)
 		}
 	}
 
-	//Check for node close to input
-	if(pointmin != -1 && distmin < 7.0){
+	//Check for node close to input, Todo elipse (angle dependent) distance?
+	if(pointmin != -1 && distmin < 6.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
@@ -263,7 +263,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	//Todo: different distance calculation elipsoid with angle and error
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 7.0){
+	if(closest2 != NULL && p_distmin2 < 6.0){
 
 		//Lower age
 		closest2->age /= 1.5;

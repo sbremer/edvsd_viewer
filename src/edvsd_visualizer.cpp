@@ -46,7 +46,7 @@ EDVSD_Visualizer::~EDVSD_Visualizer()
 }
 
 // 0xffRRGGBB
-const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFFFF0000, 0xFF00FF00, 0xFF000000}, {0xFF000000, 0xFFFFFFFF, 0xFF808080}};
+const quint32 EDVSD_Visualizer::m_colors[2][3] = {{0xFF00FF00, 0xFFFF0000, 0xFF000000}, {0xFFFFFFFF, 0xFF000000, 0xFF808080}};
 
 void EDVSD_Visualizer::start()
 {

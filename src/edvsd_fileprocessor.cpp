@@ -90,12 +90,13 @@ bool EDVSD_FileProcessor::loadFile(QString p_filename)
 		m_fileopen = true;
 
 		//Swap x and y
+		/*
 		quint8 temp;
 		for(int a=0;a<m_totalevents;a++){
 			temp = m_eventptr[a].y;
 			m_eventptr[a].y = m_eventptr[a].x;
 			m_eventptr[a].x = temp;
-		}
+		}*/
 
 		//Add random noise
 		double noise = 0;//40.0;

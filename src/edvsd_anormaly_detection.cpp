@@ -23,7 +23,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 {
 	m_collectors = new ErrorCollector*[40];
 
-	double error_imp = 0.02;
+	double error_imp = 0.005;
 
 	GnuPlot_Output out = GnuPlot_Output(QString("err.dat"));
 
@@ -34,7 +34,7 @@ void EDVSD_Anormaly_Detection::analyzeEvents(EventF *p_buffer, int p_n)
 	//Process all events of this frame, pass them to the tracker
 	for(int a = 0; a < p_n; a++){
 		//Skip "off" events //Todo
-		if(p_buffer[a].polarity == false){
+		if(p_buffer[a].polarity == EDVS_Polarity_Off){
 			continue;
 		}
 
@@ -95,7 +95,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 	//Process all events of this frame, pass them to the tracker
 	for(int a = 0; a < p_n; a++){
 		//Skip "off" events //Todo
-		if(p_buffer[a].polarity == false){
+		if(p_buffer[a].polarity == EDVS_Polarity_Off){
 			continue;
 		}
 
