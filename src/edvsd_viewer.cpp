@@ -29,6 +29,8 @@ EDVSD_Viewer::~EDVSD_Viewer()
 void EDVSD_Viewer::loadEventData()
 {
 	int c = m_fileprocessor->readEventsByTime(m_replay_speed);
+
+	m_ui->statusBar->showMessage(m_status_message + " At: " + QString::number(m_fileprocessor->getCurrentTimestamp() / 1000000.0) + "s");
 }
 
 void EDVSD_Viewer::on_actionE_xit_triggered()
@@ -69,11 +71,14 @@ void EDVSD_Viewer::on_action_Open_File_triggered()
 
 		connect(m_fileprocessor, SIGNAL(eventsReadF(EventF*,int)), m_detection, SLOT(analyzeLiveEvents(EventF*,int)));
 
-		m_ui->statusBar->showMessage("\nFile: " + m_fileprocessor->getFileName()
-				+ " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
-				+ " SizeY: " + QString::number((int)(m_fileprocessor->getSizeY()))
-				+ " TSRes(in byte): " + QString::number((int)(m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0))
-				+ " TE: " + QString::number(m_fileprocessor->getTotalEvents()));
+		m_status_message = QString("\nFile: " + m_fileprocessor->getFileName()
+								   + " SizeX: " + QString::number((int)(m_fileprocessor->getSizeX()))
+								   + " SizeY: " + QString::number((int)(m_fileprocessor->getSizeY()))
+								   + " TSRes(in byte): " + QString::number((int)(m_fileprocessor->getTimestampResolution()!=0? m_fileprocessor->getTimestampResolution() + 1 : 0))
+								   + " TE: " + QString::number(m_fileprocessor->getTotalEvents()));
+
+		m_ui->statusBar->showMessage(m_status_message);
+
 		m_visualizer->move(0,26);
 		m_visualizer->setScaler(5.0);
 		if(m_ui->action_White_Black->isChecked())m_visualizer->setMode(EDVS_Visualization_Mode_White_Black);

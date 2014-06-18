@@ -230,3 +230,8 @@ int EDVSD_FileProcessor::readEventsByTime(quint32 p_t)
 	m_timestamp = timestamp_new;
 	return read;
 }
+
+quint32 EDVSD_FileProcessor::getCurrentTimestamp()
+{
+	return m_timestamp;
+}

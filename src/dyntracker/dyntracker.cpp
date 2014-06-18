@@ -6,7 +6,7 @@ using namespace std;
 DynTracker::DynTracker()
 	:m_track_num(20), m_featurenum(9), m_connection_threshold(0.8)
 {
-	m_trackerage_initial = 40;
+	m_trackerage_initial = 50;
 
 	//Todo: smaller grid?
 	//Initiate point pattern for spawning Trackers (2D every 10px)
@@ -147,7 +147,7 @@ void DynTracker::analyzeEvent(EventF p_event)
 	}
 
 	//Check for node close to input, Todo elipse (angle dependent) distance?
-	if(pointmin != -1 && distmin < 6.0){
+	if(pointmin != -1 && distmin < 9.0){
 		adjustTrackers(p_event, pointmin, distmin, pointmin2, distmin2);
 
 	}
@@ -211,13 +211,12 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		closest->last = p_event.ts;
 		closest->rate =  (1.0 - rate_imp) * closest->rate + rate_imp * (closest->events_slot / (0.000001 * diff));
 		closest->events_slot = 0;
-
-		cout << closest->rate << endl;
 	}
 
 	//Update tracker velocity
 	double velocity_imp = 0.02;
-	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
+	PointF velocity = delta * closest->rate;
+	closest->velocity = closest->velocity * (1.0 - velocity_imp) + velocity * velocity_imp;
 
 	//Attract all tracking points to the event depending on their connection strength to the closest event
 	for(int a = 0; a < m_track_num; a++){
@@ -264,7 +263,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	//Todo: different distance calculation elipsoid with angle and error
 
 	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 6.0){
+	if(closest2 != NULL && p_distmin2 < 7.0){
 
 		//Lower age
 		closest2->age /= 1.5;
@@ -280,7 +279,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	}
 
 	//Check for a high error
-	if(closest->error > 15.0){
+	if(closest->error > 18.0){
 		//Try to create a new point
 		int new_track = newTrackingNode(closest->position, p_event.ts);
 		if(new_track != -1){
@@ -713,6 +712,9 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 
 	TrackingNode *node = m_track_trackingnodes[p_a];
 
+	double error = 0;
+	double rate = 0;
+
 	int group = node->group;
 	if(group != -1){
 
@@ -724,6 +726,8 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		for(list<int>::iterator iter = m_groups[group]->begin(); iter != m_groups[group]->end(); iter++){
 			center += m_track_trackingnodes[*iter]->position;
 			n++;
+			error += m_track_trackingnodes[*iter]->error;
+			rate += m_track_trackingnodes[*iter]->rate;
 		}
 
 		center /= n;
@@ -732,12 +736,10 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		center = node->position;
 	}
 
-	center = node->position;
+	PointF center_node = node->position - center;
 
 	//Build Feature Vector
 	vector<double> features(m_featurenum);
-
-	PointF center_node = node->position - center;
 
 	int at = 0;
 
@@ -748,9 +750,9 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 	features[at++] = center_node.x / 5.0;
 	features[at++] = center_node.y / 5.0;
 	features[at++] = node->error / 14.0;
-	features[at++] = 0;//node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
-	features[at++] = 0;//node->velocity.x / 1500.0;
-	features[at++] = 0;//node->velocity.y / 1500.0;
+	features[at++] = node->rate / 1000.0; //Rate and velocity can be very different for different data sets!
+	features[at++] = node->velocity.x / 1500.0;
+	features[at++] = node->velocity.y / 1500.0;
 	features[at++] = node->angle / M_PI_2;
 	//ToDo: More?
 
@@ -771,6 +773,11 @@ void DynTracker::resetTracker()
 		if(m_groups[a] != NULL){
 			delete m_groups[a];
 			m_groups[a] = NULL;
+		}
+
+		//Reset adjecency matrix
+		for(int b = 0; b < a; b++){
+			m_track_adj[a][b] = 0.0;
 		}
 	}
 

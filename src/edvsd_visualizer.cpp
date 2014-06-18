@@ -115,11 +115,12 @@ void EDVSD_Visualizer::displayFrame()
 void EDVSD_Visualizer::paintEvent(QPaintEvent *p_paintevent)
 {
 	QPainter painter (this);
-	if(!m_paused)
-		fadeImage();
 	QPixmap buffer = QPixmap::fromImage(*m_image, Qt::ThresholdDither);
 	painter.drawPixmap(0, 0, (int)(m_size_x*m_scaler), (int)(m_size_y*m_scaler), buffer, 0, 0, m_size_x, m_size_y);
 	painter.drawPixmap(0, 0, *m_debug_pixmap);
+
+	if(!m_paused)
+		fadeImage();
 
 //	m_debug_painter->end();
 //	m_debug_pixmap->fill(Qt::transparent);

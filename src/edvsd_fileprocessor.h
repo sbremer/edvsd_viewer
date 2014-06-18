@@ -35,6 +35,8 @@ public:
 	int readEvents(unsigned int p_n);
 	int readEventsByTime(quint32 p_t);
 
+	quint32 getCurrentTimestamp();
+
 private:
 	QFile *m_file;
 

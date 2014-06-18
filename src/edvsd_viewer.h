@@ -85,6 +85,8 @@ private:
 	quint32 m_replay_speed;
 	int m_replay_speed_state;
 
+	QString m_status_message;
+
 	vector<EventF> m_eventbuffer;
 
 };
