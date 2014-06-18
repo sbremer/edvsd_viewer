@@ -7,7 +7,7 @@ using namespace std;
 
 
 GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
-	:m_gng(p_dim, 0.001, 0.0001, 100, 400, 50, 0), m_normalizer(p_dim), m_gng_newkill(3, 0.5, 0.05, 5, 3, 30, 4), m_normalizer_newkill(2), m_learning(true)
+	:m_gng(p_dim, 0.001, 0.0001, 100, 400, 50, 0), m_normalizer(p_dim), m_learning(true)
 {
 
 }
@@ -40,39 +40,18 @@ double GrowingNeuralGas_Driver::learn_node(vector<double> p_input, int p_id, uns
 
 double GrowingNeuralGas_Driver::new_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
-	//Normalize inputs
-	p_input = m_normalizer_newkill.normalize(p_input);
-
-	//Data for "New" Tracker
-	p_input.push_back(3.0);
-
-	//Test and learn input with GNG
-	double error = m_gng_newkill.test(p_input);
-	if(m_learning)m_gng_newkill.learn(p_input);
 	return 0.0;
-	return error;
 }
 
 double GrowingNeuralGas_Driver::kill_node(vector<double> p_input, int p_id, unsigned int p_time)
 {
-	//Normalize inputs
-	p_input = m_normalizer_newkill.normalize(p_input);
-
-	//Data for "Dead" Tracker
-	p_input.push_back(-3.0);
-
-	//Test and learn input with GNG
-	double error = m_gng_newkill.test(p_input);
-	if(m_learning)m_gng_newkill.learn(p_input);
 	return 0.0;
-	return error;
 }
 
 void GrowingNeuralGas_Driver::setLearning(bool p_learning)
 {
 	m_learning = p_learning;
 	m_normalizer.setLearning(p_learning);
-	m_normalizer_newkill.setLearning(p_learning);
 }
 
 void GrowingNeuralGas_Driver::dumpData()

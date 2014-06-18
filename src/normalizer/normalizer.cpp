@@ -5,7 +5,7 @@ Normalizer::Normalizer(int p_dim)
 {
 	for(int a = 0; a < m_dim; a++){
 		m_mean[a] = 0.0;
-		m_deviation[a] = 1.0;
+		m_deviation[a] = 0.2;
 	}
 }
 

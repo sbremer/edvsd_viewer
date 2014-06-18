@@ -182,6 +182,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 
 	//Increase event number for this node
 	closest->events++;
+	closest->events_slot++;
 
 	//Update event angle
 	double angle_imp = 0.06;
@@ -203,18 +204,18 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 	double error_imp = 0.05;
 	closest->error = (1.0 - error_imp) * closest->error + error_imp * p_distmin * p_distmin;
 
-	//Update event rate TODO! exp decay and addition
-	double rate_imp = 0.02;
-	unsigned int diff = p_event.ts - closest->last;
-	if(diff != 0){
-		closest->rate = (1.0 - rate_imp) * closest->rate + rate_imp * diff;
-	}
-	else{
-		diff = 1;
-	}
-	closest->last = p_event.ts;
+	//Update event rate
+	double rate_imp = 0.1;
+	if(closest->events_slot == 10){
+		unsigned int diff = p_event.ts - closest->last;
+		closest->last = p_event.ts;
+		closest->rate =  (1.0 - rate_imp) * closest->rate + rate_imp * (closest->events_slot / (0.000001 * diff));
+		closest->events_slot = 0;
 
-	//Update tracker velocity avg exp decay delta times rate
+		cout << closest->rate << endl;
+	}
+
+	//Update tracker velocity
 	double velocity_imp = 0.02;
 	closest->velocity = closest->velocity * (1.0 - velocity_imp) + delta * velocity_imp * 1000000.0 / (double)diff;
 

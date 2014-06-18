@@ -28,9 +28,6 @@ private:
 	bool m_learning;
 	GrowingNeuralGas m_gng;
 	Normalizer m_normalizer;
-
-	GrowingNeuralGas m_gng_newkill;
-	Normalizer m_normalizer_newkill;
 };
 
 #endif // GROWINGNEURALGAS_DRIVER_H

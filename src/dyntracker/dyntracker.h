@@ -14,13 +14,13 @@ using namespace std;
 
 struct TrackingNode{
 	TrackingNode(PointF p_point, unsigned int p_ts)
-		:position(p_point), age(0.0), events(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity(), looked_at(false), group(-1)
+		:position(p_point), age(0.0), events(0), events_slot(0), error(0.0), last(p_ts), rate(2000.0), angle(0.0), velocity(), looked_at(false), group(-1), creation(p_ts)
 	{
 
 	}
 
 	TrackingNode()
-		:position(), age(0.0), events(0), error(0.0), last(0), rate(2000.0), angle(0.0), velocity(), looked_at(false), group(-1)
+		:position(), age(0.0), events(0), error(0.0), last(0), rate(0.0), angle(0.0), velocity(), looked_at(false), group(-1)
 	{
 
 	}
@@ -28,11 +28,14 @@ struct TrackingNode{
 	PointF position;
 	double age;
 	int events;
+	int events_slot;
 	double error;
 	unsigned int last;
 	double rate;
 	double angle;
 	PointF velocity;
+
+	unsigned int creation;
 
 	//For group searching/ ToDo: Replace with more intelligent algorithm
 	bool looked_at;
