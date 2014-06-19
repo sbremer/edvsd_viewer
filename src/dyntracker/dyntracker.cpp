@@ -4,7 +4,7 @@
 using namespace std;
 
 DynTracker::DynTracker()
-	:m_track_num(20), m_featurenum(9), m_connection_threshold(0.8)
+	:m_track_num(20), m_featurenum(10), m_connection_threshold(0.8)
 {
 	m_trackerage_initial = 50;
 
@@ -244,7 +244,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		//Age Trackers here
 		m_track_trackingnodes[a]->age += 1.0;
 
-		if(a != p_pointmin && a != p_pointmin2 && m_track_trackingnodes[a]->age > 7 * m_track_active + 20){
+		if(a != p_pointmin && a != p_pointmin2 && m_track_trackingnodes[a]->age > 6 * m_track_active + 10){
 			if(m_track_trackingnodes[a]->events > m_trackerage_initial){
 				//Fire kill event to GNG
 				vector<double> features(2);
@@ -736,6 +736,24 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		center = node->position;
 	}
 
+	//Calculate distance to closest neighbor
+	double min_dist_neighbor = INFINITY;
+
+	for(int a = 0; a < m_track_num; a++){
+		if(m_track_trackingnodes[a] == NULL || (m_track_trackingnodes[a]->group != -1 && m_track_trackingnodes[a]->group == group)){
+			continue;
+		}
+
+		double dist = center.getDistance(m_track_trackingnodes[a]->position);
+		if(dist < min_dist_neighbor){
+			min_dist_neighbor = dist;
+		}
+	}
+
+	if(min_dist_neighbor > 128.0){
+		min_dist_neighbor = 0.0;
+	}
+
 	PointF center_node = node->position - center;
 
 	//Build Feature Vector
@@ -754,6 +772,7 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 	features[at++] = node->velocity.x / 1500.0;
 	features[at++] = node->velocity.y / 1500.0;
 	features[at++] = node->angle / M_PI_2;
+	features[at++] = min_dist_neighbor / 15.0;
 	//ToDo: More?
 
 	return features;

@@ -26,7 +26,7 @@ vector<double> Normalizer::normalize(vector<double> p_input){
 	//Adjust mean and deviation values
 	if(m_learning){
 
-		double learn = m_baselearnrate + m_learnrate;
+		double learn = (m_baselearnrate + m_learnrate) / 2;
 		double learn_deviation = learn / 2.0;
 
 		for(int a = 0; a < m_dim; a++){

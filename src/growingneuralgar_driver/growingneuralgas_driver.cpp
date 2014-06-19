@@ -7,7 +7,7 @@ using namespace std;
 
 
 GrowingNeuralGas_Driver::GrowingNeuralGas_Driver(int p_dim)
-	:m_gng(p_dim, 0.001, 0.0001, 100, 400, 50, 0), m_normalizer(p_dim), m_learning(true)
+	:m_gng(p_dim, 0.0008, 0.0001, 400, 500, 50, 0), m_normalizer(p_dim), m_learning(true)
 {
 
 }

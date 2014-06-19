@@ -111,7 +111,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 	//Visual output
 	m_painter->fillRect(0,0,128,128,Qt::transparent);
 
-	m_painter->drawText(0,10, QString::number(error));
+	//m_painter->drawText(0,10, QString::number(error));
 
 	for(int a = 0; a < m_dyntracker.getTrackerNum(); a++){
 		if(m_dyntracker.isTrackingNodeActive(a)){
