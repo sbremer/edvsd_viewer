@@ -61,6 +61,8 @@ void EDVSD_Visualizer::setPaused(bool p_paused)
 		m_timer->stop();
 	else
 		m_timer->start(33);
+
+	update();
 }
 
 void EDVSD_Visualizer::setScaler(double p_scaler)
