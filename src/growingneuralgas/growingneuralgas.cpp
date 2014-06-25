@@ -95,9 +95,9 @@ double GrowingNeuralGas::test(vector<double> p_input)
 		}
 	}
 
-	if(s3 == NULL){
-		return 0.0;
-	}
+//	if(s3 == NULL){
+//		return 0.0;
+//	}
 
 	return distmin;
 }

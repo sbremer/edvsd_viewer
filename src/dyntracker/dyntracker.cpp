@@ -227,6 +227,24 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		m_track_trackingnodes[a]->position += delta * fact * m_track_adj[max(p_pointmin, a)][min(p_pointmin, a)] * 0.4;
 	}
 
+	//Todo: different distance calculation elipsoid with angle and error
+
+	//Check if 2nd closest trackingpoint is also nearby
+	if(closest2 != NULL && p_distmin2 < 7.0){
+
+		//Lower age
+		closest2->age /= 1.5;
+
+		//Strengthen the connection between closest and 2nd closest point
+		double new_adj = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.1);
+
+		if(m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] < m_connection_threshold && new_adj >= m_connection_threshold){
+			group(p_pointmin, p_pointmin2);
+		}
+
+		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = new_adj;
+	}
+
 	//Lower connection strength between closest trackingpoint to all other trackingpoints
 	for(int a = 0; a < m_track_num; a++){
 		if(p_pointmin == a || m_track_trackingnodes[a] == NULL){
@@ -260,24 +278,6 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 		}
 	}
 
-	//Todo: different distance calculation elipsoid with angle and error
-
-	//Check if 2nd closest trackingpoint is also nearby
-	if(closest2 != NULL && p_distmin2 < 7.0){
-
-		//Lower age
-		closest2->age /= 1.5;
-
-		//Strengthen the connection between closest and 2nd closest point
-		double new_adj = min(1.0, m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] + 0.1);
-
-		if(m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] < m_connection_threshold && new_adj >= m_connection_threshold){
-			group(p_pointmin, p_pointmin2);
-		}
-
-		m_track_adj[max(p_pointmin, p_pointmin2)][min(p_pointmin, p_pointmin2)] = new_adj;
-	}
-
 	//Check for a high error
 	if(closest->error > 18.0){
 		//Try to create a new point
@@ -287,7 +287,7 @@ void DynTracker::adjustTrackers(EventF p_event, int p_pointmin, double p_distmin
 			closest->error /= 2.0;
 
 			//Connect new node to neighbor
-			m_track_adj[max(p_pointmin, new_track)][min(p_pointmin, new_track)] = m_connection_threshold;
+			m_track_adj[max(p_pointmin, new_track)][min(p_pointmin, new_track)] = 1.0;
 			group(p_pointmin, new_track);
 
 			if(p_pointmin2 != -1){
@@ -359,7 +359,7 @@ void DynTracker::adjustInitial(EventF p_event)
 void DynTracker::group(int p_a, int p_b)
 {
 	//Verify that nodes are not connected already
-	if(m_track_trackingnodes[p_a]->group == m_track_trackingnodes[p_b]->group){
+	if(m_track_trackingnodes[p_a]->group != -1 && m_track_trackingnodes[p_a]->group == m_track_trackingnodes[p_b]->group){
 		return;
 	}
 
@@ -607,6 +607,7 @@ int DynTracker::newTrackingNode(PointF p_point, unsigned int p_ts)
 
 		//Increase counter
 		m_track_active++;
+
 		return free;
 	}
 	else{
@@ -628,73 +629,48 @@ void DynTracker::killTrackingNode(int p_a)
 
 		//Node is in a group
 		int group = m_track_trackingnodes[p_a]->group;
+		list<int> group_list = *(m_groups[group]);
 
-		//Remove node from group
-		m_groups[group]->remove(p_a);
+		//Delete group
+		delete m_groups[group];
+		m_groups[group] = NULL;
 
-		if(m_groups[group]->size() > 1){
+		for(list<int>::iterator iter = group_list.begin(); iter != group_list.end(); iter++){
+			m_track_trackingnodes[*iter]->group = -1;
+		}
 
-			int ogroup = m_track_num;
+		if(group_list.size() > 1){
 
 			//Regroup nodes
-			while(m_groups[group]->size() > 0){
-				int i = m_groups[group]->front();
-				m_groups[group]->pop_front();
+			while(group_list.size() > 0){
+				int i = group_list.front();
+				group_list.pop_front();
 
 				//Find group of element
 				list<int> ogroup_list = findgroup(i);
 
-				if(ogroup_list.size() == 1){
+				//Single Node
+				if(ogroup_list.size() <= 1){
 					m_track_trackingnodes[i]->group = -1;
 				}
+				//Multiple Nodes
 				else{
 					//Find min value of group
-					ogroup = m_track_num;
+					int ogroup = m_track_num;
 					for(list<int>::iterator iter = ogroup_list.begin(); iter != ogroup_list.end(); iter++){
-						if(*iter != group){
-							ogroup = min(group, *iter);
-						}
-						m_groups[group]->remove(*iter);
+						ogroup = min(ogroup, *iter);
+						group_list.remove(*iter);
 					}
 
-					if(ogroup == m_track_num && m_groups[group]->size() > 0){
-						m_groups[group]->push_back(i);
-						continue;
-					}
-					else if(ogroup == m_track_num && m_groups[group]->size() == 0){
-						ogroup = group;
-					}
+					m_groups[ogroup] = new list<int>();
 
-					if(ogroup != group){
-						//Create new group
-						m_groups[ogroup] = new list<int>();
-					}
-
-					//Add all nodes connected to p_b
+					//Add all nodes
 					for(list<int>::iterator iter = ogroup_list.begin(); iter != ogroup_list.end(); iter++){
 						m_track_trackingnodes[*iter]->group = ogroup;
 						m_groups[ogroup]->push_back(*iter);
 					}
-
-					if(ogroup == group){
-						break;
-					}
 				}
 			}
-
-			if(group != ogroup){
-				//Delete group
-				delete m_groups[group];
-				m_groups[group] = NULL;
-			}
-		}
-		else{
-			//Only one other node in group --> ungroup and delete group
-			m_track_trackingnodes[m_groups[group]->front()]->group = -1;
-
-			//Delete group
-			delete m_groups[group];
-			m_groups[group] = NULL;
 		}
 	}
 
@@ -721,8 +697,6 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		//Find group center
 		int n = 0;
 
-		list<int> *gr = m_groups[group];
-
 		for(list<int>::iterator iter = m_groups[group]->begin(); iter != m_groups[group]->end(); iter++){
 			center += m_track_trackingnodes[*iter]->position;
 			n++;
@@ -734,13 +708,15 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 	}
 	else{
 		center = node->position;
+		error += node->error;
+		rate += node->rate;
 	}
 
 	//Calculate distance to closest neighbor
 	double min_dist_neighbor = INFINITY;
 
 	for(int a = 0; a < m_track_num; a++){
-		if(m_track_trackingnodes[a] == NULL || (m_track_trackingnodes[a]->group != -1 && m_track_trackingnodes[a]->group == group)){
+		if(m_track_trackingnodes[a] == NULL || a == p_a || (m_track_trackingnodes[a]->group != -1 && m_track_trackingnodes[a]->group == group)){
 			continue;
 		}
 
@@ -750,7 +726,7 @@ vector<double> DynTracker::buildFeatureVector(int p_a)
 		}
 	}
 
-	if(min_dist_neighbor > 128.0){
+	if(min_dist_neighbor > 200.0){
 		min_dist_neighbor = 0.0;
 	}
 

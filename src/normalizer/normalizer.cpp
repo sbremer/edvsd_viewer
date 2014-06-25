@@ -1,5 +1,8 @@
 #include "normalizer.h"
 
+#include <iostream>
+using namespace std;
+
 Normalizer::Normalizer(int p_dim)
 	:m_dim(p_dim), m_learning(true), m_mean(m_dim), m_deviation(m_dim), m_learnrate(0.03), m_baselearnrate(0.001), m_learnratereduction(0.9995)
 {
@@ -39,6 +42,13 @@ vector<double> Normalizer::normalize(vector<double> p_input){
 
 		m_learnrate *= m_learnratereduction;
 	}
+
+//	cout << "(";
+//	for(int a = 0; a < m_dim; a++){
+//		cout << output[a] << ", ";
+//	}
+//	cout << ")" << endl;
+
 
 	return output;
 }
