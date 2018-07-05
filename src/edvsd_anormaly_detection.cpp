@@ -96,7 +96,7 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 	for(int a = 0; a < p_n; a++){
 		//Skip "off" events //Todo
 		if(p_buffer[a].polarity == EDVS_Polarity_Off){
-			continue;
+			//continue;
 		}
 
 		m_dyntracker.analyzeEvent(p_buffer[a]);
@@ -118,11 +118,11 @@ void EDVSD_Anormaly_Detection::analyzeLiveEvents(EventF *p_buffer, int p_n)
 			TrackingNode tpoint = m_dyntracker.getTrackingNode(a);
 
 			//Draw nodes
-			double radius = 1.8 * sqrt(tpoint.error);
+			double radius = sqrt(tpoint.error);
 			m_painter->save();
 			m_painter->translate(tpoint.position.toQPointF());
 			m_painter->rotate(tpoint.angle / M_PI * 180.0);
-			m_painter->drawEllipse(QPoint(), radius, 1.0);
+			m_painter->drawEllipse(QPoint(), radius, radius);
 			m_painter->restore();
 
 			//Draw node connections

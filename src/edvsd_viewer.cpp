@@ -30,6 +30,7 @@ void EDVSD_Viewer::loadEventData()
 {
 	int c = m_fileprocessor->readEventsByTime(m_replay_speed);
 
+    m_ui->statusBar->clearMessage();
 	m_ui->statusBar->showMessage(m_status_message + " At: " + QString::number(m_fileprocessor->getCurrentTimestamp() / 1000000.0) + "s");
 }
 
